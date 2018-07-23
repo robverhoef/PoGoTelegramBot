@@ -1,0 +1,34 @@
+{
+  "name": "telegrampogobot",
+  "version": "0.5.0",
+  "description": "A Telegram Pokemon Go Raid Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "forever --minUptime 1000 --spinSleepTime 500 -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
+    "dev": "forever --minUptime 1000 --spinSleepTime 500 -w --watchIgnore node_modules --watchIgnore logs -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
+    "eslint": "eslint ./*.js ./models ./wizards ./util",
+    "eslintfix": "eslint --fix ./*.js ./models ./wizards ./util"
+  },
+  "author": "rob verhoef",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^6.5.2",
+    "dotenv": "^6.0.0",
+    "i18n": "^0.8.3",
+    "moment": "^2.22.2",
+    "moment-timezone": "^0.5.21",
+    "mysql2": "^1.5.3",
+    "sequelize": "^4.38.0",
+    "telegraf": "^3.21.2",
+    "telegraf-session-mysql": "^5.1.0"
+  },
+  "devDependencies": {
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "forever": "^0.15.3",
+    "sequelize-cli": "^4.0.0"
+  }
+}
