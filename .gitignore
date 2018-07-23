@@ -1,3 +1,9 @@
+config/config.json
+docs/*
+logs/*
+!logs/.gitkeep
+pogo_googlemaps
+
 # Logs
 logs
 *.log
