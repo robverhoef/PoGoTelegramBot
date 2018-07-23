@@ -8,7 +8,7 @@ module.exports = {
           autoIncrement: true, 
           primaryKey: true
         },
-        endtime: Sequelize.DATE,
+        endtime: Sequelize.INTEGER,
         target: Sequelize.STRING(191),
         exraidtrigger: Sequelize.BOOLEAN,
         gymId: {
@@ -19,9 +19,9 @@ module.exports = {
             onDelete: 'CASCADE'
           }
         },
-        start1: Sequelize.DATE,
-        start2: Sequelize.DATE,
-        start3: Sequelize.DATE,
+        start1: Sequelize.INTEGER,
+        start2: Sequelize.INTEGER,
+        start3: Sequelize.INTEGER,
         // Timestamps
         createdAt: Sequelize.DATE,
         updatedAt: Sequelize.DATE
