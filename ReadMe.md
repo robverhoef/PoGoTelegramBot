@@ -40,7 +40,6 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 ## ToDo
 
 * I18n; it is currently Dutch only
-* User management: blacklist users, possibly automatic addition/removal of users
 * Enable multiple raid start times for bigger groups
 * Admins can remove gyms
 * Sessions will be persistent (db). Sessions are now in memory (not good for graceful restarts)
