@@ -89,7 +89,7 @@ Run from the project directory:
 ## Usage
 
 Make sure that there is a group admin. Only group admins are allowed to add / modify gyms.  
-All users will have to say:	  
+All existing users in a group will have to say:	  
 >/hi@your_bot_name  
 
 from the Telegram group before they are allowed to use the bot. Obviously 'your_bot_name' should be replaced with YOUR real bot name.  
