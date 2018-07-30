@@ -1,7 +1,6 @@
 
-
 const moment = require('moment-timezone')
-moment.tz.setDefault('Europe/Amsterdam')
+moment.tz.setDefault(process.env.TZ)
 
 /**
 * Converts a given time, i.e. 20:30 or 09:45, to a timestamp

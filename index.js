@@ -91,7 +91,6 @@ function showHelp (ctx) {
 bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
-
 // This runs after the user has 'start'ed from an inline query in the group
 // 'help_fromgroup' will soon become a configurable item in .env
 
@@ -224,17 +223,48 @@ bot.hears(/\/whoisthebot/i, async (ctx) => {
 })
 
 /**
-* Will be used in the near future to register new members
+* Register new member
 */
-bot.on('new_chat_members', (ctx) => {
-  console.log('new chat member', ctx.message)
+bot.on('new_chat_members', async (ctx) => {
+  // console.log('new chat member', ctx.message)
+  var newusr = ctx.message.new_chat_member
+  if (newusr.is_bot === true) {
+    console.log('A bot tried to become a group member…')
+    return
+  }
+  if (ctx.message.chat.id.toString() === process.env.GROUP_ID) {
+    let newuser = models.User.build({
+      tId: newusr.id,
+      tUsername: newusr.first_name,
+      tGroupID: process.env.GROUP_ID.toString()
+    })
+    try {
+      await newuser.save()
+      console.log('new user added', newusr)
+    } catch (error) {
+      console.error('Error saving user', ctx.update.message.from.first_name, error)
+    }
+  } else {
+    console.log('User tried to join but group check failed', newusr)
+  }
 })
 
 /**
-* Will be used in the near future to remove members who left the group
+* Removing members who left the group
 */
-bot.on('left_chat_member', (ctx) => {
-  console.log('chat member left', ctx.message)
+bot.on('left_chat_member', async (ctx) => {
+  // console.log('chat member left', ctx.message.left_chat_member)
+  var removed = ctx.message.left_chat_member
+  try {
+    await models.User.destroy({
+      where: {
+        tId: removed.id
+      }
+    })
+    console.log('user removed:', removed)
+  } catch (error) {
+    console.log('caught error removing user', removed)
+  }
 })
 
 /**

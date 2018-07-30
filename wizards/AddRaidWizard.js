@@ -154,7 +154,7 @@ function AddRaidWizard (bot) {
           console.log('New raid exists… Ignoring ' + ctx.session.newraid.gymId + ctx.session.newraid.target + ctx.session.newraid.endtime)
           return ctx.answerCbQuery(null, undefined, true)
             .then(() => {
-              if(ctx.update.callback_query.message.message_id){
+              if (ctx.update.callback_query.message.message_id) {
                 return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
               }
             })
