@@ -2,7 +2,7 @@
 
 Please note: *Early Work In Progress*
 
-This is a new project, based on [Telegraf](https://telegraf.js.org/), and not even close to a stable version. It works, kind off, but things might change quickly (…or not at all) and backwards compatibility is not guaranteed yet.  
+This project is based on [Telegraf](https://telegraf.js.org/).  
 You will need to have some experience with Telegram bots; know how to initialize a bot with Botfather, set inline mode, etc.  
 Although it is being used in the wild; there are no guarantees this will work for you, yet. Your mileage may vary…
 
