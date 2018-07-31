@@ -88,12 +88,11 @@ Run from the project directory:
 ## Usage
 
 Make sure that there is a group admin. Only group admins are allowed to add / modify gyms.  
-All existing users in a group will have to say:	  
+The bot will detect addition and removal of users in a group. But all *existing* users in a group will have to say:	  
 >/hi@your_bot_name  
 
 from the Telegram group before they are allowed to use the bot. Obviously 'your_bot_name' should be replaced with YOUR real bot name.  
-Frankly this is the only part that may be confusing to a few new users. But unfortunately it is necessary because the Telegram API has no way to verify the group ID from an inline query.  
-I'm working on detection of new users when they are added to the group. But saying 'hi' will still be required for existing group members.  
-The bot will respond with a private message to the user with instructions on how to address the bot.
+Frankly this is the only part that may be confusing to a few new bot users. But unfortunately it is necessary because the Telegram API has no way to verify the group ID from an inline query.  
+The bot will then respond with a private message to the user with instructions on how to address the bot.
 
 A user can stop any conversation with the bot by entering the **/cancel** command. This is the preferred method of stopping when something appears to go wrong.
