@@ -26,7 +26,7 @@ function JoinRaidWizard (bot) {
       })
       if (raids.length === 0) {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n*Je kunt weer terug naar groep*'))
+          .then(() => ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
@@ -59,7 +59,7 @@ function JoinRaidWizard (bot) {
     async (ctx) => {
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
           .then(() => {
             ctx.session.raidcandidates = null
             return ctx.scene.leave()

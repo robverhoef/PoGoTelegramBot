@@ -26,7 +26,7 @@ function EditRaidWizard (bot) {
       })
       if (raids.length === 0) {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Sorry, ik kan nu geen raid vinden 🤨'))
+          .then(() => ctx.replyWithMarkdown('Sorry, ik kan nu geen raid vinden 🤨\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
