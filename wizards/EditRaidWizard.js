@@ -10,7 +10,7 @@ const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault('Europe/Amsterdam')
+moment.tz.setDefault(process.env.TZ)
 
 function EditRaidWizard (bot) {
   return new WizardScene('edit-raid-wizard',
@@ -56,14 +56,14 @@ function EditRaidWizard (bot) {
     },
     async (ctx) => {
       if (!ctx.update.callback_query && ctx.session.more !== true) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       // retrieve selected candidate  from session…
       if (ctx.session.more !== true) {
         let selectedraid = ctx.session.raidcandidates[ctx.update.callback_query.data]
         if (selectedraid.id === 0) {
           return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan…*'))
+            .then(() => ctx.replyWithMarkdown('Jammer!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => {
               ctx.session.raidcandidates = null
@@ -93,12 +93,12 @@ function EditRaidWizard (bot) {
 
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       const editattr = ctx.update.callback_query.data
       if (editattr === '0') {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan…*'))
+          .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => {
             if (ctx.update.callback_query.message.message_id) {
               return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
@@ -127,7 +127,7 @@ function EditRaidWizard (bot) {
             question = `*Hoe heet de nieuwe raidboss of ei?*\nBijvoorbeeld 'Kyogre' of 'Lvl 5 ei'`
             break
           default:
-            question = '*Ik heb geen idee wat je wilt wijzigen*\nGa terug naar de groep en probeer het nog eens'
+            question = 'Ik heb geen idee wat je wilt wijzigen\n. *Gebruik */start* om het nog eens te proberen. Of ga terug naar de groep.*'
             return ctx.answerCbQuery(null, undefined, true)
               .then(() => ctx.replyWithMarkdown(question))
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -171,7 +171,7 @@ function EditRaidWizard (bot) {
 
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       const choice = parseInt(ctx.update.callback_query.data)
       switch (choice) {
@@ -200,7 +200,7 @@ function EditRaidWizard (bot) {
                   return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
                 }
               })
-              .then(() => ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan…*'))
+              .then(() => ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           } catch (error) {
             console.error(error)
             return ctx.replyWithMarkdown('Het bewaren van deze wijziging is mislukt').then(() => ctx.scene.leave())
@@ -219,7 +219,7 @@ function EditRaidWizard (bot) {
         case 2:
           // Don't save and leave
           return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan…*'))
+            .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => {
               ctx.session.raidcandidates = null

@@ -27,7 +27,7 @@ function AddGymWizard (bot) {
         }
       })
       if (oldgyms.length > 0) {
-        return ctx.replyWithMarkdown(`Deze gym bestaat al…\nJe kunt weer terug naar de groep gaan.`)
+        return ctx.replyWithMarkdown(`Deze gym bestaat al…\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`)
           .then(() => ctx.scene.leave())
       }
       ctx.session.newgym.reporterName = user.first_name
@@ -87,17 +87,17 @@ function AddGymWizard (bot) {
         } catch (error) {
           console.log('Whoops… saving new gym failed', error)
           return ctx.answerCbQuery('', undefined, true)
-            .then(() => ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen?\n*Je kan weer terug naar de groep…*`))
+            .then(() => ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => ctx.scene.leave())
         }
         return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kan weer terug naar de groep…*'))
+          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       } else {
         return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK. *Je kan weer terug naar de groep…*'))
+          .then(() => ctx.replyWithMarkdown('OK. *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }

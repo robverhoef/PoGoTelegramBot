@@ -9,7 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault('Europe/Amsterdam')
+moment.tz.setDefault(process.env.TZ)
 
 function JoinRaidWizard (bot) {
   return new WizardScene('join-raid-wizard',
@@ -69,7 +69,7 @@ function JoinRaidWizard (bot) {
       let selectedraid = ctx.session.raidcandidates[ctx.update.callback_query.data]
       if (selectedraid.raidid === 0) {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan…*'))
+          .then(() => ctx.replyWithMarkdown('Jammer! \n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             ctx.session.raidcandidates = null
@@ -126,19 +126,19 @@ function JoinRaidWizard (bot) {
           await raiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen door vanuit de groep te starten`)
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`)
             .then(() => ctx.scene.leave())
         }
       }
       let out = await listRaids(`Toegevoegd aan raid: [${user.first_name}](tg://user?id=${user.id})\n\n`)
       if (out === null) {
         ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`))
+          .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je bent aangemeld voor ${joinedraid.gymname} om ${joinedraid.startsat} 👍\n*Je kunt nu weer terug naar de groep gaan.*`))
+        .then(() => ctx.replyWithMarkdown(`Je bent aangemeld voor ${joinedraid.gymname} om ${joinedraid.startsat} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(async () => {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})

@@ -9,7 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault('Europe/Amsterdam')
+moment.tz.setDefault(process.env.TZ)
 
 function ExitRaidWizard (bot) {
   return new WizardScene('exit-raid-wizard',
@@ -33,7 +33,7 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        ctx.replyWithMarkdown('*Je doet nog niet mee met raids…*')
+        ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             return ctx.scene.leave()
@@ -42,7 +42,7 @@ function ExitRaidWizard (bot) {
         let btns = []
         for (var a = 0; a < raids.length; a++) {
           let strttm = moment.unix(raids[a].start1).format('H:mm')
-          console.log(raids[a].start1, moment(raids[a].start1).tz('Europe/Amsterdam'))
+          // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
           btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id))
         }
         btns.push(Markup.callbackButton('Mijn raid staat er niet bij…', 0))
@@ -55,11 +55,11 @@ function ExitRaidWizard (bot) {
       const user = ctx.from
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆*')
+        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       let selectedraid = parseInt(ctx.update.callback_query.data)
       if (selectedraid === 0) {
-        return ctx.replyWithMarkdown('Cool!\n*Je kunt nu weer terug naar de groep gaan.*')
+        return ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             return ctx.scene.leave()
@@ -90,7 +90,7 @@ function ExitRaidWizard (bot) {
       }
       bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
       ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan.*`))
+        .then(() => ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.scene.leave())
     }

@@ -33,7 +33,7 @@ moment.tz.setDefault('Europe/Amsterdam')
 * @param context
 */
 function cancelConversation (ctx) {
-  return ctx.scene.leave().then(() => ctx.replyWithMarkdown('Ok, je kunt weer terug naar de groep…'))
+  return ctx.scene.leave().then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
 }
 
 // Setup for all wizards
@@ -91,13 +91,8 @@ function showHelp (ctx) {
 bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
-// This runs after the user has 'start'ed from an inline query in the group
-// 'help_fromgroup' will soon become a configurable item in .env
-
-bot.command('/start', async (ctx) => {
-  let user = ctx.update.message.from
-  if (ctx.message.text === '/start help_fromgroup') {
-    let btns = [
+async function showMainMenu (ctx, user) {
+  let btns = [
       Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'),
       Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'),
       Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'),
@@ -114,10 +109,26 @@ bot.command('/start', async (ctx) => {
         break
       }
     }
-    ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
+   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
       btns, {columns: 2}).extra())
+  }
+// This runs after the user has 'start'ed from an inline query in the group
+// 'help_fromgroup' will soon become a configurable item in .env
+
+bot.command('/start', async (ctx) => {
+  let user = ctx.update.message.from
+  // validate the user
+  var fuser = await models.User.find({
+    where: {
+      tId: user.id
+    }
+  })
+  // console.log('USER FOUND', fuser)
+  // if (ctx.message.text === '/start help_fromgroup') {
+  if (fuser !== null) {
+    return showMainMenu(ctx, user)
   } else {
-    ctx.replyWithMarkdown(`Ik help je graag verder als je via de Raid groep komt… 🤔`)
+    return ctx.replyWithMarkdown(`Ik help je graag verder als je via de Raid groep komt… 🤔`)
   }
 })
 
@@ -148,13 +159,13 @@ bot.on('inline_query', async ctx => {
     console.log(`NIET OK, ik ken ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name} niet`)
     return
   }
-  if (ctx.inlineQuery.query === 'actie') {
+  // if (ctx.inlineQuery.query === 'actie') {
     return ctx.answerInlineQuery([],
       {
         switch_pm_text: 'STARTEN',
         switch_pm_parameter: 'help_fromgroup'
       })
-  }
+  // }
 })
 
 /**

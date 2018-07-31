@@ -10,7 +10,7 @@ const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault('Europe/Amsterdam')
+moment.tz.setDefault(process.env.TZ)
 
 function AddRaidWizard (bot) {
   return new WizardScene('add-raid-wizard',
@@ -57,13 +57,13 @@ function AddRaidWizard (bot) {
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       let selectedIndex = parseInt(ctx.update.callback_query.data)
       if (ctx.session.gymcandidates[selectedIndex].id === 0) {
         return ctx.answerCbQuery('', undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan.*'))
+          .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => {
             ctx.session.gymcandidates = null
             ctx.session.newraid = null
@@ -135,7 +135,7 @@ function AddRaidWizard (bot) {
       let saveme = ctx.update.callback_query.data
       if (saveme === 'no') {
         return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('Jammer… Je kan nu weer terug naar de groep gaan.'))
+          .then(() => ctx.replyWithMarkdown('Jammer… \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.scene.leave())
       } else {
         // Sometimes a new raid is getting submitted multiple times
@@ -196,7 +196,7 @@ function AddRaidWizard (bot) {
             bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
           })
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown('Dankjewel! Je kan nu weer terug naar de groep gaan.'))
+          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.scene.leave())
       }
     }

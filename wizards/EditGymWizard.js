@@ -29,7 +29,7 @@ function EditGymWizard (bot) {
           }
         })
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…`)
+          return ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\n\n*Gebruik */start* als je nog een actie wilt uitvoeren. Of ga terug naar de groep.*`)
             .then(() => ctx.scene.leave())
         }
         ctx.session.gymcandidates = []
@@ -52,14 +52,14 @@ function EditGymWizard (bot) {
     // step 2
     async (ctx) => {
       if (!ctx.update.callback_query && ctx.session.more !== true) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       if (ctx.session.more !== true) {
         let selectedIndex = parseInt(ctx.update.callback_query.data)
 
         if (ctx.session.gymcandidates[selectedIndex].id === 0) {
           return ctx.answerCbQuery('', undefined, true)
-            .then(() => ctx.replyWithMarkdown('Jammer! \nJe kunt nu weer terug naar de groep gaan.'))
+            .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => {
               ctx.session.gymcandidates = null
@@ -87,12 +87,12 @@ function EditGymWizard (bot) {
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       const editattr = ctx.update.callback_query.data
       if (editattr === '0') {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK, *je kunt nu weer terug naar de groep gaan…*'))
+          .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             ctx.session.gymcandidates = null
@@ -120,7 +120,7 @@ function EditGymWizard (bot) {
             question = `*Kan hier een ExRaid op vallen?*\nType *Ja* of *Nee*`
             break
           default:
-            question = 'Sorry. Ik heb geen idee wat je wilt wijzigen\n*Ga terug naar de groep en probeer het nog eens*'
+            question = 'Sorry. Ik heb geen idee wat je wilt wijzigen\n*Klik op */start* om het nog eens te proberen. Of ga terug naar de groep.*'
             break
         }
         return ctx.answerCbQuery(null, undefined, true)
@@ -150,7 +150,7 @@ function EditGymWizard (bot) {
 
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆*')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       const choice = parseInt(ctx.update.callback_query.data)
       switch (choice) {
@@ -171,13 +171,13 @@ function EditGymWizard (bot) {
                 }
               })
             return ctx.answerCbQuery('', undefined, true)
-              .then(() => ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan…*'))
+              .then(() => ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
               .then(() => ctx.scene.leave())
           } catch (error) {
             console.error(error)
             return ctx.answerCbQuery('', undefined, true)
-              .then(() => ctx.replyWithMarkdown('Het bewaren van deze wijziging is mislukt\nJe kunt teruggaan naar de groep en het nog eens proberen.'))
+              .then(() => ctx.replyWithMarkdown('Het bewaren van deze wijziging is mislukt\n*Je kunt het nog eens proberen met */start*. Of terug naar de groep gaan.*'))
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
               .then(() => ctx.scene.leave())
           }
@@ -194,7 +194,7 @@ function EditGymWizard (bot) {
         case 2:
           // Don't save and leave
           return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan…*'))
+            .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => {
               ctx.session.raidcandidates = null
