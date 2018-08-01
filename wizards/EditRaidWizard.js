@@ -10,7 +10,7 @@ const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault(process.env.TZ)
+moment.tz.setDefault('Europe/Amsterdam')
 
 function EditRaidWizard (bot) {
   return new WizardScene('edit-raid-wizard',

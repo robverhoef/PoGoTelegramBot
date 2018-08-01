@@ -112,10 +112,13 @@ async function showMainMenu (ctx, user) {
    return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
       btns, {columns: 2}).extra())
   }
-// This runs after the user has 'start'ed from an inline query in the group
-// 'help_fromgroup' will soon become a configurable item in .env
 
+// This runs after the user has 'start'ed from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
+  // check if start is not directly comming from the group
+  if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
+    return 
+  }
   let user = ctx.update.message.from
   // validate the user
   var fuser = await models.User.find({
@@ -123,7 +126,6 @@ bot.command('/start', async (ctx) => {
       tId: user.id
     }
   })
-  // console.log('USER FOUND', fuser)
   // if (ctx.message.text === '/start help_fromgroup') {
   if (fuser !== null) {
     return showMainMenu(ctx, user)

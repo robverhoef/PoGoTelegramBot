@@ -10,7 +10,7 @@ const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault(process.env.TZ)
+moment.tz.setDefault('Europe/Amsterdam')
 
 function AddRaidWizard (bot) {
   return new WizardScene('add-raid-wizard',
@@ -27,6 +27,7 @@ function AddRaidWizard (bot) {
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
+      console.log('looking for raid', ctx.update)
       const term = ctx.update.message.text.trim()
       let btns = []
       if (term.length < 2) {

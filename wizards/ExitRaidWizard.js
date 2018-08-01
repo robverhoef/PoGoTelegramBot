@@ -9,7 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 
-moment.tz.setDefault(process.env.TZ)
+moment.tz.setDefault('Europe/Amsterdam')
 
 function ExitRaidWizard (bot) {
   return new WizardScene('exit-raid-wizard',
