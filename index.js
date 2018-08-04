@@ -93,31 +93,31 @@ bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
   let btns = [
-      Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'),
-      Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'),
-      Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'),
-      Markup.callbackButton(`Een raid wijzigen`, 'editRaid'),
-      Markup.callbackButton(`Vind een gymlocatie`, 'findGym')
-    ]
-    // admin only:
-    const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+    Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'),
+    Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'),
+    Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'),
+    Markup.callbackButton(`Een raid wijzigen`, 'editRaid'),
+    Markup.callbackButton(`Vind een gymlocatie`, 'findGym')
+  ]
+  // admin only:
+  const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
 
-    for (let a = 0; a < admins.length; a++) {
-      if (admins[a].user.id === user.id) {
-        btns.push(Markup.callbackButton(`Een gym toevoegen`, 'addGym'))
-        btns.push(Markup.callbackButton(`Een gym wijzigen`, 'editGym'))
-        break
-      }
+  for (let a = 0; a < admins.length; a++) {
+    if (admins[a].user.id === user.id) {
+      btns.push(Markup.callbackButton(`Een gym toevoegen`, 'addGym'))
+      btns.push(Markup.callbackButton(`Een gym wijzigen`, 'editGym'))
+      break
     }
-   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
-      btns, {columns: 2}).extra())
   }
+  return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
+    btns, {columns: 2}).extra())
+}
 
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
   // check if start is not directly comming from the group
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
-    return 
+    return
   }
   let user = ctx.update.message.from
   // validate the user
@@ -162,11 +162,11 @@ bot.on('inline_query', async ctx => {
     return
   }
   // if (ctx.inlineQuery.query === 'actie') {
-    return ctx.answerInlineQuery([],
-      {
-        switch_pm_text: 'STARTEN',
-        switch_pm_parameter: 'help_fromgroup'
-      })
+  return ctx.answerInlineQuery([],
+    {
+      switch_pm_text: 'STARTEN',
+      switch_pm_parameter: 'help_fromgroup'
+    })
   // }
 })
 
