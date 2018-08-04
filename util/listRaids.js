@@ -49,7 +49,7 @@ module.exports = async (reason) => {
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       accounter += raids[a].Raidusers[b].accounts
-      userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid}) `
+      userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + raids[a].Raidusers[b].accounts) : ''} `
     }
     out += `Aantal: ${accounter}\n`
     out += `Deelnemers: ${userlist}`
