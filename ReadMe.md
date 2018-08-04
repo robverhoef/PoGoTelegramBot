@@ -93,6 +93,12 @@ The bot will detect addition and removal of users in a group. But all *existing*
 
 from the Telegram group before they are allowed to use the bot. Obviously 'your_bot_name' should be replaced with YOUR real bot name.  
 Frankly this is the only part that may be confusing to a few new bot users. But unfortunately it is necessary because the Telegram API has no way to verify the group ID from an inline query.  
-The bot will then respond with a private message to the user with instructions on how to address the bot.
+The bot will respond with a private message to the user with instructions on how to address the bot. Note: not after the first /hi@your_bot_name, because of this Telegram limit; "Bots can't initiate conversations with users".
+
+After the bot knows about the user, a conversation can be initiated from the group by typing
+> @your_bot_name
+
+The bot will then show a button that will take the user to a private chat.
+The conversation stays private. The final output will be sent to the group.
 
 A user can stop any conversation with the bot by entering the **/cancel** command. This is the preferred method of stopping when something appears to go wrong.
