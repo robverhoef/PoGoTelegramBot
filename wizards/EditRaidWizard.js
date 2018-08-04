@@ -73,7 +73,7 @@ function EditRaidWizard (bot) {
         }
         // save selected index to session
         let editraidindex = parseInt(ctx.update.callback_query.data)
-        ctx.session.editraid = await ctx.session.raidcandidates[editraidindex]
+        ctx.session.editraid = ctx.session.raidcandidates[editraidindex]
       }
       let btns = [
         Markup.callbackButton(`Eindtijd ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}`, 'endtime'),
