@@ -186,7 +186,7 @@ bot.hears(/\/hi/i, async (ctx) => {
   if (ctx.update.message.chat === undefined) {
     return ctx.replyWithMarkdown(`Nee joh… doe dit vanuit de groep!`)
   }
-  console.log('Iemand zei hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message, ctx.update.message.chat)
+  console.log('Iemand zei hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
   let olduser = await models.User.find({
     where: {
       [Op.and]: [
@@ -195,13 +195,18 @@ bot.hears(/\/hi/i, async (ctx) => {
       ]
     }
   })
-  console.log('olduser', olduser)
+  // console.log('olduser', olduser)
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
     bot.telegram.sendMessage(olduser.tId, `Dag ${ctx.from.first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*`, {parse_mode: 'Markdown'})
     return
   }
-  console.log(ctx.update.message.chat.id.toString(), '===', process.env.GROUP_ID, ctx.update.message.chat.id === process.env.GROUP_ID)
+  console.log(
+    'given chat === correct chat?',
+    ctx.update.message.chat.id.toString(), 
+    '===', 
+    process.env.GROUP_ID, ctx.update.message.chat.id.toString() === process.env.GROUP_ID
+  )
   if (ctx.update.message.chat.id.toString() === process.env.GROUP_ID) {
     let newuser = models.User.build({
       tId: ctx.update.message.from.id,
@@ -214,7 +219,13 @@ bot.hears(/\/hi/i, async (ctx) => {
       console.error('Error saving user', ctx.update.message.from.first_name, error)
     }
     const chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
+    // Catch error in case the bot is responding for the first time to user
+    // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
+    try {
+      bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
+    } catch (error) {
+      console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
+    }
   } else {
     return ctx.replyWithMarkdown(`Uhm… ik ken je niet, sorry. Meldt je bij mij aan in je groep met \n\n*/hi@${me.username}*\n\nDan stuur ik je instructies.`)
   }
