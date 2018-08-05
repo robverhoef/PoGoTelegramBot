@@ -14,6 +14,7 @@ moment.tz.setDefault('Europe/Amsterdam')
 
 function AddRaidWizard (bot) {
   return new WizardScene('add-raid-wizard',
+    //step 0
     async (ctx) => {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
@@ -26,8 +27,9 @@ function AddRaidWizard (bot) {
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
     },
+    //step 1
     async (ctx) => {
-      console.log('looking for raid', ctx.update)
+      // console.log('looking for raid', ctx.update)
       const term = ctx.update.message.text.trim()
       let btns = []
       if (term.length < 2) {
@@ -56,6 +58,7 @@ function AddRaidWizard (bot) {
           .then(() => ctx.wizard.next())
       }
     },
+    //step 2
     async (ctx) => {
       if (!ctx.update.callback_query) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
@@ -81,13 +84,14 @@ function AddRaidWizard (bot) {
           .then(() => ctx.wizard.next())
       }
     },
+    //step 3
     async (ctx) => {
       // ToDo input check
       const endtimestr = ctx.update.message.text.trim()
       const endtime = inputTime(endtimestr)
       if (endtime === false) {
         return ctx.replyWithMarkdown('Dit is geen geldige tijd. Probeer het nog eens.')
-          .then(() => ctx.wizard.back())
+          // .then(() => ctx.wizard.back())
       }
       ctx.session.newraid.endtime = endtime
       let starttime = moment.unix(endtime)
@@ -95,6 +99,7 @@ function AddRaidWizard (bot) {
       ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
         .then(() => ctx.wizard.next())
     },
+    //step 4
     async (ctx) => {
       let endtime = moment.unix(ctx.session.newraid.endtime)
       let starttime = moment.unix(ctx.session.newraid.endtime)
@@ -102,18 +107,17 @@ function AddRaidWizard (bot) {
       const start1 = inputTime(ctx.update.message.text.trim())
       if (start1 === false) {
         return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment(endtime).format('HH:mm')}*`)
-          .then(() => ctx.wizard.back())
+          // .then(() => ctx.wizard.back())
       }
-      console.log('endtime', endtime, 'starttime', starttime, 'start1', start1)
-      // Input check valid interval; starttime < start1 && endtime > start1
       if (starttime.diff(moment.unix(start1)) > 0 || endtime.diff(moment.unix(start1)) < 0) {
-        return ctx.replyWithMarkdown(`De starttijd is niet geldig. Probeer het nog eens…`)
-          .then(() => ctx.wizard.back())
+        return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment(endtime).format('HH:mm')}*\nProbeer het nog eens…`)
+          // .then(() => ctx.wizard.back())
       }
       ctx.session.newraid.start1 = start1
       ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Kyogre* of *Level 5 ei*`)
         .then(() => ctx.wizard.next())
     },
+    //step 5
     async (ctx) => {
       const target = ctx.update.message.text.trim()
       ctx.session.newraid.target = target
@@ -128,6 +132,7 @@ function AddRaidWizard (bot) {
       ], {columns: 1}).removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
+    //step 6
     async (ctx) => {
       if (!ctx.update.callback_query) {
         ctx.replyWithMarkdown('Hier ging iets niet goed… *Klik op een knop 👆*')
