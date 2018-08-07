@@ -14,8 +14,14 @@ moment.tz.setDefault('Europe/Amsterdam')
 
 function EditRaidWizard (bot) {
   return new WizardScene('edit-raid-wizard',
+    
     // raid choice…
+    // step 0
     async (ctx) => {
+      // reset some values for gym editting
+      ctx.session.newgymid = null
+      ctx.session.editattr = null
+
       let raids = await models.Raid.findAll({
         include: [models.Gym, models.Raiduser],
         where: {
@@ -54,10 +60,13 @@ function EditRaidWizard (bot) {
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
     },
+    
+    // step 1
     async (ctx) => {
       if (!ctx.update.callback_query && ctx.session.more !== true) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
+
       // retrieve selected candidate  from session…
       if (ctx.session.more !== true) {
         let selectedraid = ctx.session.raidcandidates[ctx.update.callback_query.data]
@@ -76,6 +85,7 @@ function EditRaidWizard (bot) {
         ctx.session.editraid = ctx.session.raidcandidates[editraidindex]
       }
       let btns = [
+        Markup.callbackButton(`Gym ${ctx.session.editraid.gymname}`, 'gym'),
         Markup.callbackButton(`Eindtijd ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}`, 'endtime'),
         Markup.callbackButton(`Starttijd ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}`, 'start1'),
         Markup.callbackButton(`Pokemon ${ctx.session.editraid.target}`, 'target'),
@@ -90,12 +100,14 @@ function EditRaidWizard (bot) {
         })
         .then(() => ctx.wizard.next())
     },
-
+    
+    // step 2
     async (ctx) => {
       if (!ctx.update.callback_query) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       const editattr = ctx.update.callback_query.data
+      console.log('editattr', editattr)
       if (editattr === '0') {
         return ctx.answerCbQuery(null, undefined, true)
           .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
@@ -126,8 +138,12 @@ function EditRaidWizard (bot) {
             ctx.session.editattr = 'target'
             question = `*Hoe heet de nieuwe raidboss of ei?*\nBijvoorbeeld 'Kyogre' of 'Lvl 5 ei'`
             break
+          case 'gym':
+            ctx.session.editattr = 'gym'
+            question = `Je wilt de gym wijzigen\nWelke gym wordt het nu?\n*Voer een deel van de naam in, minimaal 2 tekens…*`
+            break
           default:
-            question = 'Ik heb geen idee wat je wilt wijzigen\n. *Gebruik */start* om het nog eens te proberen. Of ga terug naar de groep.*'
+            question = 'Ik heb geen idee wat je wilt wijzigen. \n*Gebruik */start* om het nog eens te proberen. Of ga terug naar de groep.*'
             return ctx.answerCbQuery(null, undefined, true)
               .then(() => ctx.replyWithMarkdown(question))
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -139,9 +155,19 @@ function EditRaidWizard (bot) {
             .then(() => ctx.wizard.next()))
       }
     },
-    (ctx) => {
+    
+    // step 3
+    async (ctx) => {
       let key = ctx.session.editattr
-      let value = ctx.update.message.text.trim()
+      console.log('KEY', key)
+      let value = null
+      // user has not just updated gym? If not expect text message
+      if(key !== 'gymId') {
+        value = ctx.update.message.text.trim()
+      } else {
+        value = ctx.session.newgymid
+      }
+        
       if (key === 'endtime' || key === 'start1') {
         let timevalue = inputTime(value)
         if (timevalue === false) {
@@ -157,6 +183,40 @@ function EditRaidWizard (bot) {
           }
           ctx.session.editraid[key] = timevalue
         }
+      } 
+
+      if (key === 'gym'){
+        // show list of gyms and jump to step 5
+        
+        const term = ctx.update.message.text.trim()
+        let btns = []
+        if (term.length < 2) {
+          return ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
+            .then(() => ctx.wizard.back())
+        } else {
+          const candidates = await models.Gym.findAll({
+            where: {
+              gymname: {[Op.like]: '%' + term + '%'}
+            }
+          })
+          if (candidates.length === 0) {
+          // ToDo: check dit dan...
+            return ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\n*Probeer het nog eens*\nGebruik /cancel om te stoppen.`)
+              // .then(() => ctx.wizard.back())
+          }
+          ctx.session.gymcandidates = []
+          for (let i = 0; i < candidates.length; i++) {
+            ctx.session.gymcandidates.push({gymname: candidates[i].gymname, id: candidates[i].id})
+            btns.push(Markup.callbackButton(candidates[i].gymname, i))
+          }
+
+          btns.push(Markup.callbackButton('Mijn gym staat er niet bij…', candidates.length))
+          ctx.session.gymcandidates.push({name: 'none', id: 0})
+          return ctx.replyWithMarkdown('Kies de nieuwe gym.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+            //.then(() => ctx.wizard.next())
+            .then(() => ctx.wizard.selectStep(5))
+            .then(() => ctx.wizard.steps[5](ctx))
+        }
       } else {
         ctx.session.editraid[key] = value
       }
@@ -168,7 +228,7 @@ function EditRaidWizard (bot) {
       ], {columns: 1}).removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
-
+    // step 4
     async (ctx) => {
       if (!ctx.update.callback_query) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
@@ -183,7 +243,8 @@ function EditRaidWizard (bot) {
               {
                 endtime: ctx.session.editraid.endtime,
                 start1: ctx.session.editraid.start1,
-                target: ctx.session.editraid.target
+                target: ctx.session.editraid.target,
+                gymId: ctx.session.editraid.gymId
               },
               {
                 where: {
@@ -231,6 +292,39 @@ function EditRaidWizard (bot) {
         .then(() => ctx.reply('OK'))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.scene.leave())
+    },
+
+    // Extra steps to select gym…
+    // step 5
+
+    async (ctx) => {
+      if (!ctx.update.callback_query) {
+        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      }
+      let selectedIndex = parseInt(ctx.update.callback_query.data)
+      if (ctx.session.gymcandidates[selectedIndex].id === 0) {
+        return ctx.answerCbQuery('', undefined, true)
+          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => {
+            ctx.session.gymcandidates = null
+            ctx.session.editraid = null
+            return ctx.scene.leave()
+          })
+      } else {
+        // retrieve selected candidate from session
+        let selectedgym = ctx.session.gymcandidates[selectedIndex]
+        ctx.session.editraid.gymId = selectedgym.id
+        ctx.session.editraid.gymname = selectedgym.gymname
+        ctx.session.newgymid = selectedgym.id
+        ctx.session.editattr = 'gymId'
+        return ctx.answerCbQuery('', undefined, true)
+          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          .then(() => {
+            ctx.wizard.selectStep(3)
+            ctx.wizard.steps[3](ctx)
+          })
+      }
     }
   )
 }
