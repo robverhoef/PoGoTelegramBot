@@ -222,7 +222,7 @@ bot.hears(/\/hi/i, async (ctx) => {
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
+      await bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
