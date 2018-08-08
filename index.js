@@ -33,7 +33,10 @@ moment.tz.setDefault('Europe/Amsterdam')
 * @param context
 */
 function cancelConversation (ctx) {
-  return ctx.scene.leave().then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+  // Since something might be failing… reset session
+  ctx.session = {}
+  return ctx.scene.leave()
+    .then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
 }
 
 // Setup for all wizards
@@ -201,12 +204,12 @@ bot.hears(/\/hi/i, async (ctx) => {
     bot.telegram.sendMessage(olduser.tId, `Dag ${ctx.from.first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*`, {parse_mode: 'Markdown'})
     return
   }
-  console.log(
-    'given chat === correct chat?',
-    ctx.update.message.chat.id.toString(), 
-    '===', 
-    process.env.GROUP_ID, ctx.update.message.chat.id.toString() === process.env.GROUP_ID
-  )
+  // console.log(
+  //  'given chat === correct chat?',
+  //  ctx.update.message.chat.id.toString(),
+  //  '===',
+  //  process.env.GROUP_ID, ctx.update.message.chat.id.toString() === process.env.GROUP_ID
+  // )
   if (ctx.update.message.chat.id.toString() === process.env.GROUP_ID) {
     let newuser = models.User.build({
       tId: ctx.update.message.from.id,
