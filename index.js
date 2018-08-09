@@ -113,7 +113,7 @@ async function showMainMenu (ctx, user) {
     }
   }
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
-    btns, {columns: 2}).extra())
+    btns, {columns: 1}).extra())
 }
 
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
