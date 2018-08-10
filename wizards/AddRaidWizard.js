@@ -30,10 +30,13 @@ function AddRaidWizard (bot) {
     // step 1
     async (ctx) => {
       // console.log('looking for raid', ctx.update)
+      if (ctx.update.message.text === undefined) {
+        return
+      }
       const term = ctx.update.message.text.trim()
       let btns = []
       if (term.length < 2) {
-        return ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
+        return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
           .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
@@ -42,9 +45,9 @@ function AddRaidWizard (bot) {
           }
         })
         if (candidates.length === 0) {
-        // ToDo: check dit dan...
-          ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\n*Probeer het nog eens*\nGebruik /cancel om te stoppen.`)
-            .then(() => ctx.wizard.back())
+          ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
+            // .then(() => ctx.wizard.back())
+            return
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
@@ -64,15 +67,21 @@ function AddRaidWizard (bot) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
       let selectedIndex = parseInt(ctx.update.callback_query.data)
+      // User can't find the gym
       if (ctx.session.gymcandidates[selectedIndex].id === 0) {
         return ctx.answerCbQuery('', undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
           .then(() => {
-            ctx.session.gymcandidates = null
-            ctx.session.newraid = null
-            return ctx.scene.leave()
+            ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen,`)
+            ctx.wizard.selectStep(1)
+            return ctx.wizard.steps[1](ctx)
           })
+          // .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          // .then(() => {
+          //   ctx.session.gymcandidates = null
+          //   ctx.session.newraid = null
+          //   return ctx.scene.leave()
+          // })
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
