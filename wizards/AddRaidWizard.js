@@ -29,7 +29,6 @@ function AddRaidWizard (bot) {
     },
     // step 1
     async (ctx) => {
-      // console.log('looking for raid', ctx.update)
       if (ctx.update.message.text === undefined) {
         return
       }
@@ -37,7 +36,7 @@ function AddRaidWizard (bot) {
       let btns = []
       if (term.length < 2) {
         return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
-          .then(() => ctx.wizard.back())
+          // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
           where: {
@@ -76,33 +75,58 @@ function AddRaidWizard (bot) {
             ctx.wizard.selectStep(1)
             return ctx.wizard.steps[1](ctx)
           })
-          // .then(() => ctx.replyWithMarkdown('Jammer! \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          // .then(() => {
-          //   ctx.session.gymcandidates = null
-          //   ctx.session.newraid = null
-          //   return ctx.scene.leave()
-          // })
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
         ctx.session.newraid.gymId = selectedgym.id
         ctx.session.newraid.gymname = selectedgym.gymname
+
+        let btns = [
+          Markup.callbackButton('Uitkomen van het ei', 'startmode'),
+          Markup.callbackButton('Eindtijd van de raid', 'endmode')
+        ]
         return ctx.answerCbQuery('', undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(`*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`))
+          .then(() => ctx.replyWithMarkdown(`*Hoe wil je de eindtijd van de raid opgeven?*\nKlik op een knop…`,
+            Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()
+          ))
           .then(() => ctx.wizard.next())
       }
     },
-    // step 3
+    // step 3: get the time; either start or end of the raid itself
     async (ctx) => {
-      // ToDo input check
-      const endtimestr = ctx.update.message.text.trim()
-      const endtime = inputTime(endtimestr)
-      if (endtime === false) {
-        return ctx.replyWithMarkdown('Dit is geen geldige tijd. Probeer het nog eens.')
-        // .then(() => ctx.wizard.back())
+      let timemode = ctx.update.callback_query.data
+      ctx.session.timemode = timemode
+      let question = ''
+      if(timemode == 'startmode') {
+        question = `*Hoe laat komt het ei uit?*\nGeef de tijd zo op: *09:30* of *13:45*…`
+      } else {
+        question = `*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+      }
+      return ctx.answerCbQuery('', undefined, true)
+          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          .then(() => ctx.replyWithMarkdown(question))
+          .then(() => ctx.wizard.next())
+    },
+    // step 4
+    async (ctx) => {
+      const timegiven = ctx.update.message.text.trim()
+      let endtime
+      let tmptime = inputTime(timegiven)
+      // check valid time
+      if (tmptime === false) {
+        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
+      }
+
+      if(ctx.session.timemode === 'startmode'){
+        // user wanted to enter time when egg hatches
+        endtime = moment.unix(tmptime).add(45, 'minutes').unix()
+      } else {
+        // user wanted to enter raid's end time
+        endtime = tmptime
       }
       ctx.session.newraid.endtime = endtime
+      // calculate minimum start time
       let starttime = moment.unix(endtime)
       starttime.subtract(45, 'minutes')
       ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
@@ -110,16 +134,18 @@ function AddRaidWizard (bot) {
     },
     // step 4
     async (ctx) => {
-      let endtime = moment.unix(ctx.session.newraid.endtime)
-      let starttime = moment.unix(ctx.session.newraid.endtime)
+      let endtime = ctx.session.newraid.endtime
+      // calculate minimum start time
+      let starttime = moment.unix(endtime)
       starttime.subtract(45, 'minutes')
+
       const start1 = inputTime(ctx.update.message.text.trim())
       if (start1 === false) {
-        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment(endtime).format('HH:mm')}*`)
+        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
         // .then(() => ctx.wizard.back())
       }
-      if (starttime.diff(moment.unix(start1)) > 0 || endtime.diff(moment.unix(start1)) < 0) {
-        return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment(endtime).format('HH:mm')}*\nProbeer het nog eens…`)
+      if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
+        return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*\nProbeer het nog eens…`)
         // .then(() => ctx.wizard.back())
       }
       ctx.session.newraid.start1 = start1
@@ -130,10 +156,10 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       const target = ctx.update.message.text.trim()
       ctx.session.newraid.target = target
+      const endtime = ctx.session.newraid.endtime
+      const start1 =  ctx.session.newraid.start1
 
-      // console.log(ctx.session.newraid)
-
-      let out = `Tot ${moment.unix(ctx.session.newraid.endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.gymname}\nStart: ${moment.unix(ctx.session.newraid.start1).format('HH:mm')}`
+      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
 
       return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.inlineKeyboard([
         Markup.callbackButton('Ja', 'yes'),
@@ -173,7 +199,11 @@ function AddRaidWizard (bot) {
                 return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
               }
             })
-            .then(() => ctx.scene.leave())
+            .then(() => ctx.replyWithMarkdown(`Deze raid bestaat al.\nJe kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+            .then(() => {
+              ctx.session.newraid = null
+              return ctx.scene.leave()
+            })
         }
         let newraid = models.Raid.build({
           gymId: ctx.session.newraid.gymId,
@@ -183,14 +213,8 @@ function AddRaidWizard (bot) {
           reporterName: user.first_name,
           reporterId: user.id
         })
-        // console.log('TIME TEST: ',inputTime('17:15'))
-        // console.log('ENDTIME', ctx.session.newraid.endtime)
-        // console.log('START1', ctx.session.newraid.start1)
-        // console.log('NEW RAID:', newraid)
-        // console.log('TZ', process.env.TZ)
         // save...
         try {
-          // console.log('save a raid by', user.first_name, user.id)
           await newraid.save()
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
