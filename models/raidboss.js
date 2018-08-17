@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     accounts: DataTypes.STRING
   }, {});
   Raidboss.associate = function(models) {
-    // associations can be defined here
+    models.Raidboss.hasMany(models.Raid)
   };
   return Raidboss;
 };
