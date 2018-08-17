@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     start2: DataTypes.DATE,
     start3: DataTypes.DATE,
     reporterName: DataTypes.STRING,
-    reporterId: DataTypes.INTEGER
+    reporterId: DataTypes.INTEGER,
+    raidbossId: DataTypes.INTEGER
   }, {tableName: 'raids'})
 
   Raid.associate = function (models) {
