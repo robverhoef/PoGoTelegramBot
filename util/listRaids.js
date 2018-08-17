@@ -16,7 +16,8 @@ module.exports = async (reason) => {
     .then(() => models.Raid.findAll({
       include: [
         models.Gym,
-        models.Raiduser
+        models.Raiduser,
+        models.Raidboss
       ],
       where: {
         endtime: {
@@ -36,6 +37,9 @@ module.exports = async (reason) => {
     const endtime = moment.unix(raids[a].endtime)
     out += `Tot: ${endtime.format('H:mm')} `
     out += `*${raids[a].target}*\n`
+    if(raids[a].Raidboss){
+      out += `Aanbevolen: ${raids[a].Raidboss.accounts} accounts\n`
+    }
     out += `${raids[a].Gym.gymname}\n`
     if (raids[a].Gym.exRaidTrigger) {
       out += `ExRaid Trigger\n`
