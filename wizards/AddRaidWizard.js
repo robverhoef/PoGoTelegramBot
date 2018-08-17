@@ -161,7 +161,6 @@ function AddRaidWizard (bot) {
           name: target
         }
       })
-      console.log('BOSS', boss)
       if(boss !== null) {
         ctx.session.newraid.target = boss.name
         ctx.session.newraid.bossid = boss.id
