@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     })
     models.Raid.hasMany(models.Raiduser)
+    models.Raid.belongsTo(models.Raidboss)
   }
   return Raid
 }
