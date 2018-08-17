@@ -155,11 +155,26 @@ function AddRaidWizard (bot) {
     // step 5
     async (ctx) => {
       const target = ctx.update.message.text.trim()
-      ctx.session.newraid.target = target
+      // let's see if we can find the raidboss…
+      let boss = await models.Raidboss.find({
+        where: {
+          name: target
+        }
+      })
+      console.log('BOSS', boss)
+      if(boss !== null) {
+        ctx.session.newraid.target = boss.name
+        ctx.session.newraid.bossid = boss.id
+        ctx.session.newraid.accounts = boss.accounts
+      } else {
+        ctx.session.newraid.target = target
+        ctx.session.newraid.accounts = null
+        ctx.session.newraid.bossid = null
+      }
       const endtime = ctx.session.newraid.endtime
       const start1 =  ctx.session.newraid.start1
 
-      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
+      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null?('Aanbevolen: '+ctx.session.newraid.accounts+' accounts\n'):''}${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
 
       return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.inlineKeyboard([
         Markup.callbackButton('Ja', 'yes'),
@@ -209,6 +224,7 @@ function AddRaidWizard (bot) {
           gymId: ctx.session.newraid.gymId,
           start1: ctx.session.newraid.start1,
           target: ctx.session.newraid.target,
+          raidbossId: ctx.session.newraid.bossid,
           endtime: ctx.session.newraid.endtime,
           reporterName: user.first_name,
           reporterId: user.id
