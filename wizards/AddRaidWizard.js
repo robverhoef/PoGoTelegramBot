@@ -36,7 +36,7 @@ function AddRaidWizard (bot) {
       let btns = []
       if (term.length < 2) {
         return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
-          // .then(() => ctx.wizard.back())
+        // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
           where: {
@@ -45,8 +45,8 @@ function AddRaidWizard (bot) {
         })
         if (candidates.length === 0) {
           ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
-            // .then(() => ctx.wizard.back())
-            return
+          // .then(() => ctx.wizard.back())
+          return
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
@@ -98,15 +98,15 @@ function AddRaidWizard (bot) {
       let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
-      if(timemode == 'startmode') {
+      if (timemode === 'startmode') {
         question = `*Hoe laat komt het ei uit?*\nGeef de tijd zo op: *09:30* of *13:45*…`
       } else {
         question = `*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
       }
       return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(question))
-          .then(() => ctx.wizard.next())
+        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        .then(() => ctx.replyWithMarkdown(question))
+        .then(() => ctx.wizard.next())
     },
     // step 4
     async (ctx) => {
@@ -118,7 +118,7 @@ function AddRaidWizard (bot) {
         return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
       }
 
-      if(ctx.session.timemode === 'startmode'){
+      if (ctx.session.timemode === 'startmode') {
         // user wanted to enter time when egg hatches
         endtime = moment.unix(tmptime).add(45, 'minutes').unix()
       } else {
@@ -161,7 +161,7 @@ function AddRaidWizard (bot) {
           name: target
         }
       })
-      if(boss !== null) {
+      if (boss !== null) {
         ctx.session.newraid.target = boss.name
         ctx.session.newraid.bossid = boss.id
         ctx.session.newraid.accounts = boss.accounts
@@ -171,9 +171,9 @@ function AddRaidWizard (bot) {
         ctx.session.newraid.bossid = null
       }
       const endtime = ctx.session.newraid.endtime
-      const start1 =  ctx.session.newraid.start1
+      const start1 = ctx.session.newraid.start1
 
-      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null?('Aanbevolen: '+ctx.session.newraid.accounts+' accounts\n'):''}${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
+      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
 
       return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.inlineKeyboard([
         Markup.callbackButton('Ja', 'yes'),
