@@ -115,7 +115,6 @@ async function showMainMenu (ctx, user) {
   let btns = [];
   btns.push(Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'));
   if(raids.length > 0) {
-    console.log(raids);
     btns.push(Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'));
   }
   btns.push(Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'));
