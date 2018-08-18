@@ -131,7 +131,7 @@ function JoinRaidWizard (bot) {
             .then(() => ctx.scene.leave())
         }
       }
-      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${joinedraid.gymname}: \n\n`)
+      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${joinedraid.gymname}\n\n`)
       if (out === null) {
         ctx.answerCbQuery(null, undefined, true)
           .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
