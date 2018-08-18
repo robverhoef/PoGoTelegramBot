@@ -105,13 +105,32 @@ bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
-  let btns = [
-    Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'),
-    Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'),
-    Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'),
-    Markup.callbackButton(`Een raid wijzigen`, 'editRaid'),
-    Markup.callbackButton(`Vind een gymlocatie`, 'findGym')
-  ]
+  let raids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: moment().unix()
+      }
+    },
+    include: [
+      models.Gym,
+      {
+        model: models.Raiduser,
+        where: {
+          'uid': user.id
+        }
+      }
+    ]
+  });
+
+  let btns = [];
+  btns.push(Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'));
+  if(raids.length > 0) {
+    btns.push(Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'));
+  }
+  btns.push(Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'));
+  btns.push(Markup.callbackButton(`Een raid wijzigen`, 'editRaid'));
+  btns.push(Markup.callbackButton(`Vind een gymlocatie`, 'findGym'));
+
   // admin only:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
 
@@ -130,7 +149,7 @@ async function showMainMenu (ctx, user) {
 
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
-  // check if start is not directly comming from the group
+  // check if start is not directly coming from the group
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
     return
   }
