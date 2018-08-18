@@ -40,7 +40,10 @@ function ExitRaidWizard (bot) {
           })
       } else {
         let btns = []
+        ctx.session.gymnames = {};
         for (var a = 0; a < raids.length; a++) {
+          ctx.session.gymnames[raids[a].id] = raids[a].Gym.gymname;
+
           let strttm = moment.unix(raids[a].start1).format('H:mm')
           // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
           btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id))
@@ -81,7 +84,7 @@ function ExitRaidWizard (bot) {
       } catch (error) {
         console.log('Error removing user from raid', error)
       }
-      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) meldde zich af voor een raid\n\n`)
+      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) meldde zich af voor raid bij ${ctx.session.gymnames[selectedraid]}\n\n`)
       if (out === null) {
         ctx.answerCbQuery(null, undefined, true)
           .then(() => ctx.replyWithMarkdown(`Mmmm, geen raid te vinden`))

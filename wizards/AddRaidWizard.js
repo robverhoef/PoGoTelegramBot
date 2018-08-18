@@ -237,7 +237,7 @@ function AddRaidWizard (bot) {
             .then(() => ctx.scene.leave())
         }
         // send updated list to group
-        let out = await listRaids(`Raid toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+        let out = await listRaids(`Raid bij ${ctx.session.newraid.gymname} toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
         if (out === null) {
           return ctx.answerCbQuery(null, undefined, true)
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))

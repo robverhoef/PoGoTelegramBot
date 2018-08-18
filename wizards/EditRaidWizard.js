@@ -270,7 +270,7 @@ function EditRaidWizard (bot) {
                 }
               }
             )
-            let out = await listRaids(`*Raid gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+            let out = await listRaids(`*Raid bij ${ctx.session.editraid.gymname} gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
             return ctx.answerCbQuery('', undefined, true)
               .then(async () => {
                 bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
