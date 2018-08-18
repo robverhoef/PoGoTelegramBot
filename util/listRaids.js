@@ -41,7 +41,7 @@ module.exports = async (reason) => {
       out += `Aanbevolen: ${raids[a].Raidboss.accounts} accounts\n`
     }
     if (raids[a].Gym.googleMapsLink) {
-      out += `[🌍 ${raids[a].Gym.gymname}](${raids[a].Gym.googleMapsLink})\n`
+      out += `[${raids[a].Gym.gymname}](${raids[a].Gym.googleMapsLink})\n`
     } else {
       out += `${raids[a].Gym.gymname}\n`
     }
