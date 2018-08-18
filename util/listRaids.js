@@ -37,15 +37,16 @@ module.exports = async (reason) => {
     const endtime = moment.unix(raids[a].endtime)
     out += `Tot: ${endtime.format('H:mm')} `
     out += `*${raids[a].target}*\n`
-    if(raids[a].Raidboss){
+    if (raids[a].Raidboss) {
       out += `Aanbevolen: ${raids[a].Raidboss.accounts} accounts\n`
     }
-    out += `${raids[a].Gym.gymname}\n`
+    if (raids[a].Gym.googleMapsLink) {
+      out += `[🌍 ${raids[a].Gym.gymname}](${raids[a].Gym.googleMapsLink})\n`
+    } else {
+      out += `${raids[a].Gym.gymname}\n`
+    }
     if (raids[a].Gym.exRaidTrigger) {
       out += `ExRaid Trigger\n`
-    }
-    if (raids[a].Gym.googleMapsLink) {
-      out += `[Kaart](${raids[a].Gym.googleMapsLink})\n`
     }
     const strtime = moment.unix(raids[a].start1)
     out += `Start: ${strtime.format('H:mm')} `
@@ -53,7 +54,7 @@ module.exports = async (reason) => {
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       accounter += raids[a].Raidusers[b].accounts
-      userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts-1)) : ''} `
+      userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
     }
     out += `Aantal: ${accounter}\n`
     out += `Deelnemers: ${userlist}`
