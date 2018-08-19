@@ -140,8 +140,6 @@ function AddRaidWizard (bot) {
         tmptime = moment().add(minutes, 'minutes').unix()
       }
 
-      console.log('determined time: ' + moment.unix(tmptime))
-
       let endtime
       if (ctx.session.timemode === 'startmodetijd' || ctx.session.timemode === 'startmodemin') {
         // user wanted to enter time when egg hatches
