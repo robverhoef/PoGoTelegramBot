@@ -133,7 +133,8 @@ function AddRaidWizard (bot) {
         }
 
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
-          return ctx.replyWithMarkdown(`Dat wordt een beetje krap om nog te melden, volgende keer beter.`)
+          return ctx.replyWithMarkdown('*Dat wordt een beetje krap om nog te melden, volgende keer beter.\nWil je nog een actie uitvoeren? Klik dan hier op */start')
+                    .then(() => ctx.scene.leave())
         }
 
         tmptime = moment().add(minutes, 'minutes').unix()
