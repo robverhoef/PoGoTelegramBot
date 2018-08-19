@@ -82,8 +82,10 @@ function AddRaidWizard (bot) {
         ctx.session.newraid.gymname = selectedgym.gymname
 
         let btns = [
-          Markup.callbackButton('Uitkomen van het ei', 'startmode'),
-          Markup.callbackButton('Eindtijd van de raid', 'endmode')
+          Markup.callbackButton('Uitkomen van het ei: start tijd', 'startmodetijd'),
+          Markup.callbackButton('Uitkomen van het ei: in minuten', 'startmodemin'),
+          Markup.callbackButton('Einde van de raid: eind tijd', 'endmodetijd'),
+          Markup.callbackButton('Einde van de raid: in minuten', 'endmodemin')
         ]
         return ctx.answerCbQuery('', undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -93,15 +95,19 @@ function AddRaidWizard (bot) {
           .then(() => ctx.wizard.next())
       }
     },
-    // step 3: get the time; either start or end of the raid itself
+    // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
       let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
-      if (timemode === 'startmode') {
+      if (timemode === 'startmodetijd') {
         question = `*Hoe laat komt het ei uit?*\nGeef de tijd zo op: *09:30* of *13:45*…`
-      } else {
+      } else if (timemode === 'endmodetijd') {
         question = `*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+      } else if (timemode === 'startmodemin') {
+        question = `*Hoeveel minuten staat er nog op het ei?*\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+      } else if (timemode === 'endmodemin') {
+        question = `*Hoeveel minuten staat er nog op de raid?*`
       }
       return ctx.answerCbQuery('', undefined, true)
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -110,25 +116,49 @@ function AddRaidWizard (bot) {
     },
     // step 4
     async (ctx) => {
-      const timegiven = ctx.update.message.text.trim()
-      let endtime
-      let tmptime = inputTime(timegiven)
-      // check valid time
-      if (tmptime === false) {
-        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
+      const message = ctx.update.message.text.trim()
+
+      let tmptime
+      if (ctx.session.timemode === 'startmodetijd' || ctx.session.timemode === 'endmodetijd') {
+        tmptime = inputTime(message)
+        // check valid time
+        if (tmptime === false) {
+          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
+        }
+      } else {
+        let minutes = parseInt(message)
+
+        if (!minutes || minutes < 0 || minutes > 60) {
+          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 60 liggen. \n*Probeer het nog eens.*`)
+        }
+
+        if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
+          return ctx.replyWithMarkdown(`Dat wordt een beetje krap om nog te melden, volgende keer beter.`)
+        }
+
+        tmptime = moment().add(minutes, 'minutes').unix()
       }
 
-      if (ctx.session.timemode === 'startmode') {
+      console.log('determined time: ' + moment.unix(tmptime))
+
+      let endtime
+      if (ctx.session.timemode === 'startmodetijd' || ctx.session.timemode === 'startmodemin') {
         // user wanted to enter time when egg hatches
         endtime = moment.unix(tmptime).add(45, 'minutes').unix()
       } else {
         // user wanted to enter raid's end time
         endtime = tmptime
       }
+
       ctx.session.newraid.endtime = endtime
       // calculate minimum start time
       let starttime = moment.unix(endtime)
       starttime.subtract(45, 'minutes')
+
+      if (starttime < moment()) {
+        starttime = moment()
+      }
+
       ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
         .then(() => ctx.wizard.next())
     },
