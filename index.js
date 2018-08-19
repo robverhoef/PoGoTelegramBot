@@ -68,6 +68,14 @@ const EditGymWizard = require('./wizards/EditGymWizard')
 const editGymWizard = EditGymWizard(bot)
 editGymWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AddRaidbossWizard = require('./wizards/AddRaidbossWizard')
+const addRaidbossWizard = AddRaidbossWizard(bot)
+addRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const EditRaidbossWizard = require('./wizards/EditRaidbossWizard')
+const editRaidbossWizard = EditRaidbossWizard(bot)
+editRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -75,7 +83,9 @@ const stage = new Stage([
   joinRaidWizard,
   findGymWizard,
   addGymWizard,
-  editGymWizard
+  editGymWizard,
+  addRaidbossWizard,
+  editRaidbossWizard
 ])
 
 /**
@@ -128,6 +138,8 @@ async function showMainMenu (ctx, user) {
     if (admins[a].user.id === user.id) {
       btns.push(Markup.callbackButton(`Een gym toevoegen`, 'addGym'))
       btns.push(Markup.callbackButton(`Een gym wijzigen`, 'editGym'))
+      btns.push(Markup.callbackButton(`Een raidboss toevoegen`, 'addBoss'))
+      btns.push(Markup.callbackButton(`Een raidboss wijzigen`, 'editBoss'))
       break
     }
   }
@@ -165,6 +177,8 @@ bot.action('editRaid', Stage.enter('edit-raid-wizard'))
 bot.action('findGym', Stage.enter('find-gym-wizard'))
 bot.action('addGym', Stage.enter('add-gym-wizard'))
 bot.action('editGym', Stage.enter('edit-gym-wizard'))
+bot.action('addBoss', Stage.enter('add-raidboss-wizard'))
+bot.action('editBoss', Stage.enter('edit-raidboss-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode

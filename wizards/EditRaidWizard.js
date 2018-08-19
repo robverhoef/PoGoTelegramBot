@@ -59,9 +59,9 @@ function EditRaidWizard (bot) {
         Markup.inlineKeyboard(btns, {
           columns: 1
         })
-        .removeKeyboard().extra())
+          .removeKeyboard().extra())
         .then(() => {
-          if(ctx.update.callback_query.message){
+          if (ctx.update.callback_query.message) {
             ctx.deleteMessage(ctx.update.callback_query.message.message_id)
           }
         })
@@ -82,7 +82,7 @@ function EditRaidWizard (bot) {
           return ctx.answerCbQuery(null, undefined, true)
             .then(() => ctx.replyWithMarkdown('Jammer!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
             .then(() => {
-              if(ctx.update.callback_query.message) {
+              if (ctx.update.callback_query.message) {
                 ctx.deleteMessage(ctx.update.callback_query.message.message_id)
               }
             })
@@ -202,7 +202,28 @@ function EditRaidWizard (bot) {
         }
         value = timevalue
       }
-      ctx.session.editraid[key] = value
+      // Handle the raidboss:
+      if (key === 'target') {
+        const target = ctx.update.message.text.trim()
+        // let's see if we can find the raidboss…
+        let boss = await models.Raidboss.find({
+          where: {
+            name: target
+          }
+        })
+        console.log('BOSS', boss)
+        if (boss !== null) {
+          ctx.session.editraid.target = boss.name
+          ctx.session.editraid.bossid = boss.id
+          ctx.session.editraid.accounts = boss.accounts
+        } else {
+          ctx.session.editraid.target = target
+          ctx.session.editraid.accounts = null
+          ctx.session.editraid.bossid = null
+        }
+      } else {
+        ctx.session.editraid[key] = value
+      }
       // console.log('next…')
       ctx.wizard.selectStep(4)
       return ctx.wizard.steps[4](ctx)
@@ -211,7 +232,7 @@ function EditRaidWizard (bot) {
     // step 4: do more or save?
     async (ctx) => {
       // console.log('edit raid step 4')
-      let out = `Tot ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
+      let out = `Tot ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.editraid.accounts + ' accounts\n') : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
       return ctx.replyWithMarkdown(`Dit zijn nu de raid gegevens:\n\n${out}*Wat wil je nu doen?*`, Markup.inlineKeyboard([
         Markup.callbackButton('Opslaan en afsluiten', 0),
         Markup.callbackButton('Nog iets wijzigen aan deze raid', 1),
@@ -240,7 +261,8 @@ function EditRaidWizard (bot) {
                 endtime: ctx.session.editraid.endtime,
                 start1: ctx.session.editraid.start1,
                 target: ctx.session.editraid.target,
-                gymId: ctx.session.editraid.gymId
+                gymId: ctx.session.editraid.gymId,
+                raidbossId: ctx.session.editraid.bossid
               },
               {
                 where: {
@@ -248,7 +270,7 @@ function EditRaidWizard (bot) {
                 }
               }
             )
-            let out = await listRaids(`*Raid gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+            let out = await listRaids(`*Raid bij ${ctx.session.editraid.gymname} gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
             return ctx.answerCbQuery('', undefined, true)
               .then(async () => {
                 bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
@@ -296,7 +318,7 @@ function EditRaidWizard (bot) {
       // console.log('DBUG2', ctx.update.message)
 
       // why do i need this??
-      if(ctx.update.message === undefined) {
+      if (ctx.update.message === undefined) {
         return // ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
       }
 
