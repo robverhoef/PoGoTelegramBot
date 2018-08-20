@@ -4,8 +4,8 @@
   "description": "A Telegram Pokemon Go Raid Bot",
   "main": "index.js",
   "scripts": {
-    "start": "forever --minUptime 1000 --spinSleepTime 500 -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
-    "dev": "forever --minUptime 1000 --spinSleepTime 500 -w --watchIgnore node_modules --watchIgnore logs -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
+    "start": "./node_modules/.bin/forever --minUptime 1000 --spinSleepTime 500 -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
+    "dev": "./node_modules/.bin/forever --minUptime 1000 --spinSleepTime 500 -w --watchIgnore node_modules --watchIgnore logs -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
     "eslint": "eslint ./*.js ./models ./wizards ./util",
     "eslintfix": "eslint --fix ./*.js ./models ./wizards ./util"
   },
