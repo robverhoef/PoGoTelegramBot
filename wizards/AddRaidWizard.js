@@ -82,9 +82,9 @@ function AddRaidWizard (bot) {
         ctx.session.newraid.gymname = selectedgym.gymname
 
         let btns = [
-          Markup.callbackButton('Uitkomen van het ei: start tijd', 'startmodetijd'),
+          Markup.callbackButton('Uitkomen van het ei: start tijd', 'startmodetime'),
           Markup.callbackButton('Uitkomen van het ei: in minuten', 'startmodemin'),
-          Markup.callbackButton('Einde van de raid: eind tijd', 'endmodetijd'),
+          Markup.callbackButton('Einde van de raid: eind tijd', 'endmodetime'),
           Markup.callbackButton('Einde van de raid: in minuten', 'endmodemin')
         ]
         return ctx.answerCbQuery('', undefined, true)
@@ -100,9 +100,9 @@ function AddRaidWizard (bot) {
       let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
-      if (timemode === 'startmodetijd') {
+      if (timemode === 'startmodetime') {
         question = `*Hoe laat komt het ei uit?*\nGeef de tijd zo op: *09:30* of *13:45*…`
-      } else if (timemode === 'endmodetijd') {
+      } else if (timemode === 'endmodetime') {
         question = `*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
       } else if (timemode === 'startmodemin') {
         question = `*Hoeveel minuten staat er nog op het ei?*\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
@@ -119,7 +119,7 @@ function AddRaidWizard (bot) {
       const message = ctx.update.message.text.trim()
 
       let tmptime
-      if (ctx.session.timemode === 'startmodetijd' || ctx.session.timemode === 'endmodetijd') {
+      if (ctx.session.timemode === 'startmodetime' || ctx.session.timemode === 'endmodetime') {
         tmptime = inputTime(message)
         // check valid time
         if (tmptime === false) {
@@ -141,7 +141,7 @@ function AddRaidWizard (bot) {
       }
 
       let endtime
-      if (ctx.session.timemode === 'startmodetijd' || ctx.session.timemode === 'startmodemin') {
+      if (ctx.session.timemode === 'startmodetime' || ctx.session.timemode === 'startmodemin') {
         // user wanted to enter time when egg hatches
         endtime = moment.unix(tmptime).add(45, 'minutes').unix()
       } else {
