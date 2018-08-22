@@ -97,6 +97,9 @@ function AddRaidWizard (bot) {
     },
     // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
+      if (!ctx.update.callback_query) {
+        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      }
       let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
