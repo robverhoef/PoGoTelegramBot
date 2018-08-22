@@ -158,7 +158,7 @@ function AddRaidWizard (bot) {
         starttime = moment()
       }
 
-      ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
+      ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten`)
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -168,15 +168,28 @@ function AddRaidWizard (bot) {
       let starttime = moment.unix(endtime)
       starttime.subtract(45, 'minutes')
 
-      const start1 = inputTime(ctx.update.message.text.trim())
-      if (start1 === false) {
-        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
-        // .then(() => ctx.wizard.back())
+      let message = ctx.update.message.text.trim()
+      let start1
+      if (message === 'x' || message === 'X') {
+        // default starttime of 15 before endtime or right now, when time is short:
+        let start1time = moment.unix(endtime)
+        start1time.subtract(15, 'minutes')
+        if (start1time < moment()) {
+          start1time = moment()
+        }
+        start1 = start1time.unix()
+      } else {
+        start1 = inputTime(message)
+        if (start1 === false) {
+          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*  of vul een *x* in om deze leeg te laten`)
+          // .then(() => ctx.wizard.back())
+        }
+        if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
+          return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten\nProbeer het nog eens…`)
+          // .then(() => ctx.wizard.back())
+        }
       }
-      if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
-        return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*\nProbeer het nog eens…`)
-        // .then(() => ctx.wizard.back())
-      }
+
       ctx.session.newraid.start1 = start1
       ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Kyogre* of *Level 5 ei*`)
         .then(() => ctx.wizard.next())
