@@ -1,6 +1,6 @@
 {
   "name": "telegrampogobot",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "description": "A Telegram Pokemon Go Raid Bot",
   "main": "index.js",
   "scripts": {

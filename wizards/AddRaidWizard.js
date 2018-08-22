@@ -97,6 +97,9 @@ function AddRaidWizard (bot) {
     },
     // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
+      if (!ctx.update.callback_query) {
+        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      }
       let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
@@ -134,7 +137,7 @@ function AddRaidWizard (bot) {
 
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
           return ctx.replyWithMarkdown('*Dat wordt een beetje krap om nog te melden, volgende keer beter.\nWil je nog een actie uitvoeren? Klik dan hier op */start')
-                    .then(() => ctx.scene.leave())
+            .then(() => ctx.scene.leave())
         }
 
         tmptime = moment().add(minutes, 'minutes').unix()

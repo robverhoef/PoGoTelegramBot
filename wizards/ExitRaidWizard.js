@@ -40,9 +40,9 @@ function ExitRaidWizard (bot) {
           })
       } else {
         let btns = []
-        ctx.session.gymnames = {};
+        ctx.session.gymnames = {}
         for (var a = 0; a < raids.length; a++) {
-          ctx.session.gymnames[raids[a].id] = raids[a].Gym.gymname;
+          ctx.session.gymnames[raids[a].id] = raids[a].Gym.gymname
 
           let strttm = moment.unix(raids[a].start1).format('H:mm')
           // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))

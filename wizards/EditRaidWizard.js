@@ -17,7 +17,6 @@ function EditRaidWizard (bot) {
 
     // step 0: choose raid
     async (ctx) => {
-      // console.log('edit raid step 0')
       // reset some values for gym editting
       ctx.session.newgymid = null
       ctx.session.editattr = null
@@ -70,7 +69,6 @@ function EditRaidWizard (bot) {
 
     // step 1: raid chosen, edit what?
     async (ctx) => {
-      // console.log('edit raid step 1')
       if (!ctx.update.callback_query && ctx.session.more !== true) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
@@ -114,7 +112,6 @@ function EditRaidWizard (bot) {
 
     // step 2: chosen what to edit, enter a value
     async (ctx) => {
-      // console.log('edit raid step 2')
       if (!ctx.update.callback_query) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
@@ -152,7 +149,6 @@ function EditRaidWizard (bot) {
           case 'gym':
             ctx.session.editattr = 'gym'
             question = `Je wilt de gym wijzigen\nWelke gym wordt het nu?\n*Voer een deel van de naam in, minimaal 2 tekens…*`
-            // console.log('DBUG', ctx)
             return ctx.answerCbQuery(null, undefined, true)
 
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -176,9 +172,7 @@ function EditRaidWizard (bot) {
     },
     // step 3: enter new value or jump to 6 for entering a new gym
     async (ctx) => {
-      // console.log('edit raid step 3')
       let key = ctx.session.editattr
-      // console.log('KEY', key)
       let value = null
       // user has not just updated gym? If not expect text message
       if (key !== 'gymId') {
@@ -186,7 +180,6 @@ function EditRaidWizard (bot) {
       } else {
         value = ctx.session.newgymid
       }
-      // console.log('VALUE', value)
       if (key === 'endtime' || key === 'start1') {
         let timevalue = inputTime(value)
         if (timevalue === false) {
@@ -211,7 +204,6 @@ function EditRaidWizard (bot) {
             name: target
           }
         })
-        console.log('BOSS', boss)
         if (boss !== null) {
           ctx.session.editraid.target = boss.name
           ctx.session.editraid.bossid = boss.id
@@ -224,14 +216,12 @@ function EditRaidWizard (bot) {
       } else {
         ctx.session.editraid[key] = value
       }
-      // console.log('next…')
       ctx.wizard.selectStep(4)
       return ctx.wizard.steps[4](ctx)
     },
 
     // step 4: do more or save?
     async (ctx) => {
-      // console.log('edit raid step 4')
       let out = `Tot ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.editraid.accounts + ' accounts\n') : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
       return ctx.replyWithMarkdown(`Dit zijn nu de raid gegevens:\n\n${out}*Wat wil je nu doen?*`, Markup.inlineKeyboard([
         Markup.callbackButton('Opslaan en afsluiten', 0),
@@ -246,7 +236,6 @@ function EditRaidWizard (bot) {
 
     // step 5: save & exit or jump to 2
     async (ctx) => {
-      // console.log('edit raid step 5')
       if (!ctx.update.callback_query) {
         return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
       }
@@ -315,8 +304,6 @@ function EditRaidWizard (bot) {
 
     // step 6: handle gym search
     async (ctx) => {
-      // console.log('DBUG2', ctx.update.message)
-
       // why do i need this??
       if (ctx.update.message === undefined) {
         return // ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
@@ -366,7 +353,6 @@ function EditRaidWizard (bot) {
 
     // step 7: handle gym selection
     async (ctx) => {
-      // console.log('edit raid step 7')
       let gymIndex = ctx.update.callback_query.data
       let selectedGym = ctx.session.gymcandidates[gymIndex]
       if (selectedGym.id === 0) {
