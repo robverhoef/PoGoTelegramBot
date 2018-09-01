@@ -251,18 +251,16 @@ function AddRaidWizard (bot) {
           }
         })
         if (raidexists) {
-          console.log('New raid exists… Ignoring ' + ctx.session.newraid.gymId + ctx.session.newraid.target + ctx.session.newraid.endtime)
-          return ctx.answerCbQuery(null, undefined, true)
-            .then(() => {
-              if (ctx.update.callback_query.message.message_id) {
-                return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-              }
-            })
-            .then(() => ctx.replyWithMarkdown(`Deze raid bestaat al.\nJe kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
-            .then(() => {
-              ctx.session.newraid = null
-              return ctx.scene.leave()
-            })
+          console.log(`New raid exists… Ignoring id: ${ctx.session.newraid.gymId} target: ${ctx.session.newraid.target} endtime: ${ctx.session.newraid.endtime}`)
+          ctx.answerCbQuery(null, undefined, true)
+          if (ctx.update.callback_query.message.message_id) {
+            ctx.deleteMessage(ctx.update.callback_query.message.message_id)
+          }
+          return ctx.replyWithMarkdown(`Deze raid bestaat al.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`)
+          .then(() => {
+            ctx.session.newraid = null
+            return ctx.scene.leave()
+          })
         }
         let newraid = models.Raid.build({
           gymId: ctx.session.newraid.gymId,
@@ -275,11 +273,19 @@ function AddRaidWizard (bot) {
         })
         // save...
         try {
-          await newraid.save()
+           await newraid.save()
+            .then((saved) => {
+              console.log('saved', saved)
+              ctx.session.savedraid = saved
+            })
+
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het saven… Misschien toch maar eens opnieuw proberen.`)
-            .then(() => ctx.scene.leave())
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het saven… Misschien toch maar eens opnieuw proberen met /start.`)
+            .then(() => {
+              ct.session = null
+              return ctx.scene.leave()
+            })
         }
         // send updated list to group
         let out = await listRaids(`Raid bij ${ctx.session.newraid.gymname} toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
@@ -295,9 +301,97 @@ function AddRaidWizard (bot) {
             bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
           })
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => {
+            ctx.replyWithMarkdown('Dankjewel!\n*Doe je zelf mee met deze raid?*', Markup.inlineKeyboard([
+              Markup.callbackButton('Ja', 'yes'),
+              Markup.callbackButton('Nee', 'no')
+            ]).removeKeyboard().extra())
+          })
+          .then(() => ctx.wizard.next())
+      }
+    },
+    async (ctx) => {
+      if (!ctx.update.callback_query) {
+        // console.log('afhandeling raidkeuze, geen callbackquery!')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
+          .then(() => {
+            ctx.session = null
+            return ctx.scene.leave()
+          })
+      }
+      // user does NOT participate, exit
+      if (ctx.update.callback_query.data === 'no') {
+        ctx.answerCbQuery(null, undefined, true)
+        return ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
           .then(() => ctx.scene.leave())
       }
+      // user does participate
+      let btns = []
+      for (var a = 1; a < 6; a++) {
+        btns.push(Markup.callbackButton(a, a))
+      }
+      return ctx.answerCbQuery(null, undefined, true)
+        .then(() => ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${ctx.session.newraid.gymname}*?`, Markup.inlineKeyboard(btns).removeKeyboard().extra()))
+        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        .then(() => ctx.wizard.next())
+    },
+    async (ctx) => {
+      if (!ctx.update.callback_query) {
+        // console.log('afhandeling raidkeuze, geen callbackquery!')
+        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken*')
+          .then(() => ctx.scene.leave())
+      }
+      const accounts = parseInt(ctx.update.callback_query.data)
+
+      const user = ctx.from
+      // Check already registered? If so; update else store new
+      let raiduser = await models.Raiduser.find({
+        where: {
+          [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}]
+        }
+      })
+      if (raiduser) {
+        // update
+        try {
+          await models.Raiduser.update(
+            { accounts: accounts },
+            { where: { [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}] } }
+          )
+        } catch (error) {
+          return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*')
+            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+            .then(() => ctx.scene.leave())
+        }
+      } else {
+        // new raid user
+        let raiduser = models.Raiduser.build({
+          raidId: ctx.session.savedraid.id,
+          username: user.first_name,
+          uid: user.id,
+          accounts: accounts
+        })
+        try {
+          await raiduser.save()
+        } catch (error) {
+          console.log('Woops… registering raiduser failed', error)
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`)
+            .then(() => ctx.scene.leave())
+        }
+      }
+      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${ctx.session.newraid.gymname}\n\n`)
+      if (out === null) {
+        ctx.answerCbQuery(null, undefined, true)
+          .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          .then(() => ctx.scene.leave())
+      }
+      return ctx.answerCbQuery(null, undefined, true)
+        .then(() => ctx.replyWithMarkdown(`Je bent aangemeld voor ${ctx.session.newraid.gymname} om ${moment.unix(ctx.session.newraid.start1).format('HH:mm')} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        .then(async () => {
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+        })
+        .then(() => ctx.scene.leave())
     }
   )
 }
