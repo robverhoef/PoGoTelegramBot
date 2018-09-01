@@ -7,7 +7,15 @@ const Telegraf = require('telegraf')
 const {Markup} = require('telegraf')
 // const MySQLSession = require('telegraf-session-mysql')
 const Stage = require('telegraf/stage')
-// const {session} = require('telegraf')
+const TelegrafI18n = require('telegraf-i18n')
+const path = require('path')
+const i18n = new TelegrafI18n({
+  defaultLanguage: 'nl',
+  useSession: true,
+  allowMissing: true,
+  directory: path.resolve(__dirname, 'locales')
+})
+
 var models = require('./models')
 
 // var env = process.env.NODE_ENV || 'development'
@@ -23,11 +31,10 @@ var models = require('./models')
 // Let's go!
 // =====================
 const bot = new Telegraf(process.env.BOT_TOKEN)
-
+bot.use(i18n.middleware())
 // Set the default timezone.
 // ToDo: this should could come from env
 moment.tz.setDefault('Europe/Amsterdam')
-
 /**
 * This will stop the conversation immeditaly
 * @param context
@@ -36,7 +43,7 @@ function cancelConversation (ctx) {
   // Since something might be failing… reset session
   ctx.session = {}
   return ctx.scene.leave()
-    .then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+    .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage')))
 }
 
 // Setup for all wizards
@@ -93,11 +100,7 @@ const stage = new Stage([
 * @param context
 */
 function showHelp (ctx) {
-  bot.telegram.getChat(process.env.GROUP_ID)
-    .then((ch) => {
-      console.log('showHelp', ch, 'pinned message', ch.pinned_message)
-    })
-    .then(() => ctx.reply('Doet de bot vaag? Heb je een foutje gemaakt?\nJe kunt een chat met de bot altijd afbreken met het \'/cancel\' commando.'))
+  ctx.reply(ctx.i18n.t('helpmessage'))
 }
 
 // bot.use(session.middleware())
@@ -121,29 +124,29 @@ async function showMainMenu (ctx, user) {
       }
     ]
   })
-
   let btns = []
-  btns.push(Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'))
+  btns.push(Markup.callbackButton(ctx.i18n.t('btn_join_raid'), 'joinRaid'))
   if (raids.length > 0) {
-    btns.push(Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'))
+    btns.push(Markup.callbackButton(ctx.i18n.t('btn_exit_raid'), 'exitRaid'))
   }
-  btns.push(Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'))
-  btns.push(Markup.callbackButton(`Een raid wijzigen`, 'editRaid'))
-  btns.push(Markup.callbackButton(`Vind een gymlocatie`, 'findGym'))
+  btns.push(Markup.callbackButton(ctx.i18n.t('btn_add_raid'), 'addRaid'))
+  btns.push(Markup.callbackButton(ctx.i18n.t('btn_edit_raid'), 'editRaid'))
+  btns.push(Markup.callbackButton(ctx.i18n.t('btn_find_gym'), 'findGym'))
 
   // admin only:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
 
   for (let a = 0; a < admins.length; a++) {
     if (admins[a].user.id === user.id) {
-      btns.push(Markup.callbackButton(`Een gym toevoegen`, 'addGym'))
-      btns.push(Markup.callbackButton(`Een gym wijzigen`, 'editGym'))
-      btns.push(Markup.callbackButton(`Een raidboss toevoegen`, 'addBoss'))
-      btns.push(Markup.callbackButton(`Een raidboss wijzigen`, 'editBoss'))
+      btns.push(Markup.callbackButton(ctx.i18n.t('btn_add_gym'), 'addGym'))
+      btns.push(Markup.callbackButton(ctx.i18n.t('btn_edit_gym'), 'editGym'))
+      btns.push(Markup.callbackButton(ctx.i18n.t('btn_add_boss'), 'addBoss'))
+      btns.push(Markup.callbackButton(ctx.i18n.t('btn_edit_boss'), 'editBoss'))
       break
     }
   }
-  return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
+  console.log('SOFARSOGOOD', ctx.i18n.locale(), ctx.i18n.t('main_menu_greeting', {user: user}))
+  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.inlineKeyboard(
     btns, {columns: 1}).extra())
 }
 
@@ -164,7 +167,7 @@ bot.command('/start', async (ctx) => {
   if (fuser !== null) {
     return showMainMenu(ctx, user)
   } else {
-    return ctx.replyWithMarkdown(`Ik help je graag verder als je via de Raid groep komt… 🤔`)
+    return ctx.replyWithMarkdown(ctx.i18n.t('help_from_group'))
   }
 })
 
@@ -194,7 +197,7 @@ bot.on('inline_query', async ctx => {
     }
   })
   if (!user) {
-    console.log(`NIET OK, ik ken ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name} niet`)
+    console.log(`NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name}`)
     return
   }
   // if (ctx.inlineQuery.query === 'actie') {
@@ -220,9 +223,9 @@ bot.hears(/\/hi/i, async (ctx) => {
   let chattitle = ''
   const me = await ctx.telegram.getMe()
   if (ctx.update.message.chat === undefined) {
-    return ctx.replyWithMarkdown(`Nee joh… doe dit vanuit de groep!`)
+    return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_grou_warning'))
   }
-  console.log('Iemand zei hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
+  console.log('Somebody said hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
   let olduser = await models.User.find({
     where: {
       [Op.and]: [
@@ -234,7 +237,7 @@ bot.hears(/\/hi/i, async (ctx) => {
   // console.log('olduser', olduser)
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(olduser.tId, `Dag ${ctx.from.first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*`, {parse_mode: 'Markdown'})
+    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', {first_name: ctx.from.first_name, me: me, chattitle: chattitle}), {parse_mode: 'Markdown'})
     return
   }
   // console.log(
@@ -258,12 +261,12 @@ bot.hears(/\/hi/i, async (ctx) => {
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      await bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
+      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', {first_name: ctx.from.first_name, me: me, chattitle: chattitle}), {parse_mode: 'Markdown'})
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
   } else {
-    return ctx.replyWithMarkdown(`Uhm… ik ken je niet, sorry. Meldt je bij mij aan in je groep met \n\n*/hi@${me.username}*\n\nDan stuur ik je instructies.`)
+    return ctx.replyWithMarkdown(ctx.i18n.t('user_unknown_warning', {me: me}))
   }
 })
 
@@ -345,27 +348,27 @@ bot.hears(/\/raids/i, async (ctx) => {
     }))
   let out = ''
   if (raids.length === 0) {
-    ctx.reply('Geen raids gevonden…')
+    ctx.reply(ctx.i18n.t('no_raids_found'))
     return
   }
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment(new Date(raids[a].endtime))
-    out += `Tot: ${endtime.format('H:mm')} `
+    out += `${ctx.i18n.t('until')}: ${endtime.format('H:mm')} `
     out += `* ${raids[a].target}*\n`
     out += `${raids[a].Gym.gymname}\n`
     if (raids[a].Gym.googleMapsLink) {
-      out += `[Kaart](${raids[a].Gym.googleMapsLink})\n`
+      out += `[${ctx.i18n.t('map')}](${raids[a].Gym.googleMapsLink})\n`
     }
     const strtime = moment(raids[a].start1)
-    out += `Start: ${strtime.format('H:mm')} `
+    out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
     let userlist = ''
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       accounter += raids[a].Raidusers[b].accounts
       userlist += `${raids[a].Raidusers[b].username} `
     }
-    out += `Aantal: ${accounter}\n`
-    out += `Deelnemers: ${userlist}`
+    out += `${ctx.i18n.t('number')}: ${accounter}\n`
+    out += `${ctx.i18n.t('participants')}: ${userlist}`
     out += '\n\n'
   }
   return ctx.replyWithMarkdown(out, {disable_web_page_preview: true})

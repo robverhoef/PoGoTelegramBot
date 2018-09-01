@@ -1,0 +1,38 @@
+# index.js
+cancelmessage: "Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
+helpmessage: "Doet de bot vaag? Heb je een foutje gemaakt?\nJe kunt een chat met de bot altijd afbreken met het \"/cancel\" commando."
+btn_join_raid: "Meedoen met een raid"
+btn_exit_raid: "Afmelden bij een raid"
+btn_add_raid: "Een nieuwe raid melden"
+btn_edit_raid: "Een raid wijzigen"
+btn_find_gym: "Vind een gymlocatie"
+btn_add_gym: "Een gym toevoegen"
+btn_edit_gym: "Een gym wijzigen"
+btn_add_boss: "Een raidboss toevoegen"
+btn_edit_boss: "Een raidboss wijzigen"
+main_menu_greeting: "Hallo ${user.first_name}.\nWat wil je doen?"
+help_from_group: "Ik help je graag verder als je via de Raid groep komt… 🤔"
+hi_from_group_warning: "Nee joh… doe dit vanuit de groep!"
+already_know_user: "Dag ${first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*"
+just_met_message: "Dag ${first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*"
+user_unknown_warning: "Uhm… ik ken je niet, sorry. Meldt je bij mij aan in je groep met \n\n*/hi@${me.username}*\n\nDan stuur ik je instructies."
+no_raids_found: "Geen raids gevonden…"
+until: "Tot"
+map: "Kaart"
+number: "Aantal"
+start: "Start"
+participants: "Deelnemers"
+
+
+# wizards
+#  AddGymWizard.js
+
+#  AddRaidWizard.js
+#  AddRaidbossWizard.js
+#  EditGymWizard.js
+#  EditRaidWizard.js
+#  EditRaidWizard_bak.js
+#  EditRaidbossWizard.js
+#  ExitRaidWizard.js
+#  FindGymWizard.js
+#  JoinRaidWizard.js
