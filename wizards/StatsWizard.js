@@ -8,8 +8,8 @@ const {Markup} = require('telegraf')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
-const personalTop = 5
-const globalTop = 5
+const personalTop = 10
+const globalTop = 10
 
 function sortDictionaryOnValue (dictionary) {
   let items = Object.keys(dictionary).map(function (key) {
@@ -135,7 +135,7 @@ function processRaidVsRaisusers (raids) {
     total += totalRaid
   }
   let statMessage = ''
-  let gymcount = sortDictionaryOnValue(gyms)
+  let gymcount = sortDictionaryOnValue(gyms).splice(0, globalTop)
   if (gymcount.length > 0) {
     statMessage += `Totaal aantal aanmeldigen voor al deze raids: *${total}* \n`
     statMessage += `_De drukst bezochte gyms van deze periode waren:_\n`
