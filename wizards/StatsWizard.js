@@ -8,8 +8,23 @@ const {Markup} = require('telegraf')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
+const personalTop = 5
+const globalTop = 5
+
+function sortDictionaryOnValue (dictionary) {
+  let items = Object.keys(dictionary).map(function (key) {
+    return [key, dictionary[key]]
+  })
+
+  // Sort the array based on the second element
+  items.sort(function (first, second) {
+    return second[1] - first[1]
+  })
+  return items
+}
+
 function sortRaidsOnGymcount (raids) {
-  var gyms = {}
+  let gyms = {}
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
     let count = gyms[key]
@@ -21,19 +36,38 @@ function sortRaidsOnGymcount (raids) {
     gyms[key] = count
   }
 
-  let items = Object.keys(gyms).map(function (key) {
-    return [key, gyms[key]]
-  })
-
-  // Sort the array based on the second element
-  items.sort(function (first, second) {
-    return second[1] - first[1]
-  })
-
-  return items
+  return sortDictionaryOnValue(gyms)
 }
 
-async function determinePersonalStats (user, time) {
+async function processPersonalOwnRaids (user, time) {
+  let ownraids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: time
+      },
+      reporterId: {
+        [Op.eq]: user.id
+      }
+    },
+    include: [models.Gym]
+  })
+
+  let statMessage = ''
+  if (ownraids.length > 0) {
+    statMessage += `Totaal aantal raids door jou gemeld: *${ownraids.length}* \n`
+    let ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
+    if (ownedRaids.length > 0) {
+      statMessage += `_Jouw meest gemelde gyms:_\n`
+    }
+    for (let i = 0; i < ownedRaids.length; i++) {
+      statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}x gemeld*\n`
+    }
+    statMessage += '\n'
+  }
+  return statMessage
+}
+
+async function processPersonalJoinedRaids (user, time) {
   let raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -50,15 +84,136 @@ async function determinePersonalStats (user, time) {
       }
     ]
   })
-
-  let statMessage = `Totaal aantal raids bezocht: *${raids.length}* \n\n`
-  let items = sortRaidsOnGymcount(raids)
-  let result = items.slice(0, 5)
-  if(result.length > 0) {
-    statMessage += `_Jouw meest bezochte gyms:_\n\n`
+  let statMessage = ''
+  if (raids.length > 0) {
+    statMessage += `Totaal keer aangemeld voor raids: *${raids.length}* \n`
+    let joinedRaids = sortRaidsOnGymcount(raids).slice(0, personalTop)
+    if (joinedRaids.length > 0) {
+      statMessage += `_Jouw meest bezochte gyms:_\n`
+    }
+    for (var i = 0; i < joinedRaids.length; i++) {
+      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}x bezocht*\n`
+    }
   }
-  for (var i = 0; i < result.length; i++) {
-    statMessage += `${result[i][0]}: *${result[i][1]}x bezocht*\n`;
+  return statMessage
+}
+
+async function determinePersonalStats (user, time) {
+  let statMessage = ''
+  statMessage += await processPersonalOwnRaids(user, time)
+  statMessage += await processPersonalJoinedRaids(user, time)
+  return statMessage
+}
+
+function processRaidcount (raids) {
+  let statMessage = ''
+  let gymcount = sortRaidsOnGymcount(raids).slice(0, globalTop)
+  if (gymcount.length > 0) {
+    statMessage += `Totaal aantal raids gemeld door iedereen: *${raids.length}* \n`
+    statMessage += `_De meest gemelde gyms waren:_\n`
+    for (let i = 0; i < gymcount.length; i++) {
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}x gemeld*\n`
+    }
+    statMessage += '\n'
+  }
+  return statMessage
+}
+
+function processRaidVsRaisusers (raids) {
+  let gyms = {}
+  let total = 0
+  for (var a = 0; a < raids.length; a++) {
+    let key = raids[a].Gym.gymname
+    let count = gyms[key]
+    let totalRaid = raids[a].Raidusers.length;
+    if (!count) {
+      count = totalRaid
+    } else {
+      count += totalRaid
+    }
+    gyms[key] = count
+    total += totalRaid
+  }
+  let statMessage = ''
+  let gymcount = sortDictionaryOnValue(gyms)
+  if (gymcount.length > 0) {
+    statMessage += `Totaal aantal aanmeldigen voor al deze raids: *${total}* \n`
+    statMessage += `_De drukst bezochte gyms van deze periode waren:_\n`
+    for (let i = 0; i < gymcount.length; i++) {
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}x bezocht*\n`
+    }
+    statMessage += '\n'
+  }
+  return statMessage
+}
+
+function processAllRaids (raids) {
+  let statMessage = processRaidcount(raids)
+
+  statMessage += processRaidVsRaisusers(raids)
+
+  return statMessage
+}
+
+function processRaidusers (raids) {
+  let statMessage = ''
+  let users = {}
+  let userNames = {}
+  for (let a = 0; a < raids.length; a++) {
+    for (let b = 0; b < raids[a].Raidusers.length; b++) {
+      let key = raids[a].Raidusers[b].uid
+      let count = users[key]
+      if (!count) {
+        count = 1
+      } else {
+        count++
+      }
+      users[key] = count
+      userNames[key] = raids[a].Raidusers[b].username
+    }
+  }
+
+  let userCount = sortDictionaryOnValue(users).slice(0, globalTop)
+  if (userCount.length > 0) {
+    statMessage += `_De top raiders van deze periode waren:_\n`
+    for (let i = 0; i < userCount.length; i++) {
+      let userId = userCount[i][0]
+      statMessage += `- [${userNames[userId]}](tg://user?id=${userId}): *${userCount[i][1]}x geraid*\n`
+    }
+    statMessage += '\n'
+  }
+
+  return statMessage
+}
+
+async function processRaidreporters (raids) {
+  let statMessage = ''
+  let reporters = {}
+  for (let a = 0; a < raids.length; a++) {
+    let reporterKey = raids[a].reporterId
+    let reporterCount = reporters[reporterKey]
+    if (!reporterCount) {
+      reporterCount = 1
+    } else {
+      reporterCount++
+    }
+    reporters[reporterKey] = reporterCount
+  }
+  let reporterCount = sortDictionaryOnValue(reporters).slice(0, globalTop)
+  if (reporterCount.length > 0) {
+    statMessage += `_De volgende helden hebben de meeste raids gemeld:_\n`
+    for (let i = 0; i < reporterCount.length; i++) {
+      let reporterId = reporterCount[i][0]
+      let user = await models.User.findOne({
+        where: {
+          tId: {
+            [Op.eq]: reporterId
+          }
+        }
+      })
+
+      statMessage += `- [${user.tUsername}](tg://user?id=${user.tId}): *${reporterCount[i][1]}x gemeld*\n`
+    }
   }
   return statMessage
 }
@@ -70,19 +225,12 @@ async function determineGlobalStats (time) {
         [Op.gt]: time
       }
     },
-    include: [models.Gym]
+    include: [models.Gym, models.Raiduser]
   })
+  let statMessage = processAllRaids(raids)
+  statMessage += processRaidusers(raids)
+  statMessage += await processRaidreporters(raids)
 
-  let statMessage = `Totaal aantal raids bezocht door iedereen: *${raids.length}* \n\n`
-  let items = sortRaidsOnGymcount(raids)
-
-  let result = items.slice(0, 10)
-  if (result.length > 0) {
-    statMessage += `_De meest bezochte gyms waren:_\n\n`
-  }
-  for (var i = 0; i < result.length; i++) {
-    statMessage += `${result[i][0]}: *${result[i][1]}x bezocht*\n`
-  }
   return statMessage
 }
 
@@ -90,11 +238,11 @@ function determineChosenTime (chosenTime) {
   let starttime = moment()
   let time
   if (chosenTime === 0) {
-    time = starttime.subtract(7, 'days').unix()
+    time = starttime.startOf('day').unix()
   } else if (chosenTime === 1) {
-    time = starttime.startOf('month').unix()
+    time = starttime.startOf('week').unix()
   } else if (chosenTime === 2) {
-    time = starttime.subtract(3, 'months').unix()
+    time = starttime.startOf('month').unix()
   } else {
     time = starttime.startOf('year').unix()
   }
@@ -132,9 +280,9 @@ var StatsWizard = function () {
       ctx.session.chosenStat = parseInt(ctx.update.callback_query.data)
 
       let btns = []
-      btns.push(Markup.callbackButton(`Laatste 7 dagen`, 0))
-      btns.push(Markup.callbackButton(`Deze maand tot nu toe`, 1))
-      btns.push(Markup.callbackButton(`Laatste 3 maanden`, 2))
+      btns.push(Markup.callbackButton(`Vandaag`, 0))
+      btns.push(Markup.callbackButton(`Deze week tot nu toe`, 1))
+      btns.push(Markup.callbackButton(`Deze maand tot nu toe`, 2))
       btns.push(Markup.callbackButton(`Dit jaar tot nu toe`, 3))
 
       return ctx.answerCbQuery(null, undefined, true)
@@ -156,7 +304,7 @@ var StatsWizard = function () {
       let chosenStat = ctx.session.chosenStat
       let chosenTime = parseInt(ctx.update.callback_query.data)
 
-      let time = determineChosenTime(chosenTime);
+      let time = determineChosenTime(chosenTime)
 
       let statMessage = ''
       if (chosenStat === 0) {
@@ -168,10 +316,11 @@ var StatsWizard = function () {
 
       if (statMessage === '') {
         statMessage = 'Er konden geen statistieken worden bepaald!'
+      } else {
+        statMessage = `*Statistieken vanaf ${moment.unix(time).format('DD-MM-YYYY')}*\n\n` + statMessage
       }
 
-
-      let message = `${statMessage}\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`
+      let message = `${statMessage}\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`
 
       return ctx.answerCbQuery(null, undefined, true)
         .then(() => ctx.replyWithMarkdown(message))
