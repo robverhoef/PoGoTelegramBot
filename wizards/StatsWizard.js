@@ -178,7 +178,7 @@ function processRaidusers (raids) {
     statMessage += `_De top raiders van deze periode waren:_\n`
     for (let i = 0; i < userCount.length; i++) {
       let userId = userCount[i][0]
-      statMessage += `- [${userNames[userId]}](tg://user?id=${userId}): *${userCount[i][1]}x geraid*\n`
+      statMessage += `- ${userNames[userId]}: *${userCount[i][1]}x geraid*\n`
     }
     statMessage += '\n'
   }
@@ -212,7 +212,7 @@ async function processRaidreporters (raids) {
         }
       })
 
-      statMessage += `- [${user.tUsername}](tg://user?id=${user.tId}): *${reporterCount[i][1]}x gemeld*\n`
+      statMessage += `- ${user.tUsername}: *${reporterCount[i][1]}x gemeld*\n`
     }
   }
   return statMessage
