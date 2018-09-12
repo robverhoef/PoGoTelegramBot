@@ -120,16 +120,16 @@ async function showMainMenu (ctx, user) {
         }
       }
     ]
-  });
+  })
 
-  let btns = [];
-  btns.push(Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'));
-  if(raids.length > 0) {
-    btns.push(Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'));
+  let btns = []
+  btns.push(Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'))
+  if (raids.length > 0) {
+    btns.push(Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'))
   }
-  btns.push(Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'));
-  btns.push(Markup.callbackButton(`Een raid wijzigen`, 'editRaid'));
-  btns.push(Markup.callbackButton(`Vind een gymlocatie`, 'findGym'));
+  btns.push(Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'))
+  btns.push(Markup.callbackButton(`Een raid wijzigen`, 'editRaid'))
+  btns.push(Markup.callbackButton(`Vind een gymlocatie`, 'findGym'))
 
   // admin only:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
