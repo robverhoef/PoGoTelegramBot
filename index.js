@@ -83,6 +83,10 @@ const EditRaidbossWizard = require('./wizards/EditRaidbossWizard')
 const editRaidbossWizard = EditRaidbossWizard(bot)
 editRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const StatsWizard = require('./wizards/StatsWizard')
+const statsWizard = StatsWizard(bot)
+statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -92,7 +96,8 @@ const stage = new Stage([
   addGymWizard,
   editGymWizard,
   addRaidbossWizard,
-  editRaidbossWizard
+  editRaidbossWizard,
+  statsWizard
 ])
 
 /**
@@ -145,9 +150,10 @@ async function showMainMenu (ctx, user) {
       break
     }
   }
-  console.log('SOFARSOGOOD', ctx.i18n.locale(), ctx.i18n.t('main_menu_greeting', {user: user}))
-  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.inlineKeyboard(
-    btns, {columns: 1}).extra())
+
+  btns.push(Markup.callbackButton(`Statistieken`, 'stats'))
+
+  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.inlineKeyboard(btns, {columns: 1}).extra())
 }
 
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
@@ -182,6 +188,7 @@ bot.action('addGym', Stage.enter('add-gym-wizard'))
 bot.action('editGym', Stage.enter('edit-gym-wizard'))
 bot.action('addBoss', Stage.enter('add-raidboss-wizard'))
 bot.action('editBoss', Stage.enter('edit-raidboss-wizard'))
+bot.action('stats', Stage.enter('stats-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode
