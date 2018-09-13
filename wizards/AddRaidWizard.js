@@ -216,7 +216,7 @@ function AddRaidWizard (bot) {
       const endtime = ctx.session.newraid.endtime
       const start1 = ctx.session.newraid.start1
 
-      let out = `${ctx.i18n.t('until')}} ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? (ctx.i18n.t('recommended') + ': ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\n${ctx.i18n.t('start')}: ${moment.unix(start1).format('HH:mm')}`
+      let out = `${ctx.i18n.t('until')} ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? (ctx.i18n.t('recommended') + ': ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\n${ctx.i18n.t('start')}: ${moment.unix(start1).format('HH:mm')}`
 
       return ctx.replyWithMarkdown(`${out}\n\n*${ctx.i18n.t('save_question')}*`, Markup.inlineKeyboard([
         Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
@@ -331,10 +331,11 @@ function AddRaidWizard (bot) {
         btns.push(Markup.callbackButton(a, a))
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t(ctx.i18n.t('number_of_accounts_question', {
-          gymname: ctx.session.newraid.gymname
-        }), Markup.inlineKeyboard(btns).removeKeyboard().extra())))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        .then(() => ctx.replyWithMarkdown(
+            ctx.i18n.t('join_raid_accounts_question', {
+              gymname: ctx.session.newraid.gymname
+            }), Markup.inlineKeyboard(btns).removeKeyboard().extra()))
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {

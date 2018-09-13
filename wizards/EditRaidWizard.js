@@ -93,6 +93,7 @@ function EditRaidWizard (bot) {
         let editraidindex = parseInt(ctx.update.callback_query.data)
         ctx.session.editraid = ctx.session.raidcandidates[editraidindex]
       }
+      console.log('ctx.session.editraid', ctx.session.editraid, 'editmore:', ctx.session.more)
       let btns = [
         Markup.callbackButton(`${ctx.i18n.t('edit_raid_gym')}: ${ctx.session.editraid.gymname}`, 'gym'),
         Markup.callbackButton(`${ctx.i18n.t('edit_raid_endtime')}: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}`, 'endtime'),
@@ -225,7 +226,10 @@ function EditRaidWizard (bot) {
 
     // step 4: do more or save?
     async (ctx) => {
-      let out = `${ctx.i18n.t('until')} ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? (`${ctx.i18n.t('edit_raidboss_overview_accounts')}: ${ctx.session.editraid.accounts}\n`) : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
+      let out = `
+      ${ctx.i18n.t('until')}
+      ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ctx.i18n.t('edit_raidboss_overview_accounts')+': ' + ctx.session.editraid.accounts+'\n' : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
+
       return ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_overview_data', {
         out: out
       }), Markup.inlineKeyboard([
@@ -314,7 +318,7 @@ function EditRaidWizard (bot) {
     async (ctx) => {
       // why do i need this??
       if (ctx.update.message === undefined) {
-        return // ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
+        return
       }
 
       const term = ctx.update.message.text.trim()

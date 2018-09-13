@@ -83,11 +83,10 @@ function JoinRaidWizard (bot) {
         btns.push(Markup.callbackButton(a, a))
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(
-          () => ctx.replyWithMarkdown(
+        .then(() => ctx.replyWithMarkdown(
             ctx.i18n.t('join_raid_accounts_question', {
               gymname: selectedraid.gymname
-            }), Markup.inlineKeyboard(btns)).removeKeyboard().extra())
+            }), Markup.inlineKeyboard(btns).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
     },
