@@ -151,7 +151,7 @@ async function showMainMenu (ctx, user) {
     }
   }
 
-  btns.push(Markup.callbackButton(`Statistieken`, 'stats'))
+  btns.push(Markup.callbackButton(ctx.i18n.t('btn_stats'), 'stats'))
 
   return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.inlineKeyboard(btns, {columns: 1}).extra())
 }

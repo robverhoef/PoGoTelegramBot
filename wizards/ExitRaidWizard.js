@@ -33,7 +33,7 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_not_participating')
+        ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_not_participating'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             return ctx.scene.leave()

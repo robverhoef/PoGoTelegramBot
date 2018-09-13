@@ -39,7 +39,7 @@ function sortRaidsOnGymcount (raids) {
   return sortDictionaryOnValue(gyms)
 }
 
-async function processPersonalOwnRaids (user, time) {
+async function processPersonalOwnRaids (user, time, ctx) {
   let ownraids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -54,20 +54,20 @@ async function processPersonalOwnRaids (user, time) {
 
   let statMessage = ''
   if (ownraids.length > 0) {
-    statMessage += `Totaal aantal raids door jou gemeld: *${ownraids.length}* \n`
+    statMessage += `${ctx.i18n.t('stats_stats_your_total_raids_reported', {ownraids: ownraids})} \n`
     let ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
     if (ownedRaids.length > 0) {
-      statMessage += `_Jouw meest gemelde gyms:_\n`
+      statMessage += `_${ctx.i18n.t('stats_your_most_reported_gyms')}:_\n`
     }
     for (let i = 0; i < ownedRaids.length; i++) {
-      statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}x gemeld*\n`
+      statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-async function processPersonalJoinedRaids (user, time) {
+async function processPersonalJoinedRaids (user, time, ctx) {
   let raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -86,46 +86,46 @@ async function processPersonalJoinedRaids (user, time) {
   })
   let statMessage = ''
   if (raids.length > 0) {
-    statMessage += `Totaal keer aangemeld voor raids: *${raids.length}* \n`
+    statMessage += `${ctx.i18n.t('stats_total_times_joined')}: *${raids.length}* \n`
     let joinedRaids = sortRaidsOnGymcount(raids).slice(0, personalTop)
     if (joinedRaids.length > 0) {
-      statMessage += `_Jouw meest bezochte gyms:_\n`
+      statMessage += `_${ctx.i18n.t('stats_your_most_visited_gyms')}:_\n`
     }
     for (var i = 0; i < joinedRaids.length; i++) {
-      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}x bezocht*\n`
+      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}${ctx.i18n.t('stats_times_visted')}*\n`
     }
   }
   return statMessage
 }
 
-async function determinePersonalStats (user, time) {
+async function determinePersonalStats (user, time, ctx) {
   let statMessage = ''
-  statMessage += await processPersonalOwnRaids(user, time)
-  statMessage += await processPersonalJoinedRaids(user, time)
+  statMessage += await processPersonalOwnRaids(user, time, ctx)
+  statMessage += await processPersonalJoinedRaids(user, time, ctx)
   return statMessage
 }
 
-function processRaidcount (raids) {
+function processRaidcount (raids, ctx) {
   let statMessage = ''
   let gymcount = sortRaidsOnGymcount(raids).slice(0, globalTop)
   if (gymcount.length > 0) {
-    statMessage += `Totaal aantal raids gemeld door iedereen: *${raids.length}* \n`
-    statMessage += `_De meest gemelde gyms waren:_\n`
+    statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: *${raids.length}* \n`
+    statMessage += `_${ctx.i18n.t('stats_most_reported_gyms')}:_\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}x gemeld*\n`
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t('stats_times_visted')}*\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-function processRaidVsRaisusers (raids) {
+function processRaidVsRaisusers (raids, ctx) {
   let gyms = {}
   let total = 0
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
     let count = gyms[key]
-    let totalRaid = raids[a].Raidusers.length;
+    let totalRaid = raids[a].Raidusers.length
     if (!count) {
       count = totalRaid
     } else {
@@ -137,25 +137,25 @@ function processRaidVsRaisusers (raids) {
   let statMessage = ''
   let gymcount = sortDictionaryOnValue(gyms).splice(0, globalTop)
   if (gymcount.length > 0) {
-    statMessage += `Totaal aantal aanmeldigen voor al deze raids: *${total}* \n`
-    statMessage += `_De drukst bezochte gyms van deze periode waren:_\n`
+    statMessage += `${ctx.i18n.t('stats_total_joins_for_these_raids')}: *${total}* \n`
+    statMessage += `_${ctx.i18n.t('stats_busiest_gyms_in_period')}:_\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}x bezocht*\n`
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t('stats_times_visted')}*\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-function processAllRaids (raids) {
-  let statMessage = processRaidcount(raids)
+function processAllRaids (raids, ctx) {
+  let statMessage = processRaidcount(raids, ctx)
 
-  statMessage += processRaidVsRaisusers(raids)
+  statMessage += processRaidVsRaisusers(raids, ctx)
 
   return statMessage
 }
 
-function processRaidusers (raids) {
+function processRaidusers (raids, ctx) {
   let statMessage = ''
   let users = {}
   let userNames = {}
@@ -175,10 +175,10 @@ function processRaidusers (raids) {
 
   let userCount = sortDictionaryOnValue(users).slice(0, globalTop)
   if (userCount.length > 0) {
-    statMessage += `_De top raiders van deze periode waren:_\n`
+    statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
     for (let i = 0; i < userCount.length; i++) {
       let userId = userCount[i][0]
-      statMessage += `- ${userNames[userId]}: *${userCount[i][1]}x geraid*\n`
+      statMessage += `- ${userNames[userId]}: *${userCount[i][1]}${ctx.i18n.t('stats_times_raided')}*\n`
     }
     statMessage += '\n'
   }
@@ -186,7 +186,7 @@ function processRaidusers (raids) {
   return statMessage
 }
 
-async function processRaidreporters (raids) {
+async function processRaidreporters (raids, ctx) {
   let statMessage = ''
   let reporters = {}
   for (let a = 0; a < raids.length; a++) {
@@ -201,7 +201,7 @@ async function processRaidreporters (raids) {
   }
   let reporterCount = sortDictionaryOnValue(reporters).slice(0, globalTop)
   if (reporterCount.length > 0) {
-    statMessage += `_De volgende helden hebben de meeste raids gemeld:_\n`
+    statMessage += `_${ctx.i18n.t('stats_heroes_most_reported')}:_\n`
     for (let i = 0; i < reporterCount.length; i++) {
       let reporterId = reporterCount[i][0]
       let user = await models.User.findOne({
@@ -212,13 +212,13 @@ async function processRaidreporters (raids) {
         }
       })
 
-      statMessage += `- ${user.tUsername}: *${reporterCount[i][1]}x gemeld*\n`
+      statMessage += `- ${user.tUsername}: *${reporterCount[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
     }
   }
   return statMessage
 }
 
-async function determineGlobalStats (time) {
+async function determineGlobalStats (time, ctx) {
   let raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -227,9 +227,9 @@ async function determineGlobalStats (time) {
     },
     include: [models.Gym, models.Raiduser]
   })
-  let statMessage = processAllRaids(raids)
-  statMessage += processRaidusers(raids)
-  statMessage += await processRaidreporters(raids)
+  let statMessage = processAllRaids(raids, ctx)
+  statMessage += processRaidusers(raids, ctx)
+  statMessage += await processRaidreporters(raids, ctx)
 
   return statMessage
 }
@@ -258,11 +258,11 @@ var StatsWizard = function () {
       }
 
       let btns = []
-      btns.push(Markup.callbackButton(`Mijn raid statistieken`, 0))
-      btns.push(Markup.callbackButton(`Totale raid statistieken`, 1))
+      btns.push(Markup.callbackButton(ctx.i18n.t('stats_my_statistics'), 0))
+      btns.push(Markup.callbackButton(ctx.i18n.t('stats_total_statistics'), 1))
 
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.inlineKeyboard(btns, {
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_stats_question'), Markup.inlineKeyboard(btns, {
           wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
@@ -270,7 +270,7 @@ var StatsWizard = function () {
 
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
           .then(() => {
             ctx.session.chosenStat = null
             return ctx.scene.leave()
@@ -280,13 +280,13 @@ var StatsWizard = function () {
       ctx.session.chosenStat = parseInt(ctx.update.callback_query.data)
 
       let btns = []
-      btns.push(Markup.callbackButton(`Vandaag`, 0))
-      btns.push(Markup.callbackButton(`Deze week tot nu toe`, 1))
-      btns.push(Markup.callbackButton(`Deze maand tot nu toe`, 2))
-      btns.push(Markup.callbackButton(`Dit jaar tot nu toe`, 3))
+      btns.push(Markup.callbackButton(ctx.i18n.t('stats_today'), 0))
+      btns.push(Markup.callbackButton(ctx.i18n.t('stats_this_week'), 1))
+      btns.push(Markup.callbackButton(ctx.i18n.t('stats_this_month'), 2))
+      btns.push(Markup.callbackButton(ctx.i18n.t('stats_this_year'), 3))
 
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.inlineKeyboard(btns, {
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_period_question'), Markup.inlineKeyboard(btns, {
           wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
@@ -294,7 +294,7 @@ var StatsWizard = function () {
 
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
           .then(() => {
             ctx.session.chosenStat = null
             return ctx.scene.leave()
@@ -308,19 +308,21 @@ var StatsWizard = function () {
 
       let statMessage = ''
       if (chosenStat === 0) {
-        statMessage = await determinePersonalStats(ctx.from, time)
+        statMessage = await determinePersonalStats(ctx.from, time, ctx)
       }
       if (chosenStat === 1) {
-        statMessage = await determineGlobalStats(time)
+        statMessage = await determineGlobalStats(time, ctx)
       }
 
       if (statMessage === '') {
-        statMessage = 'Er konden geen statistieken worden bepaald!'
+        statMessage = ctx.i18n.t('stats_no_stat_identified')
       } else {
-        statMessage = `*Statistieken vanaf ${moment.unix(time).format('DD-MM-YYYY')}*\n\n` + statMessage
+        statMessage = `*${ctx.i18n.t('stats_since', {
+          timestr: moment.unix(time).format('DD-MM-YYYY')
+        })}*\n\n` + statMessage
       }
 
-      let message = `${statMessage}\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`
+      let message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
 
       return ctx.answerCbQuery(null, undefined, true)
         .then(() => ctx.replyWithMarkdown(message))
