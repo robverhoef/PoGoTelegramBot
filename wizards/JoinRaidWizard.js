@@ -26,7 +26,7 @@ function JoinRaidWizard (bot) {
       })
       if (raids.length === 0) {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_no_raids_found')))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
@@ -42,7 +42,7 @@ function JoinRaidWizard (bot) {
         }
         btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, a))
       }
-      btns.push(Markup.callbackButton('…toch niet meedoen', candidates.length))
+      btns.push(Markup.callbackButton(ctx.i18n.t('join_raid_dont_participate'), candidates.length))
       candidates.push({
         gymname: 'none',
         raidid: 0
@@ -50,7 +50,7 @@ function JoinRaidWizard (bot) {
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown('Kies een raid…', Markup.inlineKeyboard(btns, {
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_select_raid'), Markup.inlineKeyboard(btns, {
           wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
@@ -59,7 +59,7 @@ function JoinRaidWizard (bot) {
     async (ctx) => {
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
           .then(() => {
             ctx.session.raidcandidates = null
             return ctx.scene.leave()
@@ -69,7 +69,7 @@ function JoinRaidWizard (bot) {
       let selectedraid = ctx.session.raidcandidates[ctx.update.callback_query.data]
       if (selectedraid.raidid === 0) {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Jammer! \n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t("join_raid_cancel")))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             ctx.session.raidcandidates = null
@@ -83,15 +83,16 @@ function JoinRaidWizard (bot) {
         btns.push(Markup.callbackButton(a, a))
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${selectedraid.gymname}*?`, Markup.inlineKeyboard(btns).removeKeyboard().extra()))
+        .then(() => ctx.replyWithMarkdown(crx.i18n.t('join_raid_accounts_question', {
+          gymname: selectedraid.gymname
+        }, Markup.inlineKeyboard(btns).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken*')
-          .then(() => ctx.scene.leave())
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       const accounts = parseInt(ctx.update.callback_query.data)
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
@@ -111,7 +112,7 @@ function JoinRaidWizard (bot) {
             { where: { [Op.and]: [{uid: user.id}, {raidId: joinedraid.raidid}] } }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*')
+          return ctx.replyWithMarkdown(ctx.i19n.t('problem_while_saving'))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => ctx.scene.leave())
         }
@@ -127,19 +128,24 @@ function JoinRaidWizard (bot) {
           await raiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
             .then(() => ctx.scene.leave())
         }
       }
-      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${joinedraid.gymname}\n\n`)
+      let out = await listRaids(`${ctx.i18n.t('join_raid_list_reason', {
+        user: user,
+        gymname: joinedraid.gymname
+      })}\n\n`)
       if (out === null) {
         ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found')))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je bent aangemeld voor ${joinedraid.gymname} om ${joinedraid.startsat} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_finished', {
+          joinedraid: joinedraid
+        })))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(async () => {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})

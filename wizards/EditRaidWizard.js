@@ -31,7 +31,7 @@ function EditRaidWizard (bot) {
       })
       if (raids.length === 0) {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Sorry, ik kan nu geen raid vinden 🤨\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_no_raids_found')))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
@@ -45,16 +45,16 @@ function EditRaidWizard (bot) {
           endtime: raids[a].endtime,
           target: raids[a].target
         }
-        btns.push(Markup.callbackButton(`${raids[a].Gym.gymname}, tot: ${moment.unix(raids[a].endtime).format('HH:mm')}, start: ${moment.unix(raids[a].start1).format('HH:mm')}; ${raids[a].target}`, a))
+        btns.push(Markup.callbackButton(`${raids[a].Gym.gymname}, ${ctx.i18n.t('edit_raid_until')}: ${moment.unix(raids[a].endtime).format('HH:mm')}, ${ctx.i18n.t('edit_raid_start')}: ${moment.unix(raids[a].start1).format('HH:mm')}; ${raids[a].target}`, a))
       }
-      btns.push(Markup.callbackButton('…de raid staat er niet bij', candidates.length))
+      btns.push(Markup.callbackButton(ctx.i18n.t('edit_raid_not_found'), candidates.length))
       candidates.push({
         gymname: 'none',
         id: 0
       })
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
-      return ctx.replyWithMarkdown(`Welke raid wil je wijzigen?`,
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_raid_which_raid')}`,
         Markup.inlineKeyboard(btns, {
           columns: 1
         })
@@ -70,7 +70,7 @@ function EditRaidWizard (bot) {
     // step 1: raid chosen, edit what?
     async (ctx) => {
       if (!ctx.update.callback_query && ctx.session.more !== true) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
 
       // retrieve selected candidate from session…
@@ -78,7 +78,7 @@ function EditRaidWizard (bot) {
         let selectedraid = ctx.session.raidcandidates[ctx.update.callback_query.data]
         if (selectedraid.id === 0) {
           return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.replyWithMarkdown('Jammer!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+            .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage')))
             .then(() => {
               if (ctx.update.callback_query.message) {
                 ctx.deleteMessage(ctx.update.callback_query.message.message_id)
@@ -94,14 +94,14 @@ function EditRaidWizard (bot) {
         ctx.session.editraid = ctx.session.raidcandidates[editraidindex]
       }
       let btns = [
-        Markup.callbackButton(`Gym: ${ctx.session.editraid.gymname}`, 'gym'),
-        Markup.callbackButton(`Eindtijd: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}`, 'endtime'),
-        Markup.callbackButton(`Starttijd: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}`, 'start1'),
-        Markup.callbackButton(`Pokemon: ${ctx.session.editraid.target}`, 'target'),
-        Markup.callbackButton(`Ik wil toch niets wijzigen en niets bewaren…`, 0)
+        Markup.callbackButton(`${ctx.i18n.t('edit_raid_gym')}: ${ctx.session.editraid.gymname}`, 'gym'),
+        Markup.callbackButton(`${ctx.i18n.t('edit_raid_endtime')}: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}`, 'endtime'),
+        Markup.callbackButton(`${ctx.i18n.t('edit_raid_starttime')}: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}`, 'start1'),
+        Markup.callbackButton(`${ctx.i18n.t('edit_raid_pokemon')}: ${ctx.session.editraid.target}`, 'target'),
+        Markup.callbackButton(ctx.i18n.t('btn_edit_gym_cancel'), 0)
       ]
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Wat wil je wijzigen?`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()))
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('edit_what'), Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()))
         .then(() => {
           if (ctx.update.callback_query && ctx.session.more !== true) {
             ctx.deleteMessage(ctx.update.callback_query.message.message_id)
@@ -113,12 +113,12 @@ function EditRaidWizard (bot) {
     // step 2: chosen what to edit, enter a value
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       const editattr = ctx.update.callback_query.data
       if (editattr === '0') {
         return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage')))
           .then(() => {
             if (ctx.update.callback_query.message.message_id) {
               return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
@@ -134,21 +134,24 @@ function EditRaidWizard (bot) {
         switch (editattr) {
           case 'endtime':
             ctx.session.editattr = 'endtime'
-            question = `*Geef een nieuwe eindtijd*\nBijvoorbeeld *9:45* of *14:30*`
+            question = ctx.i18n.t('edit_raid_question_endtime')
             break
           case 'start1':
             ctx.session.editattr = 'start1'
             let endtimestr = moment.unix(ctx.session.editraid.endtime).format('HH:mm')
             let start1str = moment.unix(ctx.session.editraid.endtime).subtract(45, 'minutes').format('HH:mm')
-            question = `*Geef een nieuwe starttijd*\nDeze tijd moet tussen ${start1str} en ${endtimestr} liggen`
+            question = ctx.i18n.t('', {
+              start1str: start1str,
+              endtimestr: endtimestr
+            })
             break
           case 'target':
             ctx.session.editattr = 'target'
-            question = `*Hoe heet de nieuwe raidboss of ei?*\nBijvoorbeeld 'Kyogre' of 'Lvl 5 ei'`
+            question = ctx.i18n.t('edit_raid_question_pokemon')
             break
           case 'gym':
             ctx.session.editattr = 'gym'
-            question = `Je wilt de gym wijzigen\nWelke gym wordt het nu?\n*Voer een deel van de naam in, minimaal 2 tekens…*`
+            question = ctx.i18n.t('edit_raid_question_gym')
             return ctx.answerCbQuery(null, undefined, true)
 
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -158,7 +161,7 @@ function EditRaidWizard (bot) {
                 return ctx.wizard.steps[6](ctx)
               })
           default:
-            question = 'Ik heb geen idee wat je wilt wijzigen. \n*Gebruik */start* om het nog eens te proberen. Of ga terug naar de groep.*'
+            question = ctx.i18n.t('edit_raidboss_no_clue')
             return ctx.answerCbQuery(null, undefined, true)
               .then(() => ctx.replyWithMarkdown(question))
               .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -183,14 +186,14 @@ function EditRaidWizard (bot) {
       if (key === 'endtime' || key === 'start1') {
         let timevalue = inputTime(value)
         if (timevalue === false) {
-          return ctx.replyWithMarkdown('Deze tijd is ongeldig… probeer het nog eens.\nAls je er niet uitkomt, kan je altijd stoppen met /cancel')
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
         }
         if (key === 'start1') {
           let endtime = moment.unix(ctx.session.editraid.endtime)
           let start = moment.unix(ctx.session.editraid.endtime).subtract(45, 'minutes')
           let start1 = moment.unix(timevalue)
           if (start.diff(moment(start1)) > 0 || endtime.diff(start1) < 0) {
-            return ctx.replyWithMarkdown('Deze tijd is ongeldig… probeer het nog eens.\nAls je er niet uitkomt, kun je altijd helemaal stoppen met /cancel')
+            return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
           }
         }
         value = timevalue
@@ -222,11 +225,13 @@ function EditRaidWizard (bot) {
 
     // step 4: do more or save?
     async (ctx) => {
-      let out = `Tot ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.editraid.accounts + ' accounts\n') : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
-      return ctx.replyWithMarkdown(`Dit zijn nu de raid gegevens:\n\n${out}*Wat wil je nu doen?*`, Markup.inlineKeyboard([
-        Markup.callbackButton('Opslaan en afsluiten', 0),
-        Markup.callbackButton('Nog iets wijzigen aan deze raid', 1),
-        Markup.callbackButton('Annuleren', 2)
+      let out = `${ctx.i18n.t('until')} ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? (`${ctx.i18n.t('edit_raidboss_overview_accounts')}: ${ctx.session.editraid.accounts}\n`) : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
+      return ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_overview_data', {
+        out: out
+      }), Markup.inlineKeyboard([
+        Markup.callbackButton(ctx.i18n.t('edit_raidboss_btn_save_close'), 0),
+        Markup.callbackButton(ctx.i18n.t('edit_raid_edit_more'), 1),
+        Markup.callbackButton(ctx.i18n.t('cancel'), 2)
       ], {columns: 1})
         .removeKeyboard()
         .extra()
@@ -237,7 +242,7 @@ function EditRaidWizard (bot) {
     // step 5: save & exit or jump to 2
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       const choice = parseInt(ctx.update.callback_query.data)
       switch (choice) {
@@ -259,7 +264,10 @@ function EditRaidWizard (bot) {
                 }
               }
             )
-            let out = await listRaids(`*Raid bij ${ctx.session.editraid.gymname} gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+            let out = await listRaids('edit_raid_list_message', {
+              gymname: ctx.session.editraid.gymname,
+              user: user
+            })
             return ctx.answerCbQuery('', undefined, true)
               .then(async () => {
                 bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
@@ -270,12 +278,12 @@ function EditRaidWizard (bot) {
                 }
               })
               .then(() => {
-                ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+                ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'))
               })
               .then(() => ctx.scene.leave())
           } catch (error) {
             console.error(error)
-            return ctx.replyWithMarkdown('Het bewaren van deze wijziging is mislukt').then(() => ctx.scene.leave())
+            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving')).then(() => ctx.scene.leave())
           }
         case 1:
           // more edits
@@ -284,14 +292,14 @@ function EditRaidWizard (bot) {
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => {
               ctx.session.more = true
-              return ctx.replyWithMarkdown(`OK, meer wijzigingen…`)
+              return ctx.replyWithMarkdown(ctx.i18n.t('edit_more'))
                 .then(() => ctx.wizard.selectStep(1))
                 .then(() => ctx.wizard.steps[1](ctx))
             })
         case 2:
           // Don't save and leave
           return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+            .then(() => ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving')))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => {
               ctx.session.raidcandidates = null
@@ -312,7 +320,7 @@ function EditRaidWizard (bot) {
       const term = ctx.update.message.text.trim()
       let btns = []
       if (term.length < 2) {
-        return ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
+        return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
         // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
@@ -322,7 +330,9 @@ function EditRaidWizard (bot) {
         })
         if (candidates.length === 0) {
           // ToDo: check dit dan...
-          return ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\n*Probeer het nog eens*\nGebruik /cancel om te stoppen.`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {
+            term: term === '/start help_fromgroup' ? '' : term
+          }))
           // .then(() => ctx.wizard.back())
         }
         ctx.session.gymcandidates = []
@@ -335,14 +345,14 @@ function EditRaidWizard (bot) {
           btns.push(Markup.callbackButton(candidates[i].gymname, i))
         }
 
-        btns.push(Markup.callbackButton('Mijn gym staat er niet bij…', candidates.length))
+        btns.push(Markup.callbackButton(ctx.i18n.t('btn_gym_not_found'), candidates.length))
         ctx.session.gymcandidates.push(
           {
             name: 'none',
             id: 0
           }
         )
-        return ctx.replyWithMarkdown('Kies de nieuwe gym.', Markup.inlineKeyboard(btns,
+        return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.inlineKeyboard(btns,
           {
             columns: 1
           }
@@ -359,7 +369,7 @@ function EditRaidWizard (bot) {
         // mmm, let's try searching for a gym again
         return ctx.answerCbQuery(null, undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(`We gaan opnieuw zoeken. \nGebruik /cancel als je wilt stoppen\n*Voer een deel van de naam in, minimaal 2 tekens…*`))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_search_gym_again')))
           .then(() => {
             ctx.wizard.selectStep(6)
             return ctx.wizard.steps[6](ctx)

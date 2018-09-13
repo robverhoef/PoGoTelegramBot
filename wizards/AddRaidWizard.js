@@ -19,7 +19,7 @@ function AddRaidWizard (bot) {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`))
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('add_raid_welcome')))
         // .then(()=> {
       // .then(() => ctx.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id))
       // ctx.session.prevMessage = {chatId: ,messageId:}
@@ -35,7 +35,7 @@ function AddRaidWizard (bot) {
       const term = ctx.update.message.text.trim()
       let btns = []
       if (term.length < 2) {
-        return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
+        return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
         // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
@@ -44,7 +44,7 @@ function AddRaidWizard (bot) {
           }
         })
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
+          ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {term: term}))
           // .then(() => ctx.wizard.back())
           return
         }
@@ -54,7 +54,7 @@ function AddRaidWizard (bot) {
           btns.push(Markup.callbackButton(candidates[i].gymname, i))
         }
 
-        btns.push(Markup.callbackButton('Mijn gym staat er niet bij…', candidates.length))
+        btns.push(Markup.callbackButton(ctx.i18n.t('btn_gym_not_found'), candidates.length))
         ctx.session.gymcandidates.push({name: 'none', id: 0})
         return ctx.replyWithMarkdown('Kies een gym.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
           .then(() => ctx.wizard.next())
@@ -63,7 +63,7 @@ function AddRaidWizard (bot) {
     // step 2
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       let selectedIndex = parseInt(ctx.update.callback_query.data)
       // User can't find the gym
@@ -71,7 +71,7 @@ function AddRaidWizard (bot) {
         return ctx.answerCbQuery('', undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
-            ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen,`)
+            ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'))
             ctx.wizard.selectStep(1)
             return ctx.wizard.steps[1](ctx)
           })
@@ -82,14 +82,14 @@ function AddRaidWizard (bot) {
         ctx.session.newraid.gymname = selectedgym.gymname
 
         let btns = [
-          Markup.callbackButton('Uitkomen van het ei: start tijd', 'startmodetime'),
-          Markup.callbackButton('Uitkomen van het ei: in minuten', 'startmodemin'),
-          Markup.callbackButton('Einde van de raid: eind tijd', 'endmodetime'),
-          Markup.callbackButton('Einde van de raid: in minuten', 'endmodemin')
+          Markup.callbackButton(ctx.i18n.t('btn_start_mode_time'), 'startmodetime'),
+          Markup.callbackButton(ctx.i18n.t('btn_start_mode_min'), 'startmodemin'),
+          Markup.callbackButton(ctx.i18n.t('btn_end_mode_time'), 'endmodetime'),
+          Markup.callbackButton(ctx.i18n.t('btn_end_mode_min'), 'endmodemin')
         ]
         return ctx.answerCbQuery('', undefined, true)
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(`*Hoe wil je de eindtijd van de raid opgeven?*\nKlik op een knop…`,
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('enter_end_time_mode_question'),
             Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()
           ))
           .then(() => ctx.wizard.next())
@@ -98,19 +98,19 @@ function AddRaidWizard (bot) {
     // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
       if (timemode === 'startmodetime') {
-        question = `*Hoe laat komt het ei uit?*\nGeef de tijd zo op: *09:30* of *13:45*…`
+        question = ctx.i18n.t('enter_starttime_time')
       } else if (timemode === 'endmodetime') {
-        question = `*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+        question = ctx.i18n.t('enter_endtime_time')
       } else if (timemode === 'startmodemin') {
-        question = `*Hoeveel minuten staat er nog op het ei?*\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+        question = ctx.i18n.t('enter_starttime_minutes')
       } else if (timemode === 'endmodemin') {
-        question = `*Hoeveel minuten staat er nog op de raid?*`
+        question = ctx.i18n.t('enter_endtime_minutes')
       }
       return ctx.answerCbQuery('', undefined, true)
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
@@ -126,17 +126,17 @@ function AddRaidWizard (bot) {
         tmptime = inputTime(message)
         // check valid time
         if (tmptime === false) {
-          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
         }
       } else {
         let minutes = parseInt(message)
 
         if (!minutes || minutes < 0 || minutes > 60) {
-          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 60 liggen. \n*Probeer het nog eens.*`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_minutes_retry'))
         }
 
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
-          return ctx.replyWithMarkdown('*Dat wordt een beetje krap om nog te melden, volgende keer beter.\nWil je nog een actie uitvoeren? Klik dan hier op */start')
+          return ctx.replyWithMarkdown(ctx.i18n.t('time_to_tight'))
             .then(() => ctx.scene.leave())
         }
 
@@ -161,7 +161,7 @@ function AddRaidWizard (bot) {
         starttime = moment()
       }
 
-      ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten`)
+      ctx.replyWithMarkdown(ctx.i18n.t('starttime_proposal', {starttm: starttime.format('HH:mm'), endtm: moment.unix(endtime).format('HH:mm')}))
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -184,17 +184,15 @@ function AddRaidWizard (bot) {
       } else {
         start1 = inputTime(message)
         if (start1 === false) {
-          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*  of vul een *x* in om deze leeg te laten`)
-          // .then(() => ctx.wizard.back())
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')}))
         }
         if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
-          return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten\nProbeer het nog eens…`)
-          // .then(() => ctx.wizard.back())
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')}))
         }
       }
 
       ctx.session.newraid.start1 = start1
-      ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Kyogre* of *Level 5 ei*`)
+      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'))
         .then(() => ctx.wizard.next())
     },
     // step 5
@@ -218,24 +216,24 @@ function AddRaidWizard (bot) {
       const endtime = ctx.session.newraid.endtime
       const start1 = ctx.session.newraid.start1
 
-      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
+      let out = `${ctx.i18n.t('until')}} ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? (ctx.i18n.t('recommended') + ': ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\n${ctx.i18n.t('start')}: ${moment.unix(start1).format('HH:mm')}`
 
-      return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.inlineKeyboard([
-        Markup.callbackButton('Ja', 'yes'),
-        Markup.callbackButton('Nee', 'no')
+      return ctx.replyWithMarkdown(`${out}\n\n*${ctx.i18n.t('save_question')}*`, Markup.inlineKeyboard([
+        Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
+        Markup.callbackButton(ctx.i18n.t('no'), 'no')
       ], {columns: 1}).removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
     // step 6
     async (ctx) => {
       if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown('Hier ging iets niet goed… *Klik op een knop 👆*')
+        ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       const user = ctx.from
       let saveme = ctx.update.callback_query.data
       if (saveme === 'no') {
         return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('Jammer… \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving')))
           .then(() => ctx.scene.leave())
       } else {
         // Sometimes a new raid is getting submitted multiple times
@@ -256,11 +254,11 @@ function AddRaidWizard (bot) {
           if (ctx.update.callback_query.message.message_id) {
             ctx.deleteMessage(ctx.update.callback_query.message.message_id)
           }
-          return ctx.replyWithMarkdown(`Deze raid bestaat al.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`)
-          .then(() => {
-            ctx.session.newraid = null
-            return ctx.scene.leave()
-          })
+          return ctx.replyWithMarkdown(ctx.i18n.t('raid_exists_warning'))
+            .then(() => {
+              ctx.session.newraid = null
+              return ctx.scene.leave()
+            })
         }
         let newraid = models.Raid.build({
           gymId: ctx.session.newraid.gymId,
@@ -273,26 +271,28 @@ function AddRaidWizard (bot) {
         })
         // save...
         try {
-           await newraid.save()
+          await newraid.save()
             .then((saved) => {
               console.log('saved', saved)
               ctx.session.savedraid = saved
             })
-
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het saven… Misschien toch maar eens opnieuw proberen met /start.`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
             .then(() => {
-              ct.session = null
+              ctx.session = null
               return ctx.scene.leave()
             })
         }
         // send updated list to group
-        let out = await listRaids(`Raid bij ${ctx.session.newraid.gymname} toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+        let out = await listRaids(ctx.i18n.t('raid_added_list', {
+          gymname: ctx.session.newraid.gymname,
+          user: user
+        }))
         if (out === null) {
           return ctx.answerCbQuery(null, undefined, true)
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-            .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`))
+            .then(() => ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found')))
             .then(() => ctx.scene.leave())
         }
 
@@ -302,9 +302,9 @@ function AddRaidWizard (bot) {
           })
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
-            ctx.replyWithMarkdown('Dankjewel!\n*Doe je zelf mee met deze raid?*', Markup.inlineKeyboard([
-              Markup.callbackButton('Ja', 'yes'),
-              Markup.callbackButton('Nee', 'no')
+            ctx.replyWithMarkdown(ctx.i18n.t('do_you_participate'), Markup.inlineKeyboard([
+              Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
+              Markup.callbackButton(ctx.i18n.t('no'), 'no')
             ]).removeKeyboard().extra())
           })
           .then(() => ctx.wizard.next())
@@ -313,7 +313,7 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
           .then(() => {
             ctx.session = null
             return ctx.scene.leave()
@@ -322,7 +322,7 @@ function AddRaidWizard (bot) {
       // user does NOT participate, exit
       if (ctx.update.callback_query.data === 'no') {
         ctx.answerCbQuery(null, undefined, true)
-        return ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'))
           .then(() => ctx.scene.leave())
       }
       // user does participate
@@ -331,14 +331,16 @@ function AddRaidWizard (bot) {
         btns.push(Markup.callbackButton(a, a))
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${ctx.session.newraid.gymname}*?`, Markup.inlineKeyboard(btns).removeKeyboard().extra()))
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t(ctx.i18n.t('number_of_accounts_question', {
+          gymname: ctx.session.newraid.gymname
+        }), Markup.inlineKeyboard(btns).removeKeyboard().extra())))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken*')
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
           .then(() => ctx.scene.leave())
       }
       const accounts = parseInt(ctx.update.callback_query.data)
@@ -358,7 +360,7 @@ function AddRaidWizard (bot) {
             { where: { [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}] } }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*')
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
             .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
             .then(() => ctx.scene.leave())
         }
@@ -374,19 +376,25 @@ function AddRaidWizard (bot) {
           await raiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
             .then(() => ctx.scene.leave())
         }
       }
-      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${ctx.session.newraid.gymname}\n\n`)
+      let out = await listRaids(ctx.i18n.t('raid_user_added_list', {
+        user: user,
+        gymname: ctx.session.newraid.gymname
+      }))
       if (out === null) {
         ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found')))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
       return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je bent aangemeld voor ${ctx.session.newraid.gymname} om ${moment.unix(ctx.session.newraid.start1).format('HH:mm')} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('raid_add_finish', {
+          gymname: ctx.session.newraid.gymname,
+          starttm: moment.unix(ctx.session.newraid.start1).format('HH:mm')
+        })))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(async () => {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})

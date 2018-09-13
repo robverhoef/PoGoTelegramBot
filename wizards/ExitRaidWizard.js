@@ -33,7 +33,7 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+        ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_not_participating')
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             return ctx.scene.leave()
@@ -48,8 +48,8 @@ function ExitRaidWizard (bot) {
           // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
           btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id))
         }
-        btns.push(Markup.callbackButton('Mijn raid staat er niet bij…', 0))
-        return ctx.replyWithMarkdown('Kies een raid…', Markup.inlineKeyboard(btns, {columns: 1}).extra())
+        btns.push(Markup.callbackButton(ctx.i18n.t('exit_raid_not_listed'), 0))
+        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_select_raid'), Markup.inlineKeyboard(btns, {columns: 1}).extra())
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.wizard.next())
       }
@@ -58,11 +58,11 @@ function ExitRaidWizard (bot) {
       const user = ctx.from
       if (!ctx.update.callback_query) {
         // console.log('afhandeling raidkeuze, geen callbackquery!')
-        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+        ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
       }
       let selectedraid = parseInt(ctx.update.callback_query.data)
       if (selectedraid === 0) {
-        return ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => {
             return ctx.scene.leave()
@@ -84,16 +84,20 @@ function ExitRaidWizard (bot) {
       } catch (error) {
         console.log('Error removing user from raid', error)
       }
-      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) meldde zich af voor raid bij ${ctx.session.gymnames[selectedraid]}\n\n`)
+      let out = await listRaids(
+        ctx.i18n.t('exit_raid_list_message', {
+          user: user,
+          gymname: ctx.session.gymnames[selectedraid]
+        }))
       if (out === null) {
         ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(`Mmmm, geen raid te vinden`))
+          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('no_raids_found')))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
           .then(() => ctx.scene.leave())
       }
       bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
       ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure')))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.scene.leave())
     }
