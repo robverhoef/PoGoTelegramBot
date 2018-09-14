@@ -53,7 +53,7 @@ function JoinRaidWizard (bot) {
         .then(() => ctx.replyWithMarkdown('Kies een raid…', Markup.inlineKeyboard(btns, {
           wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     async (ctx) => {
@@ -85,7 +85,7 @@ function JoinRaidWizard (bot) {
       return ctx.answerCbQuery(null, undefined, true)
         .then(() => ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${selectedraid.gymname}*?`, Markup.inlineKeyboard(btns).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {

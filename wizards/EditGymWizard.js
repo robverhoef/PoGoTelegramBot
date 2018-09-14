@@ -13,7 +13,7 @@ function EditGymWizard (bot) {
     async (ctx) => {
       return ctx.replyWithMarkdown(`We gaan de gym zoeken die je wilt wijzigen.\n*Voer een deel van de naam in, minimaal 2 tekens…*`)
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
@@ -46,7 +46,7 @@ function EditGymWizard (bot) {
         btns.push(Markup.callbackButton('Mijn gym staat er niet bij…', candidates.length))
         ctx.session.gymcandidates.push({gymname: 'none', id: 0})
         return ctx.replyWithMarkdown('Kies een gym.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     // step 2
@@ -83,7 +83,7 @@ function EditGymWizard (bot) {
       return ctx.answerCbQuery(null, undefined, true)
         .then(() => ctx.replyWithMarkdown(`*Wat wil je wijzigen?*`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {
@@ -126,7 +126,7 @@ function EditGymWizard (bot) {
         return ctx.answerCbQuery(null, undefined, true)
           .then(() => ctx.replyWithMarkdown(question))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     async (ctx) => {
@@ -145,7 +145,7 @@ function EditGymWizard (bot) {
         Markup.callbackButton('Nog iets wijzigen aan deze gym', 1),
         Markup.callbackButton('Annuleren', 2)
       ], {columns: 1}).removeKeyboard().extra())
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     async (ctx) => {

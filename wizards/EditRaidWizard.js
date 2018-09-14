@@ -64,7 +64,7 @@ function EditRaidWizard (bot) {
             ctx.deleteMessage(ctx.update.callback_query.message.message_id)
           }
         })
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // step 1: raid chosen, edit what?
@@ -107,7 +107,7 @@ function EditRaidWizard (bot) {
             ctx.deleteMessage(ctx.update.callback_query.message.message_id)
           }
         })
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // step 2: chosen what to edit, enter a value
@@ -167,7 +167,7 @@ function EditRaidWizard (bot) {
         return ctx.answerCbQuery(null, undefined, true)
           .then(() => ctx.replyWithMarkdown(question))
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     // step 3: enter new value or jump to 6 for entering a new gym
@@ -231,7 +231,7 @@ function EditRaidWizard (bot) {
         .removeKeyboard()
         .extra()
       )
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // step 5: save & exit or jump to 2
@@ -347,7 +347,7 @@ function EditRaidWizard (bot) {
             columns: 1
           }
         ).removeKeyboard().extra())
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
 

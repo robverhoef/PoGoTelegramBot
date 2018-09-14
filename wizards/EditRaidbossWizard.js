@@ -17,7 +17,7 @@ function EditRaidbossWizard (bot) {
       }
       return ctx.replyWithMarkdown(`Je wilt een raidboss wijzigen.\n*Voer een deel van de naam in…*`)
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // Step 1: Raidboss lookup by name
@@ -46,7 +46,7 @@ function EditRaidbossWizard (bot) {
       ctx.session.bosscandidates.push({name: 'none', id: 0})
       btns.push(Markup.callbackButton('Mijn raidboss staat er niet bij…', bosses.length))
       return ctx.replyWithMarkdown('Kies een raidboss.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // Step 2: handle boss selection , ask what to change
@@ -66,7 +66,7 @@ function EditRaidbossWizard (bot) {
         Markup.callbackButton(`Ik wil toch niets wijzigen en niets bewaren…`, 0)
       ]
       return ctx.replyWithMarkdown(`Wat wil je wijzigen?`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // Step 3: ask for value
@@ -98,7 +98,7 @@ function EditRaidbossWizard (bot) {
             .then(() => ctx.scene.leave())
       }
       return ctx.replyWithMarkdown(question)
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // Step 4 handle value, ask whats next?
     async (ctx) => {
@@ -113,7 +113,7 @@ function EditRaidbossWizard (bot) {
         .removeKeyboard()
         .extra()
       )
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // Step 4 handle value, ask whats next?
     async (ctx) => {

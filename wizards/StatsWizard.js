@@ -265,7 +265,7 @@ var StatsWizard = function () {
         .then(() => ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.inlineKeyboard(btns, {
           wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     async (ctx) => {
@@ -289,7 +289,7 @@ var StatsWizard = function () {
         .then(() => ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.inlineKeyboard(btns, {
           wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     async (ctx) => {

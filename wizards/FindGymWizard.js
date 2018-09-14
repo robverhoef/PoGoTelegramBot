@@ -10,7 +10,7 @@ var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
     (ctx) => {
       ctx.replyWithMarkdown(`Geef minstens 2 tekens van de gymnaam…`)
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     async (ctx) => {
       const term = ctx.update.message.text.trim()
