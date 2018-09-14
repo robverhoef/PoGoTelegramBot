@@ -15,7 +15,7 @@ function AddRaidbossWizard (bot) {
       }
       return ctx.replyWithMarkdown(`Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*`)
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // Step 1: Handle raidboss name and ask for level
@@ -37,7 +37,7 @@ function AddRaidbossWizard (bot) {
         btns.push(Markup.callbackButton(i + 1, i + 1))
       }
       return ctx.replyWithMarkdown(`Welk level heeft ${bossname}?`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
-        .then(() => {
+        .finally(() => {
           return ctx.wizard.next()
         })
     },
@@ -50,7 +50,7 @@ function AddRaidbossWizard (bot) {
         ctx.deleteMessage(ctx.update.callback_query.message.message_id)
       }
       return ctx.replyWithMarkdown(`Wat is het aanbevolen aantal accounts voor ${ctx.session.newboss.name}?`)
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
 
     // Handle recommended number of accounts
@@ -61,7 +61,7 @@ function AddRaidbossWizard (bot) {
         Markup.callbackButton('Nee', 'no')
       ]
       ctx.replyWithMarkdown(`Raidboss: ${ctx.session.newboss.name}\nLevel: ${ctx.session.newboss.level}\nAanbevolen aantal accounts: ${ctx.session.newboss.accounts}\n\n*Opslaan?*`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
-        .then(() => {
+        .finally(() => {
           return ctx.wizard.next()
         })
     },

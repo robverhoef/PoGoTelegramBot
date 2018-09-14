@@ -51,7 +51,7 @@ function ExitRaidWizard (bot) {
         btns.push(Markup.callbackButton('Mijn raid staat er niet bij…', 0))
         return ctx.replyWithMarkdown('Kies een raid…', Markup.inlineKeyboard(btns, {columns: 1}).extra())
           .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     async (ctx) => {

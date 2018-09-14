@@ -13,7 +13,7 @@ function AddGymWizard (bot) {
       return ctx.answerCbQuery(null, undefined, true)
         .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe gym toevoegen.\n*Voer de naam in…*`))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // Adres of x
     async (ctx) => {
@@ -35,7 +35,7 @@ function AddGymWizard (bot) {
       ctx.session.newgym.gymname = gymname
       console.info('session: ', ctx.session)
       ctx.replyWithMarkdown('*Wat is het adres (straat en eventueel nummer)?*\nAls je deze niet weet, vul een *x* in…')
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // Google maps of x
     async (ctx) => {
