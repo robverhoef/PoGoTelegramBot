@@ -18,14 +18,10 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
-      return ctx.answerCbQuery(null, undefined, true)
+      return ctx.answerCbQuery(null, undefined, false)
         .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`))
-        // .then(()=> {
-      // .then(() => ctx.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id))
-      // ctx.session.prevMessage = {chatId: ,messageId:}
-        // })
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
@@ -57,7 +53,7 @@ function AddRaidWizard (bot) {
         btns.push(Markup.callbackButton('Mijn gym staat er niet bij…', candidates.length))
         ctx.session.gymcandidates.push({name: 'none', id: 0})
         return ctx.replyWithMarkdown('Kies een gym.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     // step 2
@@ -92,7 +88,7 @@ function AddRaidWizard (bot) {
           .then(() => ctx.replyWithMarkdown(`*Hoe wil je de eindtijd van de raid opgeven?*\nKlik op een knop…`,
             Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()
           ))
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     // step 3: get the time; either start or end of the raid itself, or in minutes
@@ -115,7 +111,7 @@ function AddRaidWizard (bot) {
       return ctx.answerCbQuery('', undefined, true)
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.replyWithMarkdown(question))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // step 4
     async (ctx) => {
@@ -162,7 +158,7 @@ function AddRaidWizard (bot) {
       }
 
       ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten`)
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // step 4
     async (ctx) => {
@@ -195,7 +191,7 @@ function AddRaidWizard (bot) {
 
       ctx.session.newraid.start1 = start1
       ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Kyogre* of *Level 5 ei*`)
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // step 5
     async (ctx) => {
@@ -224,7 +220,7 @@ function AddRaidWizard (bot) {
         Markup.callbackButton('Ja', 'yes'),
         Markup.callbackButton('Nee', 'no')
       ], {columns: 1}).removeKeyboard().extra())
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     // step 6
     async (ctx) => {
@@ -307,7 +303,7 @@ function AddRaidWizard (bot) {
               Markup.callbackButton('Nee', 'no')
             ]).removeKeyboard().extra())
           })
-          .then(() => ctx.wizard.next())
+          .finally(() => ctx.wizard.next())
       }
     },
     async (ctx) => {
@@ -333,7 +329,7 @@ function AddRaidWizard (bot) {
       return ctx.answerCbQuery(null, undefined, true)
         .then(() => ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${ctx.session.newraid.gymname}*?`, Markup.inlineKeyboard(btns).removeKeyboard().extra()))
         .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.wizard.next())
+        .finally(() => ctx.wizard.next())
     },
     async (ctx) => {
       if (!ctx.update.callback_query) {
