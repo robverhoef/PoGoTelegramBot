@@ -125,7 +125,7 @@ function processRaidVsRaisusers (raids) {
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
     let count = gyms[key]
-    let totalRaid = raids[a].Raidusers.length;
+    let totalRaid = raids[a].Raidusers.length
     if (!count) {
       count = totalRaid
     } else {
