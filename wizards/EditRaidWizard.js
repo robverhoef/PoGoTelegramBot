@@ -30,13 +30,7 @@ function EditRaidWizard (bot) {
         }
       })
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown('Sorry, ik kan nu geen raid vinden 🤨\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
-          .then(() => {
-            if (ctx.update.callback_query) {
-              ctx.answerCbQuery(null, undefined, true)
-              ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-            }
-          })
+        return ctx.replyWithMarkdown('Sorry, ik kan nu geen raid vinden 🤨\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
       ctx.session.raidbtns = []
@@ -62,12 +56,8 @@ function EditRaidWizard (bot) {
         Markup.keyboard(ctx.session.raidbtns)
           .oneTime()
           .resize()
-          .extra())
-        .then(() => {
-          if (ctx.update.callback_query.message) {
-            ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-          }
-        })
+          .extra()
+      )
         .then(() => ctx.wizard.next())
     },
 

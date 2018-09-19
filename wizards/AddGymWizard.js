@@ -11,9 +11,7 @@ function AddGymWizard (bot) {
     // Gym name
     async (ctx) => {
       ctx.session.newgym = {}
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe gym toevoegen.\n*Voer de naam in…*`))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe gym toevoegen.\n*Voer de naam in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // Step 1

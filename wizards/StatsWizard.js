@@ -253,11 +253,6 @@ var StatsWizard = function () {
   return new WizardScene('stats-wizard',
     // Step 0: Get the info requested
     async (ctx) => {
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
-
       ctx.session.statbtns = [`Mijn raid statistieken`, `Totale raid statistieken`]
 
       return ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.keyboard(ctx.session.statbtns)

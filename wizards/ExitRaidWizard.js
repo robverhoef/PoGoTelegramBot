@@ -33,11 +33,7 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        if (ctx.update.callback_query) {
-          ctx.answerCbQuery(null, undefined, true)
-          ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-        }
-        return ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+        return ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       } else {
         ctx.session.raidbtns = []
@@ -50,10 +46,6 @@ function ExitRaidWizard (bot) {
           ctx.session.raidbtns.push([`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id])
         }
         ctx.session.raidbtns.push(['Mijn raid staat er niet bij…', 0])
-        if (ctx.update.callback_query) {
-          ctx.answerCbQuery(null, undefined, true)
-          ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-        }
         return ctx.replyWithMarkdown('Kies een raid…', Markup.keyboard(ctx.session.raidbtns.map(el => el[0])).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }

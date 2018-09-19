@@ -9,11 +9,7 @@ const Op = Sequelize.Op
 var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
     (ctx) => {
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
-      return ctx.replyWithMarkdown(`Geef minstens 2 tekens van de gymnaam…`)
+      return ctx.replyWithMarkdown(`Geef minstens 2 tekens van de gymnaam…`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {

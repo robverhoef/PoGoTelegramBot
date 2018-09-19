@@ -12,7 +12,6 @@ function EditGymWizard (bot) {
     // step 0
     async (ctx) => {
       return ctx.replyWithMarkdown(`We gaan de gym zoeken die je wilt wijzigen.\n*Voer een deel van de naam in, minimaal 2 tekens…*`)
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
         .then(() => ctx.wizard.next())
     },
     // step 1
@@ -41,7 +40,7 @@ function EditGymWizard (bot) {
             address: candidates[i].address,
             exRaidTrigger: candidates[i].exRaidTrigger
           })
-          ctx.session.gymbtns.push(Markup.callbackButton(candidates[i].gymname))
+          ctx.session.gymbtns.push(candidates[i].gymname)
         }
         ctx.session.gymbtns.push('Mijn gym staat er niet bij…')
         ctx.session.gymcandidates.push({gymname: 'Mijn gym staat er niet bij…', id: 0})
@@ -55,7 +54,7 @@ function EditGymWizard (bot) {
       if (ctx.session.more !== true) {
         selectedIndex = ctx.session.gymcandidates.length - 1
         for (let i = 0; i < ctx.session.gymcandidates.length; i++) {
-          if (ctx.session.gymcandidates[i].gymname === ctx.update.message.text.trim()) {
+          if (ctx.session.gymcandidates[i].gymname === ctx.update.message.text) {
             selectedIndex = i
             break
           }
@@ -76,25 +75,29 @@ function EditGymWizard (bot) {
           ctx.session.editgym = selectedgym
         }
       }
-      let btns = [
-        Markup.callbackButton(`Naam: ${ctx.session.editgym.gymname}`, 'gymname'),
-        Markup.callbackButton(`Google Maps link: ${ctx.session.editgym.googleMapsLink !== null ? ctx.session.editgym.googleMapsLink : 'Niets opgegegven'}`, 'googleMapsLink'),
-        Markup.callbackButton(`Adres: ${ctx.session.editgym.address !== null ? ctx.session.editgym.address : 'Niets opgegeven'}`, 'address'),
-        Markup.callbackButton(`Ex-Raid kans: ${ctx.session.editgym.exRaidTrigger === 1 || ctx.session.editgym.exRaidTrigger === true ? 'Ja' : 'Nee'}`, 'exRaidTrigger'),
-        Markup.callbackButton(`Ik wil toch niets wijzigen en niets bewaren…`, 0)
+      ctx.session.changebtns = [
+        [`Naam: ${ctx.session.editgym.gymname}`, 'gymname'],
+        [`Google Maps link: ${ctx.session.editgym.googleMapsLink !== null ? ctx.session.editgym.googleMapsLink : 'Niets opgegegven'}`, 'googleMapsLink'],
+        [`Adres: ${ctx.session.editgym.address !== null ? ctx.session.editgym.address : 'Niets opgegeven'}`, 'address'],
+        [`Ex-Raid kans: ${ctx.session.editgym.exRaidTrigger === 1 || ctx.session.editgym.exRaidTrigger === true ? 'Ja' : 'Nee'}`, 'exRaidTrigger'],
+        [`Ik wil toch niets wijzigen en niets bewaren…`, '0']
       ]
-      return ctx.replyWithMarkdown(`*Wat wil je wijzigen?*`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      return ctx.replyWithMarkdown(`*Wat wil je wijzigen?*`, Markup.keyboard(ctx.session.changebtns.map(el => el[0]))
+        .resize()
+        .oneTime()
+        .extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      let editattr
+      for(let i = 0; i < ctx.session.changebtns.length; i++) {
+        if (ctx.session.changebtns[i][0] === ctx.update.message.text) {
+          editattr = ctx.session.changebtns[i][1]
+          break
+        }
       }
-      const editattr = ctx.update.callback_query.data
       if (editattr === '0') {
-        return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard())
           .then(() => {
             ctx.session.gymcandidates = null
             ctx.session.editgym = null
@@ -124,9 +127,7 @@ function EditGymWizard (bot) {
             question = 'Sorry. Ik heb geen idee wat je wilt wijzigen\n*Klik op */start* om het nog eens te proberen. Of ga terug naar de groep.*'
             break
         }
-        return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(question))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(question, Markup.removeKeyboard())
           .then(() => ctx.wizard.next())
       }
     },
@@ -156,7 +157,6 @@ function EditGymWizard (bot) {
       switch (choice) {
         case 0:
           // save and exit
-          // const user = ctx.update.callback_query.from
           try {
             await models.Gym.update(
               {

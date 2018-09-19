@@ -25,9 +25,7 @@ function JoinRaidWizard (bot) {
         }
       })
       if (raids.length === 0) {
-        return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
       // buttons to show, with index from candidates as data (since maxlength of button data is 64 bytes…)
@@ -49,8 +47,7 @@ function JoinRaidWizard (bot) {
       ctx.session.raidbtns.push('…toch niet meedoen')
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown('Kies een raid…', Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra()))
+      return ctx.replyWithMarkdown('Kies een raid…', Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 

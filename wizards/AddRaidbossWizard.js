@@ -10,11 +10,7 @@ function AddRaidbossWizard (bot) {
     // Step 0: Raidboss name request
     async (ctx) => {
       ctx.session.newboss = {}
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-      }
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*`)
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
 

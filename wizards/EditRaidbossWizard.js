@@ -13,11 +13,7 @@ function EditRaidbossWizard (bot) {
     // Raidboss name request
     async (ctx) => {
       ctx.session.editboss = {}
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-      }
-      return ctx.replyWithMarkdown(`Je wilt een raidboss wijzigen.\n*Voer een deel van de naam in…*`)
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`Je wilt een raidboss wijzigen.\n*Voer een deel van de naam in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
 

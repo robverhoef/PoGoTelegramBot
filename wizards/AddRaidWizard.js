@@ -18,11 +18,7 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id).catch(error => { console.log('addraid message already deleted', JSON.stringify(error)) })
-      }
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`)
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
