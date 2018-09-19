@@ -9,14 +9,18 @@ const Op = Sequelize.Op
 var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
     (ctx) => {
-      ctx.replyWithMarkdown(`Geef minstens 2 tekens van de gymnaam…`)
+      if (ctx.update.callback_query) {
+        ctx.answerCbQuery(null, undefined, true)
+        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
+      }
+      return ctx.replyWithMarkdown(`Geef minstens 2 tekens van de gymnaam…`)
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
         ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam… \n*Probeer het nog eens.* 🤨`)
-          .then(() => ctx.wizard.back())
+        // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
           where: {

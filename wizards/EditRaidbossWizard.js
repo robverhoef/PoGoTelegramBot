@@ -9,7 +9,8 @@ const Op = Sequelize.Op
 
 function EditRaidbossWizard (bot) {
   return new WizardScene('edit-raidboss-wizard',
-    // Step 0: Raidboss name request
+    // Step 0
+    // Raidboss name request
     async (ctx) => {
       ctx.session.editboss = {}
       if (ctx.update.callback_query) {
@@ -20,7 +21,8 @@ function EditRaidbossWizard (bot) {
         .then(() => ctx.wizard.next())
     },
 
-    // Step 1: Raidboss lookup by name
+    // Step 1
+    // Raidboss lookup by name
     async (ctx) => {
       let term = ctx.update.message.text.trim()
       let bosses = await models.Raidboss.findAll({
@@ -32,7 +34,6 @@ function EditRaidbossWizard (bot) {
         return ctx.replyWithMarkdown(`Ik kon geen boss vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\n\n*Gebruik */start* als je nog een actie wilt uitvoeren. Of ga terug naar de groep.*`)
           .then(() => ctx.scene.leave())
       }
-      let btns = []
       ctx.session.bosscandidates = []
       for (let i = 0; i < bosses.length; i++) {
         ctx.session.bosscandidates.push({
@@ -41,46 +42,51 @@ function EditRaidbossWizard (bot) {
           level: bosses[i].level,
           accounts: bosses[i].accounts
         })
-        btns.push(Markup.callbackButton(bosses[i].name, i))
       }
       ctx.session.bosscandidates.push({name: 'none', id: 0})
-      btns.push(Markup.callbackButton('Mijn raidboss staat er niet bij…', bosses.length))
-      return ctx.replyWithMarkdown('Kies een raidboss.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      return ctx.replyWithMarkdown('Kies een raidboss.', Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
-    // Step 2: handle boss selection , ask what to change
+    // Step 2
+    // Handle boss selection , ask what to change
     async (ctx) => {
+      let bossindex = ctx.session.bosscandidates.length - 1
       if (ctx.session.more !== true) {
-        let bossindex = ctx.update.callback_query.data
+        for (let i = 0; i < ctx.session.bosscandidates.length; i++) {
+          if (ctx.session.bosscandidates[i].name === ctx.update.message.text) {
+            bossindex = i
+          }
+        }
         if (ctx.session.bosscandidates[bossindex].id === 0) {
-          return ctx.replyWithMarkdown('OK\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start')
+          return ctx.replyWithMarkdown('OK\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
         ctx.session.editboss = ctx.session.bosscandidates[bossindex]
       }
-      let btns = [
-        Markup.callbackButton(`Naam: ${ctx.session.editboss.name}`, 'name'),
-        Markup.callbackButton(`Level: ${ctx.session.editboss.level}`, 'level'),
-        Markup.callbackButton(`Aantal accounts: ${ctx.session.editboss.accounts}`, 'accounts'),
-        Markup.callbackButton(`Ik wil toch niets wijzigen en niets bewaren…`, 0)
+
+      ctx.session.changebtns = [
+        [`Naam: ${ctx.session.editboss.name}`, 'name'],
+        [`Level: ${ctx.session.editboss.level}`, 'level'],
+        [`Aantal accounts: ${ctx.session.editboss.accounts}`, 'accounts'],
+        [`Ik wil toch niets wijzigen en niets bewaren…`, 0]
       ]
-      return ctx.replyWithMarkdown(`Wat wil je wijzigen?`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      return ctx.replyWithMarkdown(`Wat wil je wijzigen?`, Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
-    // Step 3: ask for value
+    // Step 3
+    // Ask for value
     async (ctx) => {
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
+      ctx.session.key = 0
+      for (let i = 0; i < ctx.session.changebtns.length; i++) {
+        if (ctx.session.changebtns[i][0] === ctx.update.message.text) {
+          ctx.session.key = ctx.session.changebtns[i][1]
+          break
+        }
       }
-      let attr = ctx.update.callback_query.data
       let question = ''
-      ctx.session.key = attr
-      if (ctx.update.callback_query) {
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
-      switch (attr) {
+      switch (ctx.session.key) {
         case 'name':
           question = `*Wat wordt de nieuwe naam?*`
           break
@@ -90,37 +96,40 @@ function EditRaidbossWizard (bot) {
         case 'accounts':
           question = `*Hoeveel accounts beveel je aan?*`
           break
-        case '0':
+        case 0:
           return ctx.replyWithMarkdown('OK\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start')
             .then(() => ctx.scene.leave())
         default:
-          return ctx.replyWithMarkdown(`Ik heb geen idee wat je wilt doen…\n\n`)
+          return ctx.replyWithMarkdown(`Ik heb geen idee wat je wilt doen…\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`)
             .then(() => ctx.scene.leave())
       }
       return ctx.replyWithMarkdown(question)
         .then(() => ctx.wizard.next())
     },
-    // Step 4 handle value, ask whats next?
+
+    // Step 4
+    // Handle value, ask what's next?
     async (ctx) => {
       let value = ctx.update.message.text.trim()
       ctx.session.editboss[ctx.session.key] = value
       let out = `Naam: ${ctx.session.editboss.name}\nLevel: ${ctx.session.editboss.level}\nAanbevolen aantal: ${ctx.session.editboss.accounts}`
-      return ctx.replyWithMarkdown(`Dit zijn nu de raidboss gegevens:\n\n${out}\n\n*Wat wil je nu doen?*`, Markup.inlineKeyboard([
-        Markup.callbackButton('Opslaan en afsluiten', 0),
-        Markup.callbackButton('Nog iets wijzigen aan deze raidboss', 1),
-        Markup.callbackButton('Annuleren', 2)
-      ], {columns: 1})
-        .removeKeyboard()
+
+      ctx.session.savebtns = [
+        'Opslaan en afsluiten',
+        'Nog iets wijzigen aan deze raidboss',
+        'Annuleren'
+      ]
+      return ctx.replyWithMarkdown(`Dit zijn nu de raidboss gegevens:\n\n${out}\n\n*Wat wil je nu doen?*`, Markup.keyboard(ctx.session.savebtns)
+        .oneTime()
+        .resize()
         .extra()
       )
         .then(() => ctx.wizard.next())
     },
-    // Step 4 handle value, ask whats next?
+    // Step 5
+    // Handle value, ask whats next?
     async (ctx) => {
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-      }
-      let action = parseInt(ctx.update.callback_query.data)
+      let action = ctx.session.savebtns.indexOf(ctx.update.message.text)
       switch (action) {
         case 0:
           // Save
@@ -137,18 +146,11 @@ function EditRaidbossWizard (bot) {
                 }
               }
             )
-
-            if (ctx.update.callback_query) {
-              ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-            }
-            return ctx.answerCbQuery('', undefined, true)
-              .then(() => {
-                ctx.session = null
-                return ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
-              })
+            ctx.session = null
+            return ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
           } catch (error) {
             console.error('Error saving raidboss edit', error)
-            return ctx.replyWithMarkdown('Het bewaren van deze wijziging is mislukt')
+            return ctx.replyWithMarkdown('Het bewaren van deze wijziging is mislukt', Markup.removeKeyboard().extra())
               .then(() => {
                 ctx.session = null
                 return ctx.scene.leave()
@@ -156,21 +158,17 @@ function EditRaidbossWizard (bot) {
           }
         case 1:
           // Edit more
-          return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-            .then(() => {
-              ctx.session.more = true
-              return ctx.replyWithMarkdown(`OK, meer wijzigingen…`)
-                .then(() => ctx.wizard.selectStep(2))
-                .then(() => ctx.wizard.steps[2](ctx))
-            })
+          ctx.session.more = true
+          return ctx.replyWithMarkdown(`OK, meer wijzigingen…`)
+            .then(() => ctx.wizard.selectStep(2))
+            .then(() => ctx.wizard.steps[2](ctx))
         case 2:
           // Cancel
-          return ctx.replyWithMarkdown('OK\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start')
+          return ctx.replyWithMarkdown('OK\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         default:
           console.log('EditRaidbossWizard: action not found', action)
-          return ctx.replyWithMarkdown('??\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start')
+          return ctx.replyWithMarkdown('??\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
       }
     }

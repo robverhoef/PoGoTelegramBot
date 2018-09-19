@@ -33,37 +33,43 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => {
-            return ctx.scene.leave()
-          })
+        if (ctx.update.callback_query) {
+          ctx.answerCbQuery(null, undefined, true)
+          ctx.deleteMessage(ctx.update.callback_query.message.message_id)
+        }
+        return ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+          .then(() => ctx.scene.leave())
       } else {
-        let btns = []
+        ctx.session.raidbtns = []
         ctx.session.gymnames = {}
         for (var a = 0; a < raids.length; a++) {
           ctx.session.gymnames[raids[a].id] = raids[a].Gym.gymname
 
           let strttm = moment.unix(raids[a].start1).format('H:mm')
           // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
-          btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id))
+          ctx.session.raidbtns.push([`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id])
         }
-        btns.push(Markup.callbackButton('Mijn raid staat er niet bij…', 0))
-        return ctx.replyWithMarkdown('Kies een raid…', Markup.inlineKeyboard(btns, {columns: 1}).extra())
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        ctx.session.raidbtns.push(['Mijn raid staat er niet bij…', 0])
+        if (ctx.update.callback_query) {
+          ctx.answerCbQuery(null, undefined, true)
+          ctx.deleteMessage(ctx.update.callback_query.message.message_id)
+        }
+        return ctx.replyWithMarkdown('Kies een raid…', Markup.keyboard(ctx.session.raidbtns.map(el => el[0])).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
     async (ctx) => {
       const user = ctx.from
-      if (!ctx.update.callback_query) {
-        // console.log('afhandeling raidkeuze, geen callbackquery!')
-        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      let selectedraid = 0
+      for (let i = 0; i < ctx.session.raidbtns.length; i++) {
+        if (ctx.session.raidbtns[i][0] === ctx.update.message.text) {
+          selectedraid = ctx.session.raidbtns[i][1]
+          break
+        }
       }
-      let selectedraid = parseInt(ctx.update.callback_query.data)
+
       if (selectedraid === 0) {
-        return ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
           .then(() => {
             return ctx.scene.leave()
           })
@@ -86,15 +92,11 @@ function ExitRaidWizard (bot) {
       }
       let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) meldde zich af voor raid bij ${ctx.session.gymnames[selectedraid]}\n\n`)
       if (out === null) {
-        ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(`Mmmm, geen raid te vinden`))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        ctx.replyWithMarkdown(`Mmmm, geen raid te vinden`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
-      ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
   )

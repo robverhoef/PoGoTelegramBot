@@ -255,54 +255,38 @@ var StatsWizard = function () {
     async (ctx) => {
       if (ctx.update.callback_query) {
         ctx.answerCbQuery(null, undefined, true)
+        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
       }
 
-      let btns = []
-      btns.push(Markup.callbackButton(`Mijn raid statistieken`, 0))
-      btns.push(Markup.callbackButton(`Totale raid statistieken`, 1))
+      ctx.session.statbtns = [`Mijn raid statistieken`, `Totale raid statistieken`]
 
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.inlineKeyboard(btns, {
-          wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.keyboard(ctx.session.statbtns)
+        .oneTime()
+        .resize()
+        .extra()
+      )
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
-          .then(() => {
-            ctx.session.chosenStat = null
-            return ctx.scene.leave()
-          })
+      ctx.session.chosenStat = ctx.session.statbtns.indexOf(ctx.update.message.text)
+      if (ctx.session.chosenStat === -1) {
+        return ctx.replyWithMarkdown(`Hier ging iets niet goed…\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
       }
+      ctx.session.periodbtns = [
+        `Vandaag`,
+        `Deze week tot nu toe`,
+        `Deze maand tot nu toe`,
+        `Dit jaar tot nu toe`
+      ]
 
-      ctx.session.chosenStat = parseInt(ctx.update.callback_query.data)
-
-      let btns = []
-      btns.push(Markup.callbackButton(`Vandaag`, 0))
-      btns.push(Markup.callbackButton(`Deze week tot nu toe`, 1))
-      btns.push(Markup.callbackButton(`Deze maand tot nu toe`, 2))
-      btns.push(Markup.callbackButton(`Dit jaar tot nu toe`, 3))
-
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.inlineKeyboard(btns, {
-          wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken. Of */cancel* gebruiken om mij te resetten*')
-          .then(() => {
-            ctx.session.chosenStat = null
-            return ctx.scene.leave()
-          })
-      }
-
       let chosenStat = ctx.session.chosenStat
-      let chosenTime = parseInt(ctx.update.callback_query.data)
+      let chosenTime = ctx.session.periodbtns.indexOf(ctx.update.message.text)
 
       let time = determineChosenTime(chosenTime)
 
@@ -322,9 +306,7 @@ var StatsWizard = function () {
 
       let message = `${statMessage}\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`
 
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(message))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(message, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
   )
