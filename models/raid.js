@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     start2: DataTypes.DATE,
     start3: DataTypes.DATE,
     reporterName: DataTypes.STRING,
-    reporterId: DataTypes.INTEGER
+    reporterId: DataTypes.INTEGER,
+    raidbossId: DataTypes.INTEGER
   }, {tableName: 'raids'})
 
   Raid.associate = function (models) {
@@ -25,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     })
     models.Raid.hasMany(models.Raiduser)
+    models.Raid.belongsTo(models.Raidboss)
   }
   return Raid
 }

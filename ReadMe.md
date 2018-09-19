@@ -76,7 +76,10 @@ Run from the project directory:
 ```sh
 ./node_modules/.bin/sequelize db:migrate
 ```
-
+To seed the list of raid bosses: 
+```sh
+./node_modules/.bin/sequelize db:seed:all
+```
 ## Available commands
 
 * **npm run dev** - uses forever.js and watches your sources. Tip: runs great with ngrok!

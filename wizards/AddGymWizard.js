@@ -7,17 +7,16 @@ var models = require('../models')
 
 function AddGymWizard (bot) {
   return new WizardScene('add-gym-wizard',
-    // Gym naam
+    // Step 0
+    // Gym name
     async (ctx) => {
       ctx.session.newgym = {}
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe gym toevoegen.\n*Voer de naam in…*`))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe gym toevoegen.\n*Voer de naam in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
+    // Step 1
     // Adres of x
     async (ctx) => {
-      console.info('gymname: ', ctx.update.message.from)
       let gymname = ctx.update.message.text.trim()
       let user = ctx.update.message.from
       // check if exists
@@ -33,10 +32,10 @@ function AddGymWizard (bot) {
       ctx.session.newgym.reporterName = user.first_name
       ctx.session.newgym.reporterId = user.id
       ctx.session.newgym.gymname = gymname
-      console.info('session: ', ctx.session)
       ctx.replyWithMarkdown('*Wat is het adres (straat en eventueel nummer)?*\nAls je deze niet weet, vul een *x* in…')
         .then(() => ctx.wizard.next())
     },
+    // Step 2
     // Google maps of x
     async (ctx) => {
       let gymadres = ctx.update.message.text.trim()
@@ -44,6 +43,7 @@ function AddGymWizard (bot) {
       ctx.replyWithMarkdown(`Top!\n*Kan je een Google Maps link geven?* \n\n[Hulp bij het maken van een Google Maps link](https://dev.romeen.nl/pogo_googlemaps/)\n Als je deze link niet kunt geven, verstuur dan een letter *x*…`)
         .then(() => ctx.wizard.next())
     },
+    // Step 3
     // Exraid vraag ja/nee, weet niet
     async (ctx) => {
       let gmlink = ctx.update.message.text.trim()
@@ -53,52 +53,56 @@ function AddGymWizard (bot) {
         ctx.replyWithMarkdown(`Geen geldige link. Links starten met 'http'. \n*Probeer nog eens.*`)
           .then(() => ctx.wizard.back())
       }
-      ctx.replyWithMarkdown(`Okidoki…\nIs dit een kanshebber voor een ExRaid?`, Markup.inlineKeyboard([
-        Markup.callbackButton(`Ja`, 'yes'),
-        Markup.callbackButton(`Nee / Weet ik niet`, 'no')
-      ], {columns: 1}).extra())
+      ctx.session.exraidbtns = [
+        [`Ja`, 'yes'],
+        [`Nee / Weet ik niet`, 'no']
+      ]
+      ctx.replyWithMarkdown(`Okidoki…\nIs dit een kanshebber voor een ExRaid?`, Markup.keyboard(ctx.session.exraidbtns.map(el => el[0]))
+        .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
+    // Step 4
     // toon samenvatting & bevestiging
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Klik op een knop*')
+      let exraid = 0
+      for (let i = 0; i < ctx.session.exraidbtns.length; i++) {
+        if (ctx.session.exraidbtns[i][0] === ctx.update.message.text.trim()) {
+          exraid = ctx.session.exraidbtns[i][1] === 'yes' ? 1 : 0
+          break
+        }
       }
-      let exraid = ctx.update.callback_query.data === 'yes' ? 1 : 0
       ctx.session.newgym.exRaidTrigger = exraid
-      return ctx.answerCbQuery('', undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNieuwe gym: *${ctx.session.newgym.gymname}*\nAdres: ${ctx.session.newgym.address === null ? 'Niet opgegeven' : ctx.session.newgym.address}\nKaart: ${ctx.session.newgym.googleMapsLink === null ? 'Niet opgegeven' : ctx.session.newgym.googleMapsLink}\nEX Raid kanshebber: ${ctx.session.newgym.exRaidTrigger === 1 ? 'Ja' : 'Nee / weet niet'}\n\n*Opslaan?*`, Markup.inlineKeyboard([
-          Markup.callbackButton(`Ja`, 'yes'),
-          Markup.callbackButton(`Nee`, 'no')
-        ], {columns: 1}).extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+
+      ctx.session.savebtns = [
+        ['Ja', 'yes'],
+        ['Nee', 'no']
+      ]
+      return ctx.replyWithMarkdown(`Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNieuwe gym: *${ctx.session.newgym.gymname}*\nAdres: ${ctx.session.newgym.address === null ? 'Niet opgegeven' : ctx.session.newgym.address}\nKaart: ${ctx.session.newgym.googleMapsLink === null ? 'Niet opgegeven' : ctx.session.newgym.googleMapsLink}\nEX Raid kanshebber: ${ctx.session.newgym.exRaidTrigger === 1 ? 'Ja' : 'Nee / weet niet'}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.savebtns.map(el => el[0])).resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
+    // Step 5
     async (ctx) => {
       // save …or maybe not
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown('Hier ging iets niet goed… *Klik op een knop*')
+      let savenow = true
+      for (let i = 0; i < ctx.session.savebtns.length; i++) {
+        if (ctx.session.savebtns[i][0] === ctx.update.message.text.trim()) {
+          savenow = ctx.session.savebtns[i][1] === 'yes'
+          break
+        }
       }
-      let savenow = ctx.update.callback_query.data === 'yes'
       if (savenow) {
         let gym = models.Gym.build(ctx.session.newgym)
         try {
           await gym.save()
         } catch (error) {
           console.log('Whoops… saving new gym failed', error)
-          return ctx.answerCbQuery('', undefined, true)
-            .then(() => ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`))
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          return ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       } else {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK. *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown('OK. *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
     })

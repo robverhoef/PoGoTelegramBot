@@ -68,6 +68,18 @@ const EditGymWizard = require('./wizards/EditGymWizard')
 const editGymWizard = EditGymWizard(bot)
 editGymWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AddRaidbossWizard = require('./wizards/AddRaidbossWizard')
+const addRaidbossWizard = AddRaidbossWizard(bot)
+addRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const EditRaidbossWizard = require('./wizards/EditRaidbossWizard')
+const editRaidbossWizard = EditRaidbossWizard(bot)
+editRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const StatsWizard = require('./wizards/StatsWizard')
+const statsWizard = StatsWizard(bot)
+statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -75,7 +87,10 @@ const stage = new Stage([
   joinRaidWizard,
   findGymWizard,
   addGymWizard,
-  editGymWizard
+  editGymWizard,
+  addRaidbossWizard,
+  editRaidbossWizard,
+  statsWizard
 ])
 
 /**
@@ -95,30 +110,54 @@ bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
-  let btns = [
-    Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'),
-    Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'),
-    Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'),
-    Markup.callbackButton(`Een raid wijzigen`, 'editRaid'),
-    Markup.callbackButton(`Vind een gymlocatie`, 'findGym')
-  ]
+  let raids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: moment().unix()
+      }
+    },
+    include: [
+      models.Gym,
+      {
+        model: models.Raiduser,
+        where: {
+          'uid': user.id
+        }
+      }
+    ]
+  })
+
+  let btns = []
+  btns.push(`Meedoen met een raid`)
+  if (raids.length > 0) {
+    btns.push(`Afmelden bij een raid`)
+  }
+  btns.push(`Een nieuwe raid melden`)
+  btns.push(`Een raid wijzigen`)
+  btns.push(`Vind een gymlocatie`)
+
   // admin only:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
 
   for (let a = 0; a < admins.length; a++) {
     if (admins[a].user.id === user.id) {
-      btns.push(Markup.callbackButton(`Een gym toevoegen`, 'addGym'))
-      btns.push(Markup.callbackButton(`Een gym wijzigen`, 'editGym'))
+      btns.push(`Een gym toevoegen`)
+      btns.push(`Een gym wijzigen`)
+      btns.push(`Een raidboss toevoegen`)
+      btns.push(`Een raidboss wijzigen`)
       break
     }
   }
-  return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
-    btns, {columns: 1}).extra())
+
+  btns.push(`Statistieken`)
+
+  return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.keyboard(
+    btns).oneTime().resize().extra())
 }
 
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
-  // check if start is not directly comming from the group
+  // check if start is not directly coming from the group
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
     return
   }
@@ -139,13 +178,16 @@ bot.command('/start', async (ctx) => {
 
 // set cancel command here too, not only in wizards
 bot.command('cancel', (ctx) => cancelConversation(ctx))
-bot.action('joinRaid', Stage.enter('join-raid-wizard'))
-bot.action('exitRaid', Stage.enter('exit-raid-wizard'))
-bot.action('addRaid', Stage.enter('add-raid-wizard'))
-bot.action('editRaid', Stage.enter('edit-raid-wizard'))
-bot.action('findGym', Stage.enter('find-gym-wizard'))
-bot.action('addGym', Stage.enter('add-gym-wizard'))
-bot.action('editGym', Stage.enter('edit-gym-wizard'))
+bot.hears('Meedoen met een raid', Stage.enter('join-raid-wizard'))
+bot.hears('Afmelden bij een raid', Stage.enter('exit-raid-wizard'))
+bot.hears('Een nieuwe raid melden', Stage.enter('add-raid-wizard'))
+bot.hears('Een raid wijzigen', Stage.enter('edit-raid-wizard'))
+bot.hears('Vind een gymlocatie', Stage.enter('find-gym-wizard'))
+bot.hears('Een gym toevoegen', Stage.enter('add-gym-wizard'))
+bot.hears('Een gym wijzigen', Stage.enter('edit-gym-wizard'))
+bot.hears('Een raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
+bot.hears('Een raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
+bot.hears('Statistieken', Stage.enter('stats-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode
@@ -306,9 +348,12 @@ bot.hears(/\/raids/i, async (ctx) => {
       ],
       where: {
         endtime: {
-          [Op.gt]: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+          [Op.gt]: moment().unix()
         }
-      }
+      },
+      order: [
+        ['start1', 'ASC']
+      ]
     }))
   let out = ''
   if (raids.length === 0) {

@@ -18,25 +18,16 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`))
-        // .then(()=> {
-      // .then(() => ctx.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id))
-      // ctx.session.prevMessage = {chatId: ,messageId:}
-        // })
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
-      if (ctx.update.message.text === undefined) {
-        return
-      }
+      console.log('step 1', ctx.update.message.text)
       const term = ctx.update.message.text.trim()
-      let btns = []
       if (term.length < 2) {
         return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
-          // .then(() => ctx.wizard.back())
+        // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
           where: {
@@ -45,91 +36,127 @@ function AddRaidWizard (bot) {
         })
         if (candidates.length === 0) {
           ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
-            // .then(() => ctx.wizard.back())
-            return
+          return
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
-          ctx.session.gymcandidates.push({gymname: candidates[i].gymname, id: candidates[i].id})
-          btns.push(Markup.callbackButton(candidates[i].gymname, i))
+          ctx.session.gymcandidates.push([
+            candidates[i].gymname,
+            candidates[i].id
+          ])
         }
-
-        btns.push(Markup.callbackButton('Mijn gym staat er niet bij…', candidates.length))
-        ctx.session.gymcandidates.push({name: 'none', id: 0})
-        return ctx.replyWithMarkdown('Kies een gym.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+        ctx.session.gymcandidates.push([
+          'Mijn gym staat er niet bij…', 0
+        ])
+        return ctx.replyWithMarkdown('Kies een gym.', Markup.keyboard(ctx.session.gymcandidates.map(el => el[0])).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
     // step 2
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown('Hier ging iets niet goed… \n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      console.log('step 2')
+      let selectedIndex = -1
+      for (var i = 0; i < ctx.session.gymcandidates.length; i++) {
+        if (ctx.session.gymcandidates[i][0] === ctx.update.message.text) {
+          selectedIndex = i
+          break
+        }
       }
-      let selectedIndex = parseInt(ctx.update.callback_query.data)
       // User can't find the gym
-      if (ctx.session.gymcandidates[selectedIndex].id === 0) {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => {
-            ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen,`)
-            ctx.wizard.selectStep(1)
-            return ctx.wizard.steps[1](ctx)
-          })
+      if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
+        ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
+        ctx.wizard.selectStep(0)
+        return ctx.wizard.steps[0](ctx)
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
-        ctx.session.newraid.gymId = selectedgym.id
-        ctx.session.newraid.gymname = selectedgym.gymname
-
-        let btns = [
-          Markup.callbackButton('Uitkomen van het ei', 'startmode'),
-          Markup.callbackButton('Eindtijd van de raid', 'endmode')
+        ctx.session.newraid.gymId = selectedgym[1]
+        ctx.session.newraid.gymname = selectedgym[0]
+        ctx.session.timeOptions = [
+          ['Uitkomen van het ei: start tijd', 'startmodetime'],
+          ['Uitkomen van het ei: in minuten', 'startmodemin'],
+          ['Einde van de raid: eind tijd', 'endmodetime'],
+          ['Einde van de raid: in minuten', 'endmodemin']
         ]
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(`*Hoe wil je de eindtijd van de raid opgeven?*\nKlik op een knop…`,
-            Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()
-          ))
+        let btns = ctx.session.timeOptions.map(el => el[0])
+
+        return ctx.replyWithMarkdown(`*Hoe wil je de eindtijd van de raid opgeven?*`,
+          Markup.keyboard(btns).oneTime().resize().extra()
+        )
           .then(() => ctx.wizard.next())
       }
     },
-    // step 3: get the time; either start or end of the raid itself
+    // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
-      let timemode = ctx.update.callback_query.data
+      let timemode = ''
+      for (var a = 0; a < ctx.session.timeOptions.length; a++) {
+        if (ctx.session.timeOptions[a][0] === ctx.update.message.text) {
+          timemode = ctx.session.timeOptions[a][1]
+          break
+        }
+      }
       ctx.session.timemode = timemode
       let question = ''
-      if(timemode == 'startmode') {
+      if (timemode === 'startmodetime') {
         question = `*Hoe laat komt het ei uit?*\nGeef de tijd zo op: *09:30* of *13:45*…`
-      } else {
+      } else if (timemode === 'endmodetime') {
         question = `*Hoe laat eindigt de raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+      } else if (timemode === 'startmodemin') {
+        question = `*Hoeveel minuten staat er nog op het ei?*\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)`
+      } else if (timemode === 'endmodemin') {
+        question = `*Hoeveel minuten staat er nog op de raid?*`
       }
-      return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(question))
-          .then(() => ctx.wizard.next())
+      return ctx.replyWithMarkdown(question, Markup.removeKeyboard().extra())
+        .then(() => ctx.wizard.next())
     },
     // step 4
     async (ctx) => {
-      const timegiven = ctx.update.message.text.trim()
-      let endtime
-      let tmptime = inputTime(timegiven)
-      // check valid time
-      if (tmptime === false) {
-        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
+      const message = ctx.update.message.text.trim()
+
+      let tmptime
+      if (ctx.session.timemode === 'startmodetime' || ctx.session.timemode === 'endmodetime') {
+        tmptime = inputTime(message)
+        // check valid time
+        if (tmptime === false) {
+          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. \n*Probeer het nog eens.*`)
+        }
+      } else {
+        let minutes = parseInt(message)
+
+        if ((!minutes || minutes < 0 || minutes > 60) && ctx.session.timemode === 'startmodemin') {
+          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 60 liggen. \n*Probeer het nog eens.*`)
+        }
+        if ((!minutes || minutes < 0 || minutes > 45) && ctx.session.timemode === 'endmodemin') {
+          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 45 liggen. \n*Probeer het nog eens.*`)
+        }
+
+        if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
+          return ctx.replyWithMarkdown('*Dat wordt een beetje krap om nog te melden, volgende keer beter.\nWil je nog een actie uitvoeren? Klik dan hier op */start')
+            .then(() => ctx.scene.leave())
+        }
+
+        tmptime = moment().add(minutes, 'minutes').unix()
       }
 
-      if(ctx.session.timemode === 'startmode'){
+      let endtime
+      if (ctx.session.timemode === 'startmodetime' || ctx.session.timemode === 'startmodemin') {
         // user wanted to enter time when egg hatches
         endtime = moment.unix(tmptime).add(45, 'minutes').unix()
       } else {
         // user wanted to enter raid's end time
         endtime = tmptime
       }
+
       ctx.session.newraid.endtime = endtime
       // calculate minimum start time
       let starttime = moment.unix(endtime)
       starttime.subtract(45, 'minutes')
-      ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
+
+      if (starttime < moment()) {
+        starttime = moment()
+      }
+
+      ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten`)
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -139,15 +166,28 @@ function AddRaidWizard (bot) {
       let starttime = moment.unix(endtime)
       starttime.subtract(45, 'minutes')
 
-      const start1 = inputTime(ctx.update.message.text.trim())
-      if (start1 === false) {
-        return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*`)
-        // .then(() => ctx.wizard.back())
+      let message = ctx.update.message.text.trim()
+      let start1
+      if (message === 'x' || message === 'X') {
+        // default starttime of 15 before endtime or right now, when time is short:
+        let start1time = moment.unix(endtime)
+        start1time.subtract(15, 'minutes')
+        if (start1time < moment()) {
+          start1time = moment()
+        }
+        start1 = start1time.unix()
+      } else {
+        start1 = inputTime(message)
+        if (start1 === false) {
+          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*  of vul een *x* in om deze leeg te laten`)
+          // .then(() => ctx.wizard.back())
+        }
+        if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
+          return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten\nProbeer het nog eens…`)
+          // .then(() => ctx.wizard.back())
+        }
       }
-      if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
-        return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*\nProbeer het nog eens…`)
-        // .then(() => ctx.wizard.back())
-      }
+
       ctx.session.newraid.start1 = start1
       ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Kyogre* of *Level 5 ei*`)
         .then(() => ctx.wizard.next())
@@ -155,28 +195,44 @@ function AddRaidWizard (bot) {
     // step 5
     async (ctx) => {
       const target = ctx.update.message.text.trim()
-      ctx.session.newraid.target = target
+      // let's see if we can find the raidboss…
+      let boss = await models.Raidboss.find({
+        where: {
+          name: target
+        }
+      })
+      if (boss !== null) {
+        ctx.session.newraid.target = boss.name
+        ctx.session.newraid.bossid = boss.id
+        ctx.session.newraid.accounts = boss.accounts
+      } else {
+        ctx.session.newraid.target = target
+        ctx.session.newraid.accounts = null
+        ctx.session.newraid.bossid = null
+      }
       const endtime = ctx.session.newraid.endtime
-      const start1 =  ctx.session.newraid.start1
+      const start1 = ctx.session.newraid.start1
 
-      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
-
-      return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.inlineKeyboard([
-        Markup.callbackButton('Ja', 'yes'),
-        Markup.callbackButton('Nee', 'no')
-      ], {columns: 1}).removeKeyboard().extra())
+      let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
+      ctx.session.saveOptions = [
+        ['Ja', ' yes'],
+        ['Nee', 'no']
+      ]
+      return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.saveOptions.map(el => el[0]))
+        .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
     // step 6
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown('Hier ging iets niet goed… *Klik op een knop 👆*')
-      }
       const user = ctx.from
-      let saveme = ctx.update.callback_query.data
+      let saveme = ''
+      for (var a = 0; a < ctx.session.saveOptions.length; a++) {
+        if (ctx.session.saveOptions[a][0] === ctx.update.message.text) {
+          saveme = ctx.session.saveOptions[a][1]
+        }
+      }
       if (saveme === 'no') {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('Jammer… \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+        return ctx.replyWithMarkdown('Jammer… \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       } else {
         // Sometimes a new raid is getting submitted multiple times
@@ -192,14 +248,8 @@ function AddRaidWizard (bot) {
           }
         })
         if (raidexists) {
-          console.log('New raid exists… Ignoring ' + ctx.session.newraid.gymId + ctx.session.newraid.target + ctx.session.newraid.endtime)
-          return ctx.answerCbQuery(null, undefined, true)
-            .then(() => {
-              if (ctx.update.callback_query.message.message_id) {
-                return ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-              }
-            })
-            .then(() => ctx.replyWithMarkdown(`Deze raid bestaat al.\nJe kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
+          console.log(`New raid exists… Ignoring id: ${ctx.session.newraid.gymId} target: ${ctx.session.newraid.target} endtime: ${ctx.session.newraid.endtime}`)
+          return ctx.replyWithMarkdown(`Deze raid bestaat al.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
             .then(() => {
               ctx.session.newraid = null
               return ctx.scene.leave()
@@ -209,6 +259,7 @@ function AddRaidWizard (bot) {
           gymId: ctx.session.newraid.gymId,
           start1: ctx.session.newraid.start1,
           target: ctx.session.newraid.target,
+          raidbossId: ctx.session.newraid.bossid,
           endtime: ctx.session.newraid.endtime,
           reporterName: user.first_name,
           reporterId: user.id
@@ -216,28 +267,103 @@ function AddRaidWizard (bot) {
         // save...
         try {
           await newraid.save()
+            .then((saved) => {
+              console.log('saved', saved)
+              ctx.session.savedraid = saved
+            })
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het saven… Misschien toch maar eens opnieuw proberen.`)
-            .then(() => ctx.scene.leave())
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het saven… Misschien toch maar eens opnieuw proberen met /start.`, Markup.removeKeyboard().extra())
+            .then(() => {
+              ctx.session = null
+              return ctx.scene.leave()
+            })
         }
         // send updated list to group
-        let out = await listRaids(`Raid toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+        let out = await listRaids(`Raid bij ${ctx.session.newraid.gymname} toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
         if (out === null) {
-          return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-            .then(() => ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`))
+          return ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-
-        return ctx.answerCbQuery('', undefined, true)
-          .then(async () => {
-            bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+        ctx.session.participateOptions = [
+          ['Ja', ' yes'],
+          ['Nee', 'no']
+        ]
+        return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+          .then(() => {
+            ctx.replyWithMarkdown('Dankjewel!\n*Doe je zelf mee met deze raid?*', Markup.keyboard(ctx.session.participateOptions.map((el) => el[0])).resize().oneTime().extra())
           })
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+          .then(() => ctx.wizard.next())
+      }
+    },
+    // Step 7
+    async (ctx) => {
+      let participate = 'no'
+      for (var i = 0; i < ctx.session.participateOptions.length; i++) {
+        if (ctx.session.participateOptions[i][0] === ctx.update.message.text) {
+          participate = ctx.session.participateOptions[i][1]
+          break
+        }
+      }
+      if (participate === 'no') {
+        // user does NOT participate, exit
+        return ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
+      // user does participate
+      return ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${ctx.session.newraid.gymname}*?`, Markup.keyboard(['1', '2', '3', '4', '5'])
+        .resize().oneTime().extra())
+        .then(() => ctx.wizard.next())
+    },
+
+    // Step 8
+    async (ctx) => {
+      const accounts = parseInt(ctx.update.message.text)
+
+      const user = ctx.from
+      // Check already registered? If so; update else store new
+      let raiduser = await models.Raiduser.find({
+        where: {
+          [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}]
+        }
+      })
+      if (raiduser) {
+        // update
+        try {
+          await models.Raiduser.update(
+            { accounts: accounts },
+            { where: { [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}] } }
+          )
+        } catch (error) {
+          return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*', Markup.removeKeyboard().extra())
+            .then(() => ctx.scene.leave())
+        }
+      } else {
+        // new raid user
+        let raiduser = models.Raiduser.build({
+          raidId: ctx.session.savedraid.id,
+          username: user.first_name,
+          uid: user.id,
+          accounts: accounts
+        })
+        try {
+          await raiduser.save()
+        } catch (error) {
+          console.log('Woops… registering raiduser failed', error)
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            .then(() => ctx.scene.leave())
+        }
+      }
+      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${ctx.session.newraid.gymname}\n\n`)
+      if (out === null) {
+        ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+          .then(() => ctx.scene.leave())
+      }
+      return ctx.replyWithMarkdown(`Je bent aangemeld voor ${ctx.session.newraid.gymname} om ${moment.unix(ctx.session.newraid.start1).format('HH:mm')} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+        .then(async () => {
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+        })
+        .then(() => ctx.scene.leave())
     }
   )
 }
