@@ -90,7 +90,7 @@ function EditGymWizard (bot) {
     },
     async (ctx) => {
       let editattr
-      for(let i = 0; i < ctx.session.changebtns.length; i++) {
+      for (let i = 0; i < ctx.session.changebtns.length; i++) {
         if (ctx.session.changebtns[i][0] === ctx.update.message.text) {
           editattr = ctx.session.changebtns[i][1]
           break
@@ -153,7 +153,7 @@ function EditGymWizard (bot) {
     },
 
     async (ctx) => {
-      const choice = ctx.session.savebtns.indexOf(ctx.update.message.text.trim())
+      const choice = ctx.session.savebtns.indexOf(ctx.update.message.text)
       switch (choice) {
         case 0:
           // save and exit

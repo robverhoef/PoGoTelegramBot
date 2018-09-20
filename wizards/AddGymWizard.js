@@ -53,43 +53,24 @@ function AddGymWizard (bot) {
         ctx.replyWithMarkdown(`Geen geldige link. Links starten met 'http'. \n*Probeer nog eens.*`)
           .then(() => ctx.wizard.back())
       }
-      ctx.session.exraidbtns = [
-        [`Ja`, 'yes'],
-        [`Nee / Weet ik niet`, 'no']
-      ]
-      ctx.replyWithMarkdown(`Okidoki…\nIs dit een kanshebber voor een ExRaid?`, Markup.keyboard(ctx.session.exraidbtns.map(el => el[0]))
+      ctx.session.exraidbtns = [`Ja`, `Nee / Weet ik niet`, 'no']
+      ctx.replyWithMarkdown(`Okidoki…\nIs dit een kanshebber voor een ExRaid?`, Markup.keyboard(ctx.session.exraidbtns)
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
     // Step 4
     // toon samenvatting & bevestiging
     async (ctx) => {
-      let exraid = 0
-      for (let i = 0; i < ctx.session.exraidbtns.length; i++) {
-        if (ctx.session.exraidbtns[i][0] === ctx.update.message.text.trim()) {
-          exraid = ctx.session.exraidbtns[i][1] === 'yes' ? 1 : 0
-          break
-        }
-      }
+      let exraid = ctx.session.exraidbtns.indexOf(ctx.update.message.text) === 0
       ctx.session.newgym.exRaidTrigger = exraid
-
-      ctx.session.savebtns = [
-        ['Ja', 'yes'],
-        ['Nee', 'no']
-      ]
-      return ctx.replyWithMarkdown(`Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNieuwe gym: *${ctx.session.newgym.gymname}*\nAdres: ${ctx.session.newgym.address === null ? 'Niet opgegeven' : ctx.session.newgym.address}\nKaart: ${ctx.session.newgym.googleMapsLink === null ? 'Niet opgegeven' : ctx.session.newgym.googleMapsLink}\nEX Raid kanshebber: ${ctx.session.newgym.exRaidTrigger === 1 ? 'Ja' : 'Nee / weet niet'}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.savebtns.map(el => el[0])).resize().oneTime().extra())
+      ctx.session.savebtns = ['Ja', 'Nee']
+      return ctx.replyWithMarkdown(`Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNieuwe gym: *${ctx.session.newgym.gymname}*\nAdres: ${ctx.session.newgym.address === null ? 'Niet opgegeven' : ctx.session.newgym.address}\nKaart: ${ctx.session.newgym.googleMapsLink === null ? 'Niet opgegeven' : ctx.session.newgym.googleMapsLink}\nEX Raid kanshebber: ${ctx.session.newgym.exRaidTrigger === 1 ? 'Ja' : 'Nee / weet niet'}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
     // Step 5
     async (ctx) => {
       // save …or maybe not
-      let savenow = true
-      for (let i = 0; i < ctx.session.savebtns.length; i++) {
-        if (ctx.session.savebtns[i][0] === ctx.update.message.text.trim()) {
-          savenow = ctx.session.savebtns[i][1] === 'yes'
-          break
-        }
-      }
+      let savenow = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
       if (savenow) {
         let gym = models.Gym.build(ctx.session.newgym)
         try {

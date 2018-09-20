@@ -49,11 +49,8 @@ function AddRaidbossWizard (bot) {
     // Handle recommended number of accounts
     async (ctx) => {
       ctx.session.newboss.accounts = parseInt(ctx.update.message.text.trim())
-      ctx.session.savebtns = [
-        ['Ja', 'yes'],
-        ['Nee', 'no']
-      ]
-      ctx.replyWithMarkdown(`Raidboss: ${ctx.session.newboss.name}\nLevel: ${ctx.session.newboss.level}\nAanbevolen aantal accounts: ${ctx.session.newboss.accounts}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.savebtns.map(el => el[0]))
+      ctx.session.savebtns = ['Ja', 'Nee']
+      ctx.replyWithMarkdown(`Raidboss: ${ctx.session.newboss.name}\nLevel: ${ctx.session.newboss.level}\nAanbevolen aantal accounts: ${ctx.session.newboss.accounts}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.savebtns)
         .oneTime()
         .resize()
         .extra()
@@ -65,14 +62,8 @@ function AddRaidbossWizard (bot) {
 
     // Handle save
     async (ctx) => {
-      let dosave = 'yes'
-      for (let i = 0; i < ctx.session.savebtns.length; i++) {
-        if (ctx.update.message.text.trim() === ctx.session.savebtns[i][0]) {
-          dosave = ctx.session.savebtns[i][1]
-          break
-        }
-      }
-      if (dosave === 'yes') {
+      let dosave = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
+      if (dosave) {
         let newboss = models.Raidboss.build({
           name: ctx.session.newboss.name,
           level: ctx.session.newboss.level,

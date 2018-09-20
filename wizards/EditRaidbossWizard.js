@@ -39,7 +39,7 @@ function EditRaidbossWizard (bot) {
           accounts: bosses[i].accounts
         })
       }
-      ctx.session.bosscandidates.push({name: 'none', id: 0})
+      ctx.session.bosscandidates.push({name: 'Ik wil niets wijzigen en niets bewaren…', id: 0})
       return ctx.replyWithMarkdown('Kies een raidboss.', Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
@@ -65,7 +65,7 @@ function EditRaidbossWizard (bot) {
         [`Naam: ${ctx.session.editboss.name}`, 'name'],
         [`Level: ${ctx.session.editboss.level}`, 'level'],
         [`Aantal accounts: ${ctx.session.editboss.accounts}`, 'accounts'],
-        [`Ik wil toch niets wijzigen en niets bewaren…`, 0]
+        [`Ik wil niets wijzigen en niets bewaren…`, 0]
       ]
       return ctx.replyWithMarkdown(`Wat wil je wijzigen?`, Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
