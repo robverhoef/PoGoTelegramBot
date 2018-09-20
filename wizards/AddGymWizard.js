@@ -7,17 +7,16 @@ var models = require('../models')
 
 function AddGymWizard (bot) {
   return new WizardScene('add-gym-wizard',
-    // Gym naam
+    // Step 0
+    // Gym name
     async (ctx) => {
       ctx.session.newgym = {}
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('add_gym_welcome')))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('add_gym_welcome'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
+    // Step 1
     // Adres of x
     async (ctx) => {
-      console.info('gymname: ', ctx.update.message.from)
       let gymname = ctx.update.message.text.trim()
       let user = ctx.update.message.from
       // check if exists
@@ -33,10 +32,11 @@ function AddGymWizard (bot) {
       ctx.session.newgym.reporterName = user.first_name
       ctx.session.newgym.reporterId = user.id
       ctx.session.newgym.gymname = gymname
-      console.info('session: ', ctx.session)
+
       ctx.replyWithMarkdown(ctx.i18n.t('address_question'))
         .then(() => ctx.wizard.next())
     },
+    // Step 2
     // Google maps of x
     async (ctx) => {
       let gymadres = ctx.update.message.text.trim()
@@ -44,61 +44,54 @@ function AddGymWizard (bot) {
       ctx.replyWithMarkdown(('gmlink_question'))
         .then(() => ctx.wizard.next())
     },
-    // Exraid vraag ja/nee, weet niet
+    // Step 3
+    // Exraid question
     async (ctx) => {
       let gmlink = ctx.update.message.text.trim()
       gmlink = gmlink.toLowerCase() === 'x' ? null : gmlink
       ctx.session.newgym.googleMapsLink = gmlink
       if (gmlink !== null && gmlink.substr(0, 4) !== 'http') {
         ctx.replyWithMarkdown(ctx.i18n.t('invalid_link'))
-          .then(() => ctx.wizard.back())
+          .then(() => {
+
+          })
       }
-      ctx.replyWithMarkdown(ctx.i18n.t('exraid_question'), Markup.inlineKeyboard([
-        Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
-        Markup.callbackButton(ctx.i18n.t('no_dont_know'), 'no')
-      ], {columns: 1}).extra())
+
+      ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
+      ctx.replyWithMarkdown(ctx.i18n.t('exraid_question'), Markup.keyboard(ctx.session.exraidbtns)
+        .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
+    // Step 4
     // toon samenvatting & bevestiging
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-      }
-      let exraid = ctx.update.callback_query.data === 'yes' ? 1 : 0
+      let exraid = ctx.session.exraidbtns.indexOf(ctx.update.message.text) === 0
       ctx.session.newgym.exRaidTrigger = exraid
-      return ctx.answerCbQuery('', undefined, true)
-        .then(() => ctx.replyWithMarkdown(`${ctx.i18n.t('new_gym_almost_done_confirm')}: *${ctx.session.newgym.gymname}*\n${ctx.i18n.t('address')}: ${ctx.session.newgym.address === null ? ctx.i18n.t('no_input') : ctx.session.newgym.address}\n${ctx.i18n.t('map')}: ${ctx.session.newgym.googleMapsLink === null ? ctx.i18n.t('no_input') : ctx.session.newgym.googleMapsLink}\n${ctx.i18n.t('exraid_candidate')}: ${ctx.session.newgym.exRaidTrigger === 1 ? ctx.i18n.t('yes') : ctx.i18n.t('no_dont_know')}\n\n*${ctx.i18n.t('save_question')}*`, Markup.inlineKeyboard([
-          Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
-          Markup.callbackButton(ctx.i18n.t('no'), 'no')
-        ], {columns: 1}).extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      ctx.session.savebtns = [
+        ctx.i18n.t('yes'),
+        ctx.i18n.t('no')
+      ]
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('new_gym_almost_done_confirm')}: *${ctx.session.newgym.gymname}*\n${ctx.i18n.t('address')}: ${ctx.session.newgym.address === null ? ctx.i18n.t('no_input') : ctx.session.newgym.address}\n${ctx.i18n.t('map')}: ${ctx.session.newgym.googleMapsLink === null ? ctx.i18n.t('no_input') : ctx.session.newgym.googleMapsLink}\n${ctx.i18n.t('exraid_candidate')}: ${ctx.session.newgym.exRaidTrigger === 1 ? ctx.i18n.t('yes') : ctx.i18n.t('no_dont_know')}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
+
         .then(() => ctx.wizard.next())
     },
+    // Step 5
     async (ctx) => {
       // save …or maybe not
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-      }
-      let savenow = ctx.update.callback_query.data === 'yes'
+      let savenow = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
       if (savenow) {
         let gym = models.Gym.build(ctx.session.newgym)
         try {
           await gym.save()
         } catch (error) {
           console.log('Whoops… saving new gym failed', error)
-          return ctx.answerCbQuery('', undefined, true)
-            .then(() => ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving')))
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure')))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       } else {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving')))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
     })

@@ -2,6 +2,7 @@
 // add gym wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
+const {Markup} = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -9,14 +10,13 @@ const Op = Sequelize.Op
 var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
     (ctx) => {
-      ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_intro'))
+      return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_intro'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
         ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
-          .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
           where: {

@@ -10,11 +10,7 @@ function AddRaidbossWizard (bot) {
     // Step 0: Raidboss name request
     async (ctx) => {
       ctx.session.newboss = {}
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-      }
-      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_intro'))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_intro'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
 
@@ -32,13 +28,14 @@ function AddRaidbossWizard (bot) {
         return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_exists'))
           .then(() => ctx.scene.leave())
       }
-      let btns = []
-      for (let i = 0; i < 5; i++) {
-        btns.push(Markup.callbackButton(i + 1, i + 1))
-      }
+      let btns = ['1', '2', '3', '4', '5']
       return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_level_question', {
         bossname: bossname
-      }), Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      }, Markup.keyboard(btns)
+        .resize()
+        .oneTime()
+        .extra()
+      ))
         .then(() => {
           return ctx.wizard.next()
         })
@@ -46,11 +43,7 @@ function AddRaidbossWizard (bot) {
 
     // Handle level, ask for recommended number of accounts
     (ctx) => {
-      ctx.session.newboss.level = ctx.update.callback_query.data
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
+      ctx.session.newboss.level = parseInt(ctx.update.message.text.trim())
       return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_recommended_accounts', {
         bossname: ctx.session.newboss.name
       }))
@@ -59,16 +52,17 @@ function AddRaidbossWizard (bot) {
 
     // Handle recommended number of accounts
     async (ctx) => {
-      ctx.session.newboss.accounts = ctx.update.message.text.trim()
-      let btns = [
-        Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
-        Markup.callbackButton(ctx.i18n.t('no'), 'no')
-      ]
+      ctx.session.newboss.accounts = parseInt(ctx.update.message.text.trim())
+      ctx.session.savebtns = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
       ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_question', {
         bossname: ctx.session.newboss.name,
         bosslevel: ctx.session.newboss.level,
         numaccounts: ctx.session.newboss.accounts
-      }), Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      }), Markup.keyboard(ctx.session.savebtns)
+        .oneTime()
+        .resize()
+        .extra()
+      )
         .then(() => {
           return ctx.wizard.next()
         })
@@ -76,7 +70,8 @@ function AddRaidbossWizard (bot) {
 
     // Handle save
     async (ctx) => {
-      if (ctx.update.callback_query.data === 'yes') {
+      let dosave = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
+      if (dosave) {
         let newboss = models.Raidboss.build({
           name: ctx.session.newboss.name,
           level: ctx.session.newboss.level,
@@ -86,23 +81,14 @@ function AddRaidbossWizard (bot) {
           await newboss.save()
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       } else {
-        if (ctx.update.callback_query) {
-          ctx.answerCbQuery(null, undefined, true)
-          ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-        }
-        return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_canceled'))
+        return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_canceled'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
-
-      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_finished'))
+      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_finished'), Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
   )

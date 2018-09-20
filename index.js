@@ -15,7 +15,7 @@ const i18n = new TelegrafI18n({
   allowMissing: true,
   directory: path.resolve(__dirname, 'locales')
 })
-
+const { match } = require('telegraf-i18n')
 var models = require('./models')
 
 // var env = process.env.NODE_ENV || 'development'
@@ -130,30 +130,32 @@ async function showMainMenu (ctx, user) {
     ]
   })
   let btns = []
-  btns.push(Markup.callbackButton(ctx.i18n.t('btn_join_raid'), 'joinRaid'))
+  btns.push(ctx.i18n.t('btn_join_raid'))
   if (raids.length > 0) {
-    btns.push(Markup.callbackButton(ctx.i18n.t('btn_exit_raid'), 'exitRaid'))
+    btns.push(ctx.i18n.t('btn_exit_raid'))
   }
-  btns.push(Markup.callbackButton(ctx.i18n.t('btn_add_raid'), 'addRaid'))
-  btns.push(Markup.callbackButton(ctx.i18n.t('btn_edit_raid'), 'editRaid'))
-  btns.push(Markup.callbackButton(ctx.i18n.t('btn_find_gym'), 'findGym'))
+  btns.push(ctx.i18n.t('btn_add_raid'))
+  btns.push(ctx.i18n.t('btn_edit_raid'))
+  btns.push(ctx.i18n.t('btn_find_gym'))
 
   // admin only:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
 
   for (let a = 0; a < admins.length; a++) {
     if (admins[a].user.id === user.id) {
-      btns.push(Markup.callbackButton(ctx.i18n.t('btn_add_gym'), 'addGym'))
-      btns.push(Markup.callbackButton(ctx.i18n.t('btn_edit_gym'), 'editGym'))
-      btns.push(Markup.callbackButton(ctx.i18n.t('btn_add_boss'), 'addBoss'))
-      btns.push(Markup.callbackButton(ctx.i18n.t('btn_edit_boss'), 'editBoss'))
+      btns.push(ctx.i18n.t('btn_add_gym'))
+      btns.push(ctx.i18n.t('btn_edit_gym'))
+      btns.push(ctx.i18n.t('btn_add_boss'))
+      btns.push(ctx.i18n.t('btn_edit_boss'))
+
       break
     }
   }
 
-  btns.push(Markup.callbackButton(ctx.i18n.t('btn_stats'), 'stats'))
+  btns.push(ctx.i18n.t('btn_stats'))
 
-  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.inlineKeyboard(btns, {columns: 1}).extra())
+  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.keyboard(
+    btns).oneTime().resize().extra())
 }
 
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
@@ -179,16 +181,17 @@ bot.command('/start', async (ctx) => {
 
 // set cancel command here too, not only in wizards
 bot.command('cancel', (ctx) => cancelConversation(ctx))
-bot.action('joinRaid', Stage.enter('join-raid-wizard'))
-bot.action('exitRaid', Stage.enter('exit-raid-wizard'))
-bot.action('addRaid', Stage.enter('add-raid-wizard'))
-bot.action('editRaid', Stage.enter('edit-raid-wizard'))
-bot.action('findGym', Stage.enter('find-gym-wizard'))
-bot.action('addGym', Stage.enter('add-gym-wizard'))
-bot.action('editGym', Stage.enter('edit-gym-wizard'))
-bot.action('addBoss', Stage.enter('add-raidboss-wizard'))
-bot.action('editBoss', Stage.enter('edit-raidboss-wizard'))
-bot.action('stats', Stage.enter('stats-wizard'))
+
+bot.hears(match('btn_join_raid'), Stage.enter('join-raid-wizard'))
+bot.hears(match('btn_exit_raid'), Stage.enter('exit-raid-wizard'))
+bot.hears(match('btn_add_raid'), Stage.enter('add-raid-wizard'))
+bot.hears(match('btn_edit_raid'), Stage.enter('edit-raid-wizard'))
+bot.hears(match('btn_find_gym'), Stage.enter('find-gym-wizard'))
+bot.hears(match('btn_add_gym'), Stage.enter('add-gym-wizard'))
+bot.hears(match('btn_edit_gym'), Stage.enter('edit-gym-wizard'))
+bot.hears(match('btn_add_boss'), Stage.enter('add-raidboss-wizard'))
+bot.hears(match('btn_edit_boss'), Stage.enter('edit-raidboss-wizard'))
+bot.hears(match('btn_stats'), Stage.enter('stats-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode
@@ -214,13 +217,6 @@ bot.on('inline_query', async ctx => {
       switch_pm_parameter: 'help_fromgroup'
     })
   // }
-})
-
-/**
-* Sillyness example ;-)
-*/
-bot.hears(/^(dankjewel|dank|bedankt|thanx|thx)/i, (ctx) => {
-  return ctx.replyWithMarkdown('Graag gedaan!')
 })
 
 // ================
@@ -349,9 +345,12 @@ bot.hears(/\/raids/i, async (ctx) => {
       ],
       where: {
         endtime: {
-          [Op.gt]: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+          [Op.gt]: moment().unix()
         }
-      }
+      },
+      order: [
+        ['start1', 'ASC']
+      ]
     }))
   let out = ''
   if (raids.length === 0) {

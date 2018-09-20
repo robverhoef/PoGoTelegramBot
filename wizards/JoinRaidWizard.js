@@ -25,13 +25,11 @@ function JoinRaidWizard (bot) {
         }
       })
       if (raids.length === 0) {
-        return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_no_raids_found')))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_no_raids_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
       // buttons to show, with index from candidates as data (since maxlength of button data is 64 bytes…)
-      let btns = []
+      ctx.session.raidbtns = []
       let candidates = []
       for (var a = 0; a < raids.length; a++) {
         let strttm = moment.unix(raids[a].start1).format('H:mm')
@@ -40,62 +38,44 @@ function JoinRaidWizard (bot) {
           raidid: raids[a].id,
           startsat: strttm
         }
-        btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, a))
+        ctx.session.raidbtns.push(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`)
       }
-      btns.push(Markup.callbackButton(ctx.i18n.t('join_raid_dont_participate'), candidates.length))
       candidates.push({
-        gymname: 'none',
+        gymname: ctx.i18n.t('join_raid_dont_participate'),
         raidid: 0
       })
+      ctx.session.raidbtns.push(ctx.i18n.t('join_raid_dont_participate'))
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_select_raid'), Markup.inlineKeyboard(btns, {
-          wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_select_raid'), Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-          .then(() => {
-            ctx.session.raidcandidates = null
-            return ctx.scene.leave()
-          })
-      }
       // retrieve selected candidate  from session…
-      let selectedraid = ctx.session.raidcandidates[ctx.update.callback_query.data]
+
+      let ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
+      if (ind === -1) {
+        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_not_found'), Markup.removeKeyboard().extra())
+      }
+      let selectedraid = ctx.session.raidcandidates[ind]
       if (selectedraid.raidid === 0) {
-        return ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_cancel')))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_cancel'), Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session.raidcandidates = null
             return ctx.scene.leave()
           })
       }
       // save selected index to session
-      ctx.session.joinedraid = parseInt(ctx.update.callback_query.data)
-      let btns = []
-      for (var a = 1; a < 6; a++) {
-        btns.push(Markup.callbackButton(a, a))
-      }
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(
-            ctx.i18n.t('join_raid_accounts_question', {
-              gymname: selectedraid.gymname
-            }), Markup.inlineKeyboard(btns).removeKeyboard().extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      ctx.session.joinedraid = parseInt(ind)
+      ctx.session.accountbtns = [['1'], ['2', '3', '4', '5']]
+      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
+        gymname: selectedraid.gymname
+      }), Markup.keyboard(ctx.session.accountbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-      }
-      const accounts = parseInt(ctx.update.callback_query.data)
+      const accounts = parseInt(ctx.update.message.text)
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
 
       const user = ctx.from
@@ -113,8 +93,7 @@ function JoinRaidWizard (bot) {
             { where: { [Op.and]: [{uid: user.id}, {raidId: joinedraid.raidid}] } }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown(ctx.i19n.t('problem_while_saving'))
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       } else {
@@ -129,7 +108,7 @@ function JoinRaidWizard (bot) {
           await raiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard())
             .then(() => ctx.scene.leave())
         }
       }
@@ -138,16 +117,12 @@ function JoinRaidWizard (bot) {
         gymname: joinedraid.gymname
       })}\n\n`)
       if (out === null) {
-        ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found')))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('join_raid_finished', {
-          joinedraid: joinedraid
-        })))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_finished', {
+        joinedraid: joinedraid
+      }), Markup.removeKeyboard().extra())
         .then(async () => {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
         })

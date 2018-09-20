@@ -18,22 +18,13 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('add_raid_welcome')))
-        // .then(()=> {
-      // .then(() => ctx.deleteMessage(ctx.update.callback_query.message.chat.id, ctx.update.callback_query.message.message_id))
-      // ctx.session.prevMessage = {chatId: ,messageId:}
-        // })
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('add_raid_welcome'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
-      if (ctx.update.message.text === undefined) {
-        return
-      }
+      console.log('step 1', ctx.update.message.text)
       const term = ctx.update.message.text.trim()
-      let btns = []
       if (term.length < 2) {
         return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
         // .then(() => ctx.wizard.back())
@@ -45,62 +36,66 @@ function AddRaidWizard (bot) {
         })
         if (candidates.length === 0) {
           ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {term: term}))
-          // .then(() => ctx.wizard.back())
           return
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
-          ctx.session.gymcandidates.push({gymname: candidates[i].gymname, id: candidates[i].id})
-          btns.push(Markup.callbackButton(candidates[i].gymname, i))
+          ctx.session.gymcandidates.push([
+            candidates[i].gymname,
+            candidates[i].id
+          ])
         }
 
-        btns.push(Markup.callbackButton(ctx.i18n.t('btn_gym_not_found'), candidates.length))
-        ctx.session.gymcandidates.push({name: 'none', id: 0})
-        return ctx.replyWithMarkdown('Kies een gym.', Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+        ctx.session.gymcandidates.push([
+          ctx.i18n.t('btn_gym_not_found'), 0
+        ])
+        return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymcandidates.map(el => el[0])).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
     // step 2
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
+      let selectedIndex = -1
+      for (var i = 0; i < ctx.session.gymcandidates.length; i++) {
+        if (ctx.session.gymcandidates[i][0] === ctx.update.message.text) {
+          selectedIndex = i
+          break
+        }
       }
-      let selectedIndex = parseInt(ctx.update.callback_query.data)
       // User can't find the gym
-      if (ctx.session.gymcandidates[selectedIndex].id === 0) {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => {
-            ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'))
-            ctx.wizard.selectStep(1)
-            return ctx.wizard.steps[1](ctx)
-          })
+
+      if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
+        ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.removeKeyboard().extra())
+        ctx.wizard.selectStep(0)
+        return ctx.wizard.steps[0](ctx)
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
-        ctx.session.newraid.gymId = selectedgym.id
-        ctx.session.newraid.gymname = selectedgym.gymname
-
-        let btns = [
-          Markup.callbackButton(ctx.i18n.t('btn_start_mode_time'), 'startmodetime'),
-          Markup.callbackButton(ctx.i18n.t('btn_start_mode_min'), 'startmodemin'),
-          Markup.callbackButton(ctx.i18n.t('btn_end_mode_time'), 'endmodetime'),
-          Markup.callbackButton(ctx.i18n.t('btn_end_mode_min'), 'endmodemin')
+        ctx.session.newraid.gymId = selectedgym[1]
+        ctx.session.newraid.gymname = selectedgym[0]
+        ctx.session.timeOptions = [
+          [ctx.i18n.t('btn_start_mode_time'), 'startmodetime'],
+          [ctx.i18n.t('btn_start_mode_min'), 'startmodemin'],
+          [ctx.i18n.t('btn_end_mode_time'), 'endmodetime'],
+          [ctx.i18n.t('btn_end_mode_min'), 'endmodemin']
         ]
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('enter_end_time_mode_question'),
-            Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra()
-          ))
+        let btns = ctx.session.timeOptions.map(el => el[0])
+
+        return ctx.replyWithMarkdown(ctx.i18n.t('enter_end_time_mode_question'),
+          Markup.keyboard(btns).oneTime().resize().extra()
+        )
           .then(() => ctx.wizard.next())
       }
     },
     // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
+      let timemode = ''
+      for (var a = 0; a < ctx.session.timeOptions.length; a++) {
+        if (ctx.session.timeOptions[a][0] === ctx.update.message.text) {
+          timemode = ctx.session.timeOptions[a][1]
+          break
+        }
       }
-      let timemode = ctx.update.callback_query.data
       ctx.session.timemode = timemode
       let question = ''
       if (timemode === 'startmodetime') {
@@ -112,9 +107,7 @@ function AddRaidWizard (bot) {
       } else if (timemode === 'endmodemin') {
         question = ctx.i18n.t('enter_endtime_minutes')
       }
-      return ctx.answerCbQuery('', undefined, true)
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.replyWithMarkdown(question))
+      return ctx.replyWithMarkdown(question, Markup.removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -130,16 +123,16 @@ function AddRaidWizard (bot) {
         }
       } else {
         let minutes = parseInt(message)
-
-        if (!minutes || minutes < 0 || minutes > 60) {
+        if ((!minutes || minutes < 0 || minutes > 60) && ctx.session.timemode === 'startmodemin') {
           return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_minutes_retry'))
         }
-
+        if ((!minutes || minutes < 0 || minutes > 45) && ctx.session.timemode === 'endmodemin') {
+          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 45 liggen. \n*Probeer het nog eens.*`)
+        }
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
           return ctx.replyWithMarkdown(ctx.i18n.t('time_to_tight'))
             .then(() => ctx.scene.leave())
         }
-
         tmptime = moment().add(minutes, 'minutes').unix()
       }
 
@@ -215,27 +208,17 @@ function AddRaidWizard (bot) {
       }
       const endtime = ctx.session.newraid.endtime
       const start1 = ctx.session.newraid.start1
-
       let out = `${ctx.i18n.t('until')} ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? (ctx.i18n.t('recommended') + ': ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\n${ctx.i18n.t('start')}: ${moment.unix(start1).format('HH:mm')}`
-
-      return ctx.replyWithMarkdown(`${out}\n\n*${ctx.i18n.t('save_question')}*`, Markup.inlineKeyboard([
-        Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
-        Markup.callbackButton(ctx.i18n.t('no'), 'no')
-      ], {columns: 1}).removeKeyboard().extra())
+      ctx.session.saveOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
+      return ctx.replyWithMarkdown(`${out}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.saveOptions)
+        .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
     // step 6
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-      }
       const user = ctx.from
-      let saveme = ctx.update.callback_query.data
-      if (saveme === 'no') {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving')))
-          .then(() => ctx.scene.leave())
-      } else {
+      let saveme = ctx.session.saveOptions.indexOf(ctx.update.message.text) === 0
+      if (saveme) {
         // Sometimes a new raid is getting submitted multiple times
         // ToDo: adapt this when multiple starttimes are getting implemented
         var raidexists = await models.Raid.find({
@@ -250,11 +233,7 @@ function AddRaidWizard (bot) {
         })
         if (raidexists) {
           console.log(`New raid exists… Ignoring id: ${ctx.session.newraid.gymId} target: ${ctx.session.newraid.target} endtime: ${ctx.session.newraid.endtime}`)
-          ctx.answerCbQuery(null, undefined, true)
-          if (ctx.update.callback_query.message.message_id) {
-            ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-          }
-          return ctx.replyWithMarkdown(ctx.i18n.t('raid_exists_warning'))
+          return ctx.replyWithMarkdown(ctx.i18n.t('raid_exists_warning'), Markup.removeKeyboard().extra())
             .then(() => {
               ctx.session.newraid = null
               return ctx.scene.leave()
@@ -278,7 +257,8 @@ function AddRaidWizard (bot) {
             })
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
+
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => {
               ctx.session = null
               return ctx.scene.leave()
@@ -290,62 +270,39 @@ function AddRaidWizard (bot) {
           user: user
         }))
         if (out === null) {
-          return ctx.answerCbQuery(null, undefined, true)
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-            .then(() => ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found')))
+          return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-
-        return ctx.answerCbQuery('', undefined, true)
-          .then(async () => {
-            bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
-          })
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        ctx.session.participateOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
+        return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
           .then(() => {
-            ctx.replyWithMarkdown(ctx.i18n.t('do_you_participate'), Markup.inlineKeyboard([
-              Markup.callbackButton(ctx.i18n.t('yes'), 'yes'),
-              Markup.callbackButton(ctx.i18n.t('no'), 'no')
-            ]).removeKeyboard().extra())
+            ctx.replyWithMarkdown(ctx.i18n.t('do_you_participate'), Markup.keyboard(ctx.session.participateOptions).resize().oneTime().extra())
           })
           .then(() => ctx.wizard.next())
+      } else {
+        return ctx.replyWithMarkdown('Jammer… \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
+          .then(() => ctx.scene.leave())
       }
     },
+    // Step 7
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-          .then(() => {
-            ctx.session = null
-            return ctx.scene.leave()
-          })
-      }
-      // user does NOT participate, exit
-      if (ctx.update.callback_query.data === 'no') {
-        ctx.answerCbQuery(null, undefined, true)
-        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'))
+      let participate = ctx.session.participateOptions.indexOf(ctx.update.message.text)
+      if (participate === 1) {
+        // user does NOT participate, exit
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       // user does participate
-      let btns = []
-      for (var a = 1; a < 6; a++) {
-        btns.push(Markup.callbackButton(a, a))
-      }
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-        .then(() => ctx.replyWithMarkdown(
-            ctx.i18n.t('join_raid_accounts_question', {
-              gymname: ctx.session.newraid.gymname
-            }), Markup.inlineKeyboard(btns).removeKeyboard().extra()))
+      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
+        gymname: ctx.session.newraid.gymname
+      }), Markup.keyboard([['1'], ['2', '3', '4', '5']])
+        .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
-    async (ctx) => {
-      if (!ctx.update.callback_query) {
-        // console.log('afhandeling raidkeuze, geen callbackquery!')
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-          .then(() => ctx.scene.leave())
-      }
-      const accounts = parseInt(ctx.update.callback_query.data)
 
+    // Step 8
+    async (ctx) => {
+      const accounts = parseInt(ctx.update.message.text)
       const user = ctx.from
       // Check already registered? If so; update else store new
       let raiduser = await models.Raiduser.find({
@@ -361,8 +318,7 @@ function AddRaidWizard (bot) {
             { where: { [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}] } }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       } else {
@@ -377,7 +333,7 @@ function AddRaidWizard (bot) {
           await raiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       }
@@ -386,17 +342,14 @@ function AddRaidWizard (bot) {
         gymname: ctx.session.newraid.gymname
       }))
       if (out === null) {
-        ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found')))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('raid_add_finish', {
-          gymname: ctx.session.newraid.gymname,
-          starttm: moment.unix(ctx.session.newraid.start1).format('HH:mm')
-        })))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('raid_add_finish', {
+        gymname: ctx.session.newraid.gymname,
+        starttm: moment.unix(ctx.session.newraid.start1).format('HH:mm')
+      }), Markup.removeKeyboard().extra())
+
         .then(async () => {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
         })

@@ -253,56 +253,35 @@ var StatsWizard = function () {
   return new WizardScene('stats-wizard',
     // Step 0: Get the info requested
     async (ctx) => {
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-      }
+      ctx.session.statbtns = [ctx.i18n.t('stats_my_statistics'), ctx.i18n.t('stats_total_statistics')]
 
-      let btns = []
-      btns.push(Markup.callbackButton(ctx.i18n.t('stats_my_statistics'), 0))
-      btns.push(Markup.callbackButton(ctx.i18n.t('stats_total_statistics'), 1))
-
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_stats_question'), Markup.inlineKeyboard(btns, {
-          wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_stats_question'), Markup.keyboard(ctx.session.statbtns)
+        .oneTime()
+        .resize()
+        .extra()
+      )
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-          .then(() => {
-            ctx.session.chosenStat = null
-            return ctx.scene.leave()
-          })
+      ctx.session.chosenStat = ctx.session.statbtns.indexOf(ctx.update.message.text)
+      if (ctx.session.chosenStat === -1) {
+        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong'), Markup.removeKeyboard().extra())
       }
+      ctx.session.periodbtns = [
+        ctx.i18n.t('stats_today'),
+        ctx.i18n.t('stats_this_week'),
+        ctx.i18n.t('stats_this_month'),
+        ctx.i18n.t('stats_this_year')
+      ]
 
-      ctx.session.chosenStat = parseInt(ctx.update.callback_query.data)
-
-      let btns = []
-      btns.push(Markup.callbackButton(ctx.i18n.t('stats_today'), 0))
-      btns.push(Markup.callbackButton(ctx.i18n.t('stats_this_week'), 1))
-      btns.push(Markup.callbackButton(ctx.i18n.t('stats_this_month'), 2))
-      btns.push(Markup.callbackButton(ctx.i18n.t('stats_this_year'), 3))
-
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_period_question'), Markup.inlineKeyboard(btns, {
-          wrap: (btn, index, currentRow) => 1}).removeKeyboard().extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_period_question'), Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong_press_button'))
-          .then(() => {
-            ctx.session.chosenStat = null
-            return ctx.scene.leave()
-          })
-      }
-
       let chosenStat = ctx.session.chosenStat
-      let chosenTime = parseInt(ctx.update.callback_query.data)
+      let chosenTime = ctx.session.periodbtns.indexOf(ctx.update.message.text)
 
       let time = determineChosenTime(chosenTime)
 
@@ -324,9 +303,7 @@ var StatsWizard = function () {
 
       let message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
 
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(message))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(message, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
   )
