@@ -41,7 +41,7 @@ function AddRaidWizard (bot) {
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
           ctx.session.gymcandidates.push([
-            candidates[i].gymname,
+            candidates[i].gymname.trim(),
             candidates[i].id
           ])
         }

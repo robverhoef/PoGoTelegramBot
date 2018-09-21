@@ -37,7 +37,7 @@ function EditRaidWizard (bot) {
       ctx.session.raidcandidates = []
       for (var a = 0; a < raids.length; a++) {
         ctx.session.raidcandidates[a] = {
-          gymname: raids[a].Gym.gymname,
+          gymname: raids[a].Gym.gymname.trim(),
           id: raids[a].id,
           start1: raids[a].start1,
           endtime: raids[a].endtime,
