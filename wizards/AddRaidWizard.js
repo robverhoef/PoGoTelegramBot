@@ -131,8 +131,11 @@ function AddRaidWizard (bot) {
       } else {
         let minutes = parseInt(message)
 
-        if (!minutes || minutes < 0 || minutes > 60) {
+        if ((!minutes || minutes < 0 || minutes > 60) && ctx.session.timemode === 'startmodemin') {
           return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 60 liggen. \n*Probeer het nog eens.*`)
+        }
+        if ((!minutes || minutes < 0 || minutes > 45) && ctx.session.timemode === 'endmodemin') {
+          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 45 liggen. \n*Probeer het nog eens.*`)
         }
 
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {

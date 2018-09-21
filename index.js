@@ -76,6 +76,10 @@ const EditRaidbossWizard = require('./wizards/EditRaidbossWizard')
 const editRaidbossWizard = EditRaidbossWizard(bot)
 editRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const StatsWizard = require('./wizards/StatsWizard')
+const statsWizard = StatsWizard(bot)
+statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -85,7 +89,8 @@ const stage = new Stage([
   addGymWizard,
   editGymWizard,
   addRaidbossWizard,
-  editRaidbossWizard
+  editRaidbossWizard,
+  statsWizard
 ])
 
 /**
@@ -143,6 +148,9 @@ async function showMainMenu (ctx, user) {
       break
     }
   }
+
+  btns.push(Markup.callbackButton(`Statistieken`, 'stats'))
+
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
     btns, {columns: 1}).extra())
 }
@@ -179,6 +187,7 @@ bot.action('addGym', Stage.enter('add-gym-wizard'))
 bot.action('editGym', Stage.enter('edit-gym-wizard'))
 bot.action('addBoss', Stage.enter('add-raidboss-wizard'))
 bot.action('editBoss', Stage.enter('edit-raidboss-wizard'))
+bot.action('stats', Stage.enter('stats-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode
