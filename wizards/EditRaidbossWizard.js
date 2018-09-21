@@ -50,6 +50,7 @@ function EditRaidbossWizard (bot) {
       let bossindex = ctx.session.bosscandidates.length - 1
       if (ctx.session.more !== true) {
         for (let i = 0; i < ctx.session.bosscandidates.length; i++) {
+          console.log(ctx.session.bosscandidates[i].name, ' === ', ctx.update.message.text)
           if (ctx.session.bosscandidates[i].name === ctx.update.message.text) {
             bossindex = i
           }

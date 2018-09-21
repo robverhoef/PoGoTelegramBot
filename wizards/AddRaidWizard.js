@@ -214,7 +214,7 @@ function AddRaidWizard (bot) {
       const start1 = ctx.session.newraid.start1
 
       let out = `Tot ${moment.unix(endtime).format('HH:mm')}: *${ctx.session.newraid.target}*\n${ctx.session.newraid.bossid !== null ? ('Aanbevolen: ' + ctx.session.newraid.accounts + ' accounts\n') : ''}${ctx.session.newraid.gymname}\nStart: ${moment.unix(start1).format('HH:mm')}`
-      ctx.session.saveOptions = ['Ja','Nee']
+      ctx.session.saveOptions = ['Ja', 'Nee']
       return ctx.replyWithMarkdown(`${out}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.saveOptions)
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
@@ -223,7 +223,7 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       const user = ctx.from
       let saveme = ctx.session.saveOptions.indexOf(ctx.update.message.text) === 0
-      if (saveme)  {
+      if (saveme) {
         // Sometimes a new raid is getting submitted multiple times
         // ToDo: adapt this when multiple starttimes are getting implemented
         var raidexists = await models.Raid.find({
@@ -274,7 +274,7 @@ function AddRaidWizard (bot) {
           return ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-        ctx.session.participateOptions = ['Ja','Nee']
+        ctx.session.participateOptions = ['Ja', 'Nee']
         return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
           .then(() => {
             ctx.replyWithMarkdown('Dankjewel!\n*Doe je zelf mee met deze raid?*', Markup.keyboard(ctx.session.participateOptions).resize().oneTime().extra())
