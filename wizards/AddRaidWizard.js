@@ -23,7 +23,7 @@ function AddRaidWizard (bot) {
     },
     // step 1
     async (ctx) => {
-      console.log('step 1', ctx.update.message.text)
+      // console.log('step 1', ctx.update.message.text)
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
         return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
@@ -252,7 +252,7 @@ function AddRaidWizard (bot) {
         try {
           await newraid.save()
             .then((saved) => {
-              console.log('saved', saved)
+              // console.log('saved', saved)
               ctx.session.savedraid = saved
             })
         } catch (error) {

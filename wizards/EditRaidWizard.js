@@ -129,12 +129,8 @@ function EditRaidWizard (bot) {
             break
           case 'gym':
             ctx.session.editattr = 'gym'
-            question = ctx.i18n.t('edit_raid_question_gym')
-            return ctx.replyWithMarkdown(question)
-              .then(() => {
-                ctx.wizard.selectStep(6)
-                return ctx.wizard.steps[6](ctx)
-              })
+            ctx.wizard.selectStep(6)
+            return ctx.wizard.steps[6](ctx)
           default:
             question = ctx.i18n.t('edit_raidboss_no_clue')
             return ctx.replyWithMarkdown(question)
@@ -267,6 +263,12 @@ function EditRaidWizard (bot) {
 
     // step 6: handle gym search
     async (ctx) => {
+      let question = ctx.i18n.t('edit_raid_question_gym')
+      return ctx.replyWithMarkdown(question)
+        .then(() => ctx.wizard.next())
+    },
+    // Step 7: find gyms
+    async (ctx) => {
       // why do i need this??
       if (ctx.update.message === undefined) {
         return
@@ -313,7 +315,7 @@ function EditRaidWizard (bot) {
       }
     },
 
-    // step 7: handle gym selection
+    // step 8: handle gym selection
     async (ctx) => {
       let gymIndex = ctx.session.gymbtns.indexOf(ctx.update.message.text)
       let selectedGym = ctx.session.gymcandidates[gymIndex]

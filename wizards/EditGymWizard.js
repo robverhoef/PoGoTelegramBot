@@ -184,7 +184,7 @@ function EditGymWizard (bot) {
           // more edits
           // set cursor to step 1 and trigger jump to step 1
           ctx.session.more = true
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_more'), Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(ctx.i18n.t('edit_more'))
             .then(() => ctx.wizard.selectStep(2))
             .then(() => ctx.wizard.steps[2](ctx))
         case 2:

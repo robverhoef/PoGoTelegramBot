@@ -26,14 +26,14 @@ function AddGymWizard (bot) {
         }
       })
       if (oldgyms.length > 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('gym_exists_warning'))
+
+        return ctx.replyWithMarkdown(ctx.i18n.t('gym_exists_warning'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       ctx.session.newgym.reporterName = user.first_name
       ctx.session.newgym.reporterId = user.id
       ctx.session.newgym.gymname = gymname
-
-      ctx.replyWithMarkdown(ctx.i18n.t('address_question'))
+      ctx.replyWithMarkdown(ctx.i18n.t('address_question'), Markup.removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
     // Step 2
@@ -56,7 +56,6 @@ function AddGymWizard (bot) {
 
           })
       }
-
       ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
       ctx.replyWithMarkdown(ctx.i18n.t('exraid_question'), Markup.keyboard(ctx.session.exraidbtns)
         .resize().oneTime().extra())
@@ -72,7 +71,6 @@ function AddGymWizard (bot) {
         ctx.i18n.t('no')
       ]
       return ctx.replyWithMarkdown(`${ctx.i18n.t('new_gym_almost_done_confirm')}: *${ctx.session.newgym.gymname}*\n${ctx.i18n.t('address')}: ${ctx.session.newgym.address === null ? ctx.i18n.t('no_input') : ctx.session.newgym.address}\n${ctx.i18n.t('map')}: ${ctx.session.newgym.googleMapsLink === null ? ctx.i18n.t('no_input') : ctx.session.newgym.googleMapsLink}\n${ctx.i18n.t('exraid_candidate')}: ${ctx.session.newgym.exRaidTrigger === 1 ? ctx.i18n.t('yes') : ctx.i18n.t('no_dont_know')}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
-
         .then(() => ctx.wizard.next())
     },
     // Step 5
