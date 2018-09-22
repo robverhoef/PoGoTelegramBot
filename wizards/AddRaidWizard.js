@@ -62,11 +62,19 @@ function AddRaidWizard (bot) {
           break
         }
       }
+      // Catch gym not found errors…
+      if (selectedIndex === -1) {
+        return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+        .then(() => {
+          ctx.session = {}
+          return ctx.scene.leave()
+        })
+      }
       // User can't find the gym
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
-        ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
-        ctx.wizard.selectStep(0)
-        return ctx.wizard.steps[0](ctx)
+        return ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
+          ctx.wizard.selectStep(0)
+          return ctx.wizard.steps[0](ctx)
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]

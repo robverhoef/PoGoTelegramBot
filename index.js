@@ -36,7 +36,7 @@ function cancelConversation (ctx) {
   // Since something might be failing… reset session
   ctx.session = {}
   return ctx.scene.leave()
-    .then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+    .then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra()))
 }
 
 // Setup for all wizards
