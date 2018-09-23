@@ -32,7 +32,7 @@ module.exports = {
           logging: console.log
         }
       )
-
+    }).then(() => {
       queryInterface.addConstraint(
         'notifications',
         ['gymId'],

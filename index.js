@@ -80,7 +80,7 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const AddNotificationWizard = require('./wizards/AddNotificationWizard')
+const AddNotificationWizard = require('./wizards/NotificationWizard')
 const addNotificationWizard = AddNotificationWizard(bot)
 addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
@@ -155,6 +155,7 @@ async function showMainMenu (ctx, user) {
   }
 
   btns.push(`Statistieken`)
+  btns.push(`Notificaties`)
 
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.keyboard(
     btns).oneTime().resize().extra())
@@ -193,6 +194,7 @@ bot.hears('Een gym wijzigen', Stage.enter('edit-gym-wizard'))
 bot.hears('Een raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
 bot.hears('Een raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
 bot.hears('Statistieken', Stage.enter('stats-wizard'))
+bot.hears('Notificaties', Stage.enter('notification-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode

@@ -7,13 +7,13 @@ const {Markup} = require('telegraf')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
-var AddNotificationWizard = function () {
+var NotificationWizard = function () {
   return new WizardScene('notification-wizard',
     // step 0
     async (ctx) => {
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe notificatie toevoegen op een gym. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`, Markup.removeKeyboard())
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe notificatie beheren op een gym. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
@@ -22,7 +22,6 @@ var AddNotificationWizard = function () {
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
         return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de gymnaam…\n*Probeer het nog eens.* 🤨`)
-        // .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
           where: {
@@ -71,25 +70,45 @@ var AddNotificationWizard = function () {
       } else {
         // retrieve selected candidate from session
         let gym = ctx.session.gymcandidates[selectedIndex]
+        ctx.session.selectedGym = gym
 
         const user = ctx.from
 
-        let notification = models.Notification.build({
-          gymId: gym[1],
-          userId: user.id
-        })
-        try {
-          await notification.save()
-        } catch (error) {
-          console.log('Woops… registering notification failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
-            .then(() => ctx.scene.leave())
-        }
-        return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op ${gym[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+        //find existing, change message
+        return ctx.replyWithMarkdown(`Wil je een notificatie van ${gym[0]} als er wat te raiden valt?.`, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
+          .then(() => ctx.wizard.next())
+      }
+    },
+    // step 3
+    async (ctx) => {
+      if (ctx.update.message.text === 'Nee') {
+        return ctx.replyWithMarkdown(`Prima.\n*Gebruik */start* om het nog een opdracht uit te voeren…*\n`, Markup.removeKeyboard().extra())
+          .then(() => {
+            ctx.session = {}
+            return ctx.scene.leave()
+          })
+      }
+
+      let gym = ctx.session.selectedGym
+      const user = ctx.from
+      let notification = models.Notification.build({
+        gymId: gym[1],
+        userId: user.id
+      })
+      try {
+        await notification.save()
+      } catch (error) {
+        console.log('Woops… registering notification failed', error)
+        return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
+
+      //change message
+
+      return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende gym: ${gym[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+        .then(() => ctx.scene.leave())
     }
   )
 }
 
-module.exports = StatsWizard
+module.exports = NotificationWizard
