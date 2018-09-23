@@ -154,8 +154,8 @@ async function showMainMenu (ctx, user) {
     }
   }
 
-  btns.push(`Statistieken`)
   btns.push(`Notificaties`)
+  btns.push(`Statistieken`)
 
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.keyboard(
     btns).oneTime().resize().extra())

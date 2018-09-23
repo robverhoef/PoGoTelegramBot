@@ -11,9 +11,44 @@ var NotificationWizard = function () {
   return new WizardScene('notification-wizard',
     // step 0
     async (ctx) => {
-      ctx.session.newraid = {}
-      ctx.session.gymcandidates = []
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe notificatie beheren op een gym. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*`, Markup.removeKeyboard())
+      const user = ctx.from
+      let dbuser = await models.User.findOne({
+        where: {
+          tId: {
+            [Op.eq]: user.id
+          }
+        }
+      })
+      if (!dbuser) {
+        return ctx.replyWithMarkdown(`Hier ging iets *niet* met het ophalen van jouw gebruiker…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+          .then(() => ctx.scene.leave())
+      }
+
+      ctx.session.userId = dbuser.id
+
+      let existingNotifications = await models.Notification.findAll({
+        include: [
+          models.Gym
+        ],
+        where: {
+          userId: {
+            [Op.eq]: ctx.session.userId
+          }
+        }
+      })
+
+      let message = ''
+      for (let existingNotification of existingNotifications) {
+        message += `\n- ${existingNotification.Gym.gymname}`
+      }
+
+      if (message === '') {
+        message = '\n- Je hebt geen notificaties ingesteld'
+      }
+
+      message += '\n\n'
+
+      return ctx.replyWithMarkdown(`*Je hebt momenteel op de volgende gyms notificaties ingesteld als er raids gemeld worden:*\n${message}Wil je notificaties toevoegen op een gym of juist afmelden? Dan gaan we eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
@@ -72,10 +107,23 @@ var NotificationWizard = function () {
         let gym = ctx.session.gymcandidates[selectedIndex]
         ctx.session.selectedGym = gym
 
-        const user = ctx.from
+        let existingNotification = await models.Notification.findOne({
+          where: {
+            userId: {
+              [Op.eq]: ctx.session.userId
+            },
+            gymId: {
+              [Op.eq]: gym[1]
+            }
+          }
+        })
+        let message = `Wil je een notificatie van ${gym[0]} als er wat te raiden valt?`
+        if (existingNotification) {
+          ctx.session.existingNotificationId = existingNotification.id
+          message = `Wil je je notificaties uitzetten van ${gym[0]}?`
+        }
 
-        //find existing, change message
-        return ctx.replyWithMarkdown(`Wil je een notificatie van ${gym[0]} als er wat te raiden valt?.`, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
+        return ctx.replyWithMarkdown(message, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
@@ -90,31 +138,42 @@ var NotificationWizard = function () {
       }
 
       let gym = ctx.session.selectedGym
-      const user = ctx.from
+      let userId = ctx.session.userId
 
-      let dbuser = await models.User.findOne({
-        where: {
-          tId: {
-            [Op.eq]: user.id
-          }
+      //save new
+      if (!ctx.session.existingNotificationId) {
+        let notification = models.Notification.build({
+          gymId: gym[1],
+          userId: userId
+        })
+        try {
+          await notification.save()
+        } catch (error) {
+          console.log('Woops… registering notification failed', error)
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            .then(() => ctx.scene.leave())
         }
-      })
-
-      let notification = models.Notification.build({
-        gymId: gym[1],
-        userId: dbuser.id
-      })
-      try {
-        await notification.save()
-      } catch (error) {
-        console.log('Woops… registering notification failed', error)
-        return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende gym: ${gym[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
-
-      //change message
-      return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende gym: ${gym[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
-        .then(() => ctx.scene.leave())
+      //remove old
+      else {
+        try {
+          await models.Notification.destroy({
+            where: {
+              id: {
+                [Op.eq]: ctx.session.existingNotificationId
+              }
+            }
+          })
+        } catch (error) {
+          console.log('Woops… deleting notification failed', error)
+          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            .then(() => ctx.scene.leave())
+        }
+        return ctx.replyWithMarkdown(`Je bent afgemeld voor notificaties op de volgende gym: ${gym[0]}. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+          .then(() => ctx.scene.leave())
+      }
     }
   )
 }
