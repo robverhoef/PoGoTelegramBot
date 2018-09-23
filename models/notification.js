@@ -17,16 +17,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {tableName: 'notifications'})
   Notification.associate = function (models) {
     models.Notification.belongsTo(models.Gym, {
-      onDelete: 'NO ACTION',
-      foreignKey: {
-        allowNull: false
-      }
+      onDelete: 'NO ACTION'
     })
     models.Notification.belongsTo(models.User, {
-      onDelete: 'NO ACTION',
-      foreignKey: {
-        allowNull: false
-      }
+      onDelete: 'NO ACTION'
     })
   }
   return Notification

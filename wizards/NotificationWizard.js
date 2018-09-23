@@ -91,9 +91,18 @@ var NotificationWizard = function () {
 
       let gym = ctx.session.selectedGym
       const user = ctx.from
+
+      let dbuser = await models.User.findOne({
+        where: {
+          tId: {
+            [Op.eq]: user.id
+          }
+        }
+      })
+
       let notification = models.Notification.build({
         gymId: gym[1],
-        userId: user.id
+        userId: dbuser.id
       })
       try {
         await notification.save()
@@ -104,7 +113,6 @@ var NotificationWizard = function () {
       }
 
       //change message
-
       return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende gym: ${gym[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
