@@ -80,6 +80,10 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AddNotificationWizard = require('./wizards/AddNotificationWizard')
+const addNotificationWizard = AddNotificationWizard(bot)
+addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -90,7 +94,8 @@ const stage = new Stage([
   editGymWizard,
   addRaidbossWizard,
   editRaidbossWizard,
-  statsWizard
+  statsWizard,
+  addNotificationWizard
 ])
 
 /**
