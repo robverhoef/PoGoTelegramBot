@@ -37,7 +37,7 @@ function EditRaidWizard (bot) {
       ctx.session.raidcandidates = []
       for (var a = 0; a < raids.length; a++) {
         ctx.session.raidcandidates[a] = {
-          gymname: raids[a].Gym.gymname,
+          gymname: raids[a].Gym.gymname.trim(),
           id: raids[a].id,
           start1: raids[a].start1,
           endtime: raids[a].endtime,
@@ -65,13 +65,22 @@ function EditRaidWizard (bot) {
     async (ctx) => {
       // retrieve selected candidate from session…
       if (ctx.session.more !== true) {
-        let selectedraid
+        let selectedraid = null
         for (let i = 0; i < ctx.session.raidbtns.length; i++) {
           if (ctx.session.raidbtns[i] === ctx.update.message.text) {
             selectedraid = ctx.session.raidcandidates[i]
             break
           }
         }
+        // Catch gym not found errors…
+        if (selectedraid === null) {
+          return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+          .then(() => {
+            ctx.session = {}
+            return ctx.scene.leave()
+          })
+        }
+
         if (selectedraid.id === 0) {
           return ctx.replyWithMarkdown('Jammer!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
             .then(() => {
@@ -126,12 +135,8 @@ function EditRaidWizard (bot) {
             break
           case 'gym':
             ctx.session.editattr = 'gym'
-            question = `Je wilt de gym wijzigen\nWelke gym wordt het nu?\n*Voer een deel van de naam in, minimaal 2 tekens…*`
-            return ctx.replyWithMarkdown(question)
-              .then(() => {
-                ctx.wizard.selectStep(6)
-                return ctx.wizard.steps[6](ctx)
-              })
+            ctx.wizard.selectStep(6)
+            return ctx.wizard.steps[6](ctx)
           default:
             question = 'Ik heb geen idee wat je wilt wijzigen. \n*Gebruik */start* om het nog eens te proberen. Of ga terug naar de groep.*'
             return ctx.replyWithMarkdown(question)
@@ -259,6 +264,12 @@ function EditRaidWizard (bot) {
 
     // step 6: handle gym search
     async (ctx) => {
+      let question = `Je wilt de gym wijzigen\nWelke gym wordt het nu?\n*Voer een deel van de naam in, minimaal 2 tekens…*`
+      return ctx.replyWithMarkdown(question)
+        .then(() => ctx.wizard.next())
+    },
+    // Step 7: find gyms
+    async (ctx) => {
       // why do i need this??
       if (ctx.update.message === undefined) {
         return
@@ -303,7 +314,7 @@ function EditRaidWizard (bot) {
       }
     },
 
-    // step 7: handle gym selection
+    // step 8: handle gym selection
     async (ctx) => {
       let gymIndex = ctx.session.gymbtns.indexOf(ctx.update.message.text)
       let selectedGym = ctx.session.gymcandidates[gymIndex]
