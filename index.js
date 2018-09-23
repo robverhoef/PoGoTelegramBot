@@ -154,7 +154,7 @@ async function showMainMenu (ctx, user) {
     }
   }
 
-  btns.push(`Notificaties`)
+  btns.push(`Notificaties van bepaalde gyms`)
   btns.push(`Statistieken`)
 
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.keyboard(
