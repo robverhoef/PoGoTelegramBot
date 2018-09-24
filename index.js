@@ -80,6 +80,10 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AddNotificationWizard = require('./wizards/NotificationWizard')
+const addNotificationWizard = AddNotificationWizard(bot)
+addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -90,7 +94,8 @@ const stage = new Stage([
   editGymWizard,
   addRaidbossWizard,
   editRaidbossWizard,
-  statsWizard
+  statsWizard,
+  addNotificationWizard
 ])
 
 /**
@@ -149,6 +154,7 @@ async function showMainMenu (ctx, user) {
     }
   }
 
+  btns.push(`Notificaties van bepaalde gyms`)
   btns.push(`Statistieken`)
 
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.keyboard(
@@ -188,6 +194,7 @@ bot.hears('Een gym wijzigen', Stage.enter('edit-gym-wizard'))
 bot.hears('Een raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
 bot.hears('Een raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
 bot.hears('Statistieken', Stage.enter('stats-wizard'))
+bot.hears('Notificaties van bepaalde gyms', Stage.enter('notification-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode

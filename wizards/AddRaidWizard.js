@@ -276,6 +276,9 @@ function AddRaidWizard (bot) {
               return ctx.scene.leave()
             })
         }
+
+        await sendNotifications(ctx, bot)
+
         // send updated list to group
         let out = await listRaids(`Raid bij ${ctx.session.newraid.gymname} toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
         if (out === null) {
@@ -358,4 +361,27 @@ function AddRaidWizard (bot) {
     }
   )
 }
+
+async function sendNotifications (ctx, bot) {
+  let gymId = ctx.session.newraid.gymId
+  let gymname = ctx.session.newraid.gymname
+  let target = ctx.session.newraid.target
+  let starttime = ctx.session.newraid.start1
+
+  let notifications = await models.Notification.findAll({
+    include: [
+      models.User
+    ],
+    where: {
+      gymId: {
+        [Op.eq]: gymId
+      }
+    }
+  })
+
+  for (let notification of notifications) {
+    bot.telegram.sendMessage(notification.User.tId, `Psst.. Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${moment.unix(starttime).format('H:mm')}*.`, {parse_mode: 'Markdown', disable_web_page_preview: true})
+  }
+}
+
 module.exports = AddRaidWizard
