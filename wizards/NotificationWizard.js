@@ -121,7 +121,9 @@ var NotificationWizard = function () {
         if (existingNotification) {
           ctx.session.existingNotificationId = existingNotification.id
           message = `Wil je je notificaties uitzetten van ${gym[0]}?`
-        }
+        } else {
+		  ctx.session.existingNotificationId = null
+		}
 
         return ctx.replyWithMarkdown(message, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
