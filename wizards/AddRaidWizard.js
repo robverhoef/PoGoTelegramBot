@@ -276,15 +276,16 @@ function AddRaidWizard (bot) {
               return ctx.scene.leave()
             })
         }
-
-        await sendNotifications(ctx, bot)
-
         // send updated list to group
         let out = await listRaids(`Raid bij ${ctx.session.newraid.gymname} toegevoegd door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
+
         if (out === null) {
           return ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
+        // show alert to subscribed users of this gym
+        await sendNotifications(ctx, bot)
+
         ctx.session.participateOptions = ['Ja', 'Nee']
         return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
           .then(() => {
