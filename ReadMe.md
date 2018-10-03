@@ -17,8 +17,8 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * join a raid
 * cancel raid participation
 * show the users who will participate in a raid, including the total number of accounts 
-* add gyms (admins only)
-* change gym properties (admins only)
+* add gyms or change gym properties (admins only)
+* add or modify raidbosses (admins only)
 
 ## Features
 
@@ -29,8 +29,8 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * Keeps track of the number of accounts per raid
 * Allow multiple accounts per user (…a user might bring some extra friends to the raid)
 * All users are known and linked which enables quick communication when a situation changes
-* Only group admins can add or modify gyms
-
+* Only group admins can add or modify gyms and raidbosses
+* Personal and group statistics (who is the most active player, the most reported gym, etc)
 
 ## Requirements
 
@@ -40,12 +40,8 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 ## ToDo
 
 * I18n; it is currently Dutch only
-* Enable multiple raid start times for bigger groups
-* Admins can remove gyms
-* Sessions will be persistent (db). Sessions are now in memory (not good for graceful restarts)
-* Code clean-up, add some more inline documentation
 * Add code tests
-* ?
+* Make timezones configurable, currently using Europe/Amsterdam
 
 ## Install
 
@@ -68,6 +64,7 @@ You will need the Telegram group ID. To obtain this ID;
 * add the bot to a (super)group
 * enter /whoisthebot @yourbotname
 * Check the output in the terminal screen and look for the chat id. When using a supergroup it is likely to start with -100…
+* Configure ngrok to listen to the port your bot is running on
 
 Copy the config/config_example.env to config/config.json.  
 Edit config/config.json to set your database settings.
