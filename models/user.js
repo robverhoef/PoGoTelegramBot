@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
     tGroupID: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN
     }
   }, {tableName: 'users'})
   User.associate = function (models) {

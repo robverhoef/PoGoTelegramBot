@@ -141,11 +141,21 @@ async function showMainMenu (ctx, user) {
   btns.push(`Een raid wijzigen`)
   btns.push(`Vind een gymlocatie`)
 
-  // admin only:
-  const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
-
+  // group admins:
+  let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+  // or marked admin from database
+  let dbAdmin = await models.User.find({
+    where: {
+      tId: {
+        [Op.eq]: user.id
+      },
+      [Op.and]: {
+        isAdmin: true
+      }
+    }
+  })
   for (let a = 0; a < admins.length; a++) {
-    if (admins[a].user.id === user.id) {
+    if ((admins[a].user.id === user.id) || dbAdmin !== null) {
       btns.push(`Een gym toevoegen`)
       btns.push(`Een gym wijzigen`)
       btns.push(`Een raidboss toevoegen`)
