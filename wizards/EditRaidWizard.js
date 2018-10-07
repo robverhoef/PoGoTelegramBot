@@ -75,10 +75,10 @@ function EditRaidWizard (bot) {
         // Catch gym not found errors…
         if (selectedraid === null) {
           return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
-          .then(() => {
-            ctx.session = {}
-            return ctx.scene.leave()
-          })
+            .then(() => {
+              ctx.session = {}
+              return ctx.scene.leave()
+            })
         }
 
         if (selectedraid.id === 0) {

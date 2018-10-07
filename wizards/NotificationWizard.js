@@ -122,8 +122,8 @@ var NotificationWizard = function () {
           ctx.session.existingNotificationId = existingNotification.id
           message = `Wil je je notificaties uitzetten van ${gym[0]}?`
         } else {
-		  ctx.session.existingNotificationId = null
-		}
+          ctx.session.existingNotificationId = null
+        }
 
         return ctx.replyWithMarkdown(message, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
@@ -142,7 +142,7 @@ var NotificationWizard = function () {
       let gym = ctx.session.selectedGym
       let userId = ctx.session.userId
 
-      //save new
+      // save new
       if (!ctx.session.existingNotificationId) {
         let notification = models.Notification.build({
           gymId: gym[1],
@@ -157,9 +157,8 @@ var NotificationWizard = function () {
         }
         return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende gym: ${gym[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
-      }
-      //remove old
-      else {
+      } else {
+        // remove old
         try {
           await models.Notification.destroy({
             where: {
