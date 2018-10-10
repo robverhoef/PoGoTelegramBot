@@ -177,9 +177,9 @@ function AddRaidWizard (bot) {
       let message = ctx.update.message.text.trim()
       let start1
       if (message === 'x' || message === 'X') {
-        // default starttime of 15 before endtime or right now, when time is short:
+        // default starttime of 30 before endtime or right now, when time is short:
         let start1time = moment.unix(endtime)
-        start1time.subtract(15, 'minutes')
+        start1time.subtract(30, 'minutes')
         if (start1time < moment()) {
           start1time = moment()
         }
