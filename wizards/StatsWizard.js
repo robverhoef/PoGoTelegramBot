@@ -350,8 +350,8 @@ var StatsWizard = function () {
         `Deze week tot nu toe`,
         `Deze maand tot nu toe`,
         `Dit jaar tot nu toe`,
-        `Sinds de laatste EX pasjes ${dates.lastExwaveDate.format('MM-DD-YYYY')} tot vandaag`,
-        `Sinds de vorige EX pasjes ${dates.secondToLastExwaveDate.format('MM-DD-YYYY')} tot ${dates.lastExwaveDate.format('MM-DD-YYYY')}`
+        `EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY')} tot vandaag`,
+        `EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY')}`
       ]
 
       return ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
