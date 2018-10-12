@@ -6,6 +6,7 @@ var models = require('../models')
 const moment = require('moment-timezone')
 const {Markup} = require('telegraf')
 const Sequelize = require('sequelize')
+const lastExRaidPassDate = require('../util/lastExRaidPassDate')
 const Op = Sequelize.Op
 
 const personalTop = 10
@@ -98,10 +99,57 @@ async function processPersonalJoinedRaids (user, time) {
   return statMessage
 }
 
+async function processPersonalExRaidGyms (user, start, end) {
+  let raids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: start.unix()
+      },
+      [Op.and]: {
+        endtime: {
+          [Op.lt]: end.unix()
+        }
+      }
+    },
+    include: [
+      {
+        model: models.Gym,
+        where: {
+          'exRaidTrigger': true
+        }
+      },
+      {
+        model: models.Raiduser,
+        where: {
+          'uid': user.id
+        }
+      }
+    ]
+  })
+  let statMessage = ''
+  if (raids.length > 0) {
+    statMessage += `Totaal keer aangemeld voor raids: *${raids.length}* \n`
+    let joinedRaids = sortRaidsOnGymcount(raids)
+    if (joinedRaids.length > 0) {
+      statMessage += `_Jouw bezochte EX Raid Gyms:_\n`
+    }
+    for (var i = 0; i < joinedRaids.length; i++) {
+      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}x bezocht*\n`
+    }
+  }
+  return statMessage
+}
+
 async function determinePersonalStats (user, time) {
   let statMessage = ''
   statMessage += await processPersonalOwnRaids(user, time)
   statMessage += await processPersonalJoinedRaids(user, time)
+  return statMessage
+}
+
+async function determinePersonalExRaids (user, start, end) {
+  let statMessage = ''
+  statMessage += await processPersonalExRaidGyms(user, start, end)
   return statMessage
 }
 
@@ -119,7 +167,7 @@ function processRaidcount (raids) {
   return statMessage
 }
 
-function processRaidVsRaisusers (raids) {
+function processRaidVsRaidusers (raids, splice) {
   let gyms = {}
   let total = 0
   for (var a = 0; a < raids.length; a++) {
@@ -135,7 +183,8 @@ function processRaidVsRaisusers (raids) {
     total += totalRaid
   }
   let statMessage = ''
-  let gymcount = sortDictionaryOnValue(gyms).splice(0, globalTop)
+  let value = sortDictionaryOnValue(gyms)
+  let gymcount = splice ? value.splice(0, globalTop) : value
   if (gymcount.length > 0) {
     statMessage += `Totaal aantal aanmeldigen voor al deze raids: *${total}* \n`
     statMessage += `_De drukst bezochte gyms van deze periode waren:_\n`
@@ -150,7 +199,7 @@ function processRaidVsRaisusers (raids) {
 function processAllRaids (raids) {
   let statMessage = processRaidcount(raids)
 
-  statMessage += processRaidVsRaisusers(raids)
+  statMessage += processRaidVsRaidusers(raids, true)
 
   return statMessage
 }
@@ -234,6 +283,31 @@ async function determineGlobalStats (time) {
   return statMessage
 }
 
+async function determineGlobalExRaids (start, end) {
+  let raids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: start.unix()
+      },
+      [Op.and]: {
+        endtime: {
+          [Op.lt]: end.unix()
+        }
+      }
+    },
+    include: [
+      {
+        model: models.Gym,
+        where: {
+          'exRaidTrigger': true
+        }
+      }, models.Raiduser]
+  })
+  let statMessage = processRaidVsRaidusers(raids, false)
+
+  return statMessage
+}
+
 function determineChosenTime (chosenTime) {
   let starttime = moment()
   let time
@@ -268,11 +342,16 @@ var StatsWizard = function () {
       if (ctx.session.chosenStat === -1) {
         return ctx.replyWithMarkdown(`Hier ging iets niet goed…\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
       }
+
+      let dates = await lastExRaidPassDate()
+
       ctx.session.periodbtns = [
         `Vandaag`,
         `Deze week tot nu toe`,
         `Deze maand tot nu toe`,
-        `Dit jaar tot nu toe`
+        `Dit jaar tot nu toe`,
+        `EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY')} tot vandaag`,
+        `EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY')}`
       ]
 
       return ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
@@ -283,20 +362,39 @@ var StatsWizard = function () {
       let chosenStat = ctx.session.chosenStat
       let chosenTime = ctx.session.periodbtns.indexOf(ctx.update.message.text)
 
-      let time = determineChosenTime(chosenTime)
-
       let statMessage = ''
-      if (chosenStat === 0) {
-        statMessage = await determinePersonalStats(ctx.from, time)
-      }
-      if (chosenStat === 1) {
-        statMessage = await determineGlobalStats(time)
+      if (chosenTime < 4) {
+        let time = determineChosenTime(chosenTime)
+        if (chosenStat === 0) {
+          statMessage = await determinePersonalStats(ctx.from, time)
+        }
+        if (chosenStat === 1) {
+          statMessage = await determineGlobalStats(time)
+        }
+        statMessage = `*Statistieken vanaf ${moment.unix(time).format('DD-MM-YYYY')}*\n\n` + statMessage
+      } else { //ex raid stats
+        let start
+        let end
+        let dates = await lastExRaidPassDate()
+        if (chosenTime === 4) {
+          start = dates.lastExwaveDate
+          end = moment()
+        }
+        if (chosenTime === 5) {
+          start = dates.secondToLastExwaveDate
+          end = dates.lastExwaveDate
+        }
+        if (chosenStat === 0) {
+          statMessage = await determinePersonalExRaids(ctx.from, start, end)
+        }
+        if (chosenStat === 1) {
+          statMessage = await determineGlobalExRaids(start, end)
+        }
+        statMessage = `*EX Raid Gym Statistieken van ${start.format('DD-MM-YYYY')} tot ${end.format('DD-MM-YYYY')}:*\n\n` + statMessage
       }
 
       if (statMessage === '') {
         statMessage = 'Er konden geen statistieken worden bepaald!'
-      } else {
-        statMessage = `*Statistieken vanaf ${moment.unix(time).format('DD-MM-YYYY')}*\n\n` + statMessage
       }
 
       let message = `${statMessage}\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`
