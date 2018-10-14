@@ -185,20 +185,21 @@ function processRaidVsRaidusers (raids, countAccounts, splice) {
   let filteredRaids = filterRaidsOnViability(raids)
 
   let raidTotals = getGymcounts(filteredRaids, raid => 1)
-  let subscribedTotals = getGymcounts(filteredRaids, raid => raid.Raidusers.length)
-  let accountTotals = getGymcounts(filteredRaids, raid => {
+  let countMethod = !countAccounts ? raid => raid.Raidusers.length : raid => {
     let totals = 0
     for (const raiduser of raid.Raidusers) {
       totals += raiduser.accounts
     }
     return totals
-  })
+  }
+
+  let {gyms, total} = getGymcounts(filteredRaids, countMethod)
 
   let statMessage = ''
-  let value = sortDictionaryOnValue(countAccounts ? accountTotals.gyms : subscribedTotals.gyms)
+  let value = sortDictionaryOnValue(gyms)
   let gymcount = splice ? value.splice(0, globalTop) : value
   if (gymcount.length > 0) {
-    statMessage += `Totaal aantal ${countAccounts ? 'accounts' : 'aanmeldigen'} voor al deze raids: *${countAccounts ? accountTotals.total : subscribedTotals.total}* \n`
+    statMessage += `Totaal aantal ${countAccounts ? 'accounts' : 'aanmeldigen'} voor al deze raids: *${total}* \n`
     statMessage += `_De drukst bezochte gyms van deze periode waren:_\n`
     for (let i = 0; i < gymcount.length; i++) {
       statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${countAccounts ? ' accounts' : ' aanmeldingen'} ${`in ${raidTotals.gyms[gymcount[i][0]]} raids`}*\n`
