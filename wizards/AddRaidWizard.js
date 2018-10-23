@@ -186,13 +186,15 @@ function AddRaidWizard (bot) {
         start1 = start1time.unix()
       } else {
         start1 = inputTime(message)
+        let defaultError = `\nGeef de tijd tussen *${starttime.format('HH:mm')}* en 5 minuten voor *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten\nProbeer het nog eens…`
         if (start1 === false) {
-          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. Geef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}*  of vul een *x* in om deze leeg te laten`)
-          // .then(() => ctx.wizard.back())
+          return ctx.replyWithMarkdown(`Dit is geen geldige tijd. ${defaultError}`)
         }
         if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
-          return ctx.replyWithMarkdown(`De starttijd is niet geldig. \nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten\nProbeer het nog eens…`)
-          // .then(() => ctx.wizard.back())
+          return ctx.replyWithMarkdown(`De starttijd is niet geldig. ${defaultError}`)
+        }
+        if (moment.unix(endtime).diff(moment.unix(start1)) < 5) {
+          return ctx.replyWithMarkdown(`De starttijd is te kort op de eindtijd om de raid te kunnen spelen. ${defaultError}`)
         }
       }
 

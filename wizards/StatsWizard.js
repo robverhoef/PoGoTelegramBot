@@ -56,7 +56,7 @@ async function processPersonalOwnRaids (user, time) {
   let statMessage = ''
   if (ownraids.length > 0) {
     statMessage += `Totaal aantal raids door jou gemeld: *${ownraids.length}* \n`
-    let ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
+    let ownedRaids = sortRaidsOnGymcount(ownraids).splice(0, personalTop)
     if (ownedRaids.length > 0) {
       statMessage += `_Jouw meest gemelde gyms:_\n`
     }
@@ -64,6 +64,22 @@ async function processPersonalOwnRaids (user, time) {
       statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}x gemeld*\n`
     }
     statMessage += '\n'
+  }
+  return statMessage
+}
+
+function processPersonalRaids (raids, splice) {
+  let statMessage = ''
+  if (raids.length > 0) {
+    statMessage += `Totaal keer aangemeld voor raids: *${raids.length}* \n`
+    let gymcount = sortRaidsOnGymcount(raids)
+    let joinedRaids = splice ? gymcount.splice(0, personalTop) : gymcount
+    if (joinedRaids.length > 0) {
+      statMessage += `_Jouw meest bezochte gyms:_\n`
+    }
+    for (var i = 0; i < joinedRaids.length; i++) {
+      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}x bezocht*\n`
+    }
   }
   return statMessage
 }
@@ -85,18 +101,7 @@ async function processPersonalJoinedRaids (user, time) {
       }
     ]
   })
-  let statMessage = ''
-  if (raids.length > 0) {
-    statMessage += `Totaal keer aangemeld voor raids: *${raids.length}* \n`
-    let joinedRaids = sortRaidsOnGymcount(raids).slice(0, personalTop)
-    if (joinedRaids.length > 0) {
-      statMessage += `_Jouw meest bezochte gyms:_\n`
-    }
-    for (var i = 0; i < joinedRaids.length; i++) {
-      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}x bezocht*\n`
-    }
-  }
-  return statMessage
+  return processPersonalRaids(raids, true)
 }
 
 async function processPersonalExRaidGyms (user, start, end) {
@@ -126,18 +131,8 @@ async function processPersonalExRaidGyms (user, start, end) {
       }
     ]
   })
-  let statMessage = ''
-  if (raids.length > 0) {
-    statMessage += `Totaal keer aangemeld voor raids: *${raids.length}* \n`
-    let joinedRaids = sortRaidsOnGymcount(raids)
-    if (joinedRaids.length > 0) {
-      statMessage += `_Jouw bezochte EX Raid Gyms:_\n`
-    }
-    for (var i = 0; i < joinedRaids.length; i++) {
-      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}x bezocht*\n`
-    }
-  }
-  return statMessage
+
+  return processPersonalRaids(raids, false)
 }
 
 async function determinePersonalStats (user, time) {
@@ -167,13 +162,14 @@ function processRaidcount (raids) {
   return statMessage
 }
 
-function processRaidVsRaidusers (raids, splice) {
+function getGymcounts (raids, countMethod) {
   let gyms = {}
   let total = 0
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
     let count = gyms[key]
-    let totalRaid = raids[a].Raidusers.length
+    let totalRaid = countMethod(raids[a])
+
     if (!count) {
       count = totalRaid
     } else {
@@ -182,24 +178,75 @@ function processRaidVsRaidusers (raids, splice) {
     gyms[key] = count
     total += totalRaid
   }
+  return {gyms, total}
+}
+
+function processRaidVsRaidusers (raids, countAccounts, splice) {
+  let filteredRaids = filterRaidsOnViability(raids)
+
+  let raidTotals = getGymcounts(filteredRaids, raid => 1)
+  let countMethod = !countAccounts ? raid => raid.Raidusers.length : raid => {
+    let totals = 0
+    for (const raiduser of raid.Raidusers) {
+      totals += raiduser.accounts
+    }
+    return totals
+  }
+
+  let {gyms, total} = getGymcounts(filteredRaids, countMethod)
+
   let statMessage = ''
   let value = sortDictionaryOnValue(gyms)
   let gymcount = splice ? value.splice(0, globalTop) : value
   if (gymcount.length > 0) {
-    statMessage += `Totaal aantal aanmeldigen voor al deze raids: *${total}* \n`
+    statMessage += `Totaal aantal ${countAccounts ? 'accounts' : 'aanmeldigen'} voor al deze raids: *${total}* \n`
     statMessage += `_De drukst bezochte gyms van deze periode waren:_\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}x bezocht*\n`
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${countAccounts ? ' accounts' : ' aanmeldingen'} ${`in ${raidTotals.gyms[gymcount[i][0]]} raids`}*\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
+function filterRaidsOnViability (raids) {
+  let viableRaids = []
+  for (const raid of raids) {
+    //No raidusers? dont count
+    if (raid.Raidusers.length === 0) {
+      continue
+    }
+
+    //if raidboss is unknown, count it anyways:
+    if (!raid.Raidboss) {
+      viableRaids.push(raid)
+      continue
+    } else {
+      //get the first number of accounts and compare it!
+      let regex = /(\d)/g
+      let match = regex.exec(raid.Raidboss.accounts)
+      let minAccounts = match[1]
+      let totals = 0
+      for (const raiduser of raid.Raidusers) {
+        totals += raiduser.accounts
+      }
+
+      //count the raid if it has one less than the required minimum
+      if ((minAccounts - 1) <= totals) {
+        viableRaids.push(raid)
+      } else {
+        console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
+      }
+    }
+  }
+
+  return viableRaids
+}
+
 function processAllRaids (raids) {
   let statMessage = processRaidcount(raids)
 
-  statMessage += processRaidVsRaidusers(raids, true)
+  statMessage += processRaidVsRaidusers(raids, false, true)
 
   return statMessage
 }
@@ -222,7 +269,7 @@ function processRaidusers (raids) {
     }
   }
 
-  let userCount = sortDictionaryOnValue(users).slice(0, globalTop)
+  let userCount = sortDictionaryOnValue(users).splice(0, globalTop)
   if (userCount.length > 0) {
     statMessage += `_De top raiders van deze periode waren:_\n`
     for (let i = 0; i < userCount.length; i++) {
@@ -248,7 +295,7 @@ async function processRaidreporters (raids) {
     }
     reporters[reporterKey] = reporterCount
   }
-  let reporterCount = sortDictionaryOnValue(reporters).slice(0, globalTop)
+  let reporterCount = sortDictionaryOnValue(reporters).splice(0, globalTop)
   if (reporterCount.length > 0) {
     statMessage += `_De volgende helden hebben de meeste raids gemeld:_\n`
     for (let i = 0; i < reporterCount.length; i++) {
@@ -274,7 +321,7 @@ async function determineGlobalStats (time) {
         [Op.gt]: time
       }
     },
-    include: [models.Gym, models.Raiduser]
+    include: [models.Gym, models.Raiduser, models.Raidboss]
   })
   let statMessage = processAllRaids(raids)
   statMessage += processRaidusers(raids)
@@ -301,9 +348,9 @@ async function determineGlobalExRaids (start, end) {
         where: {
           'exRaidTrigger': true
         }
-      }, models.Raiduser]
+      }, models.Raiduser, models.Raidboss]
   })
-  let statMessage = processRaidVsRaidusers(raids, false)
+  let statMessage = processRaidVsRaidusers(raids, true, false)
 
   return statMessage
 }
@@ -350,8 +397,8 @@ var StatsWizard = function () {
         `Deze week tot nu toe`,
         `Deze maand tot nu toe`,
         `Dit jaar tot nu toe`,
-        `EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY')} tot vandaag`,
-        `EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY')}`
+        `EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY HH:mm')} tot vandaag`,
+        `EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY HH:mm')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY HH:mm')}`
       ]
 
       return ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
@@ -390,7 +437,7 @@ var StatsWizard = function () {
         if (chosenStat === 1) {
           statMessage = await determineGlobalExRaids(start, end)
         }
-        statMessage = `*EX Raid Gym Statistieken van ${start.format('DD-MM-YYYY')} tot ${end.format('DD-MM-YYYY')}:*\n\n` + statMessage
+        statMessage = `*EX Raid Statstieken van ${start.format('DD-MM-YYYY HH:mm')} tot ${end.format('DD-MM-YYYY HH:mm')}:*\n\n` + statMessage
       }
 
       if (statMessage === '') {
