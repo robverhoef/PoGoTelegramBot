@@ -397,8 +397,8 @@ var StatsWizard = function () {
         `Deze week tot nu toe`,
         `Deze maand tot nu toe`,
         `Dit jaar tot nu toe`,
-        `EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY')} tot vandaag`,
-        `EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY')}`
+        `EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY HH:mm')} tot vandaag`,
+        `EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY HH:mm')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY HH:mm')}`
       ]
 
       return ctx.replyWithMarkdown('Welke periode wil je inzien?', Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
@@ -437,7 +437,7 @@ var StatsWizard = function () {
         if (chosenStat === 1) {
           statMessage = await determineGlobalExRaids(start, end)
         }
-        statMessage = `*EX Raid Gym Statistieken van ${start.format('DD-MM-YYYY')} tot ${end.format('DD-MM-YYYY')}:*\n\n` + statMessage
+        statMessage = `*EX Raid Statstieken van ${start.format('DD-MM-YYYY HH:mm')} tot ${end.format('DD-MM-YYYY HH:mm')}:*\n\n` + statMessage
       }
 
       if (statMessage === '') {
