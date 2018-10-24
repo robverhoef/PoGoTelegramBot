@@ -82,7 +82,7 @@ var NotificationWizard = function () {
       message += '\n\n'
 
       return ctx.replyWithMarkdown(`*Je hebt momenteel op de volgende ${ctx.session.chosenNotificationString} notificaties ingesteld als er raids gemeld worden:*\n${message}
-Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationString} of juist afmelden? Dan gaan we deze eerst zoeken.\n
+Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleString} of juist afmelden? Dan gaan we deze eerst zoeken.\n
 *Voer een deel van de naam in, minimaal 2 tekens in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
