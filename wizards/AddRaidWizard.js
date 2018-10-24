@@ -9,6 +9,8 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
+const sendGymNotifications = require('../util/sendGymNotifications')
+const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -199,7 +201,7 @@ function AddRaidWizard (bot) {
       }
 
       ctx.session.newraid.start1 = start1
-      ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Kyogre* of *Level 5 ei*`)
+      ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Mewtwo* of *Level 5 ei*`)
         .then(() => ctx.wizard.next())
     },
     // step 5
@@ -285,8 +287,10 @@ function AddRaidWizard (bot) {
           return ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-        // show alert to subscribed users of this gym
-        await sendNotifications(ctx, bot)
+        // send alert to subscribed users of this Gym
+        await sendGyms(ctx, bot)
+        // send alert to subscribed users of the Raidboss
+        await sendRaidbosses(ctx, bot)
 
         ctx.session.participateOptions = ['Ja', 'Nee']
         return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
@@ -365,26 +369,25 @@ function AddRaidWizard (bot) {
   )
 }
 
-async function sendNotifications (ctx, bot) {
+async function sendGyms (ctx, bot) {
   let gymId = ctx.session.newraid.gymId
   let gymname = ctx.session.newraid.gymname
   let target = ctx.session.newraid.target
   let starttime = ctx.session.newraid.start1
 
-  let notifications = await models.Notification.findAll({
-    include: [
-      models.User
-    ],
-    where: {
-      gymId: {
-        [Op.eq]: gymId
-      }
-    }
-  })
+  await sendGymNotifications(bot, gymId, gymname, target, starttime)
+}
 
-  for (let notification of notifications) {
-    bot.telegram.sendMessage(notification.User.tId, `Psst.. Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${moment.unix(starttime).format('H:mm')}*.`, {parse_mode: 'Markdown', disable_web_page_preview: true})
+async function sendRaidbosses (ctx, bot) {
+  let raidbossId = ctx.session.newraid.bossid
+  if (!raidbossId) {
+    return
   }
+  let gymname = ctx.session.newraid.gymname
+  let target = ctx.session.newraid.target
+  let starttime = ctx.session.newraid.start1
+
+  await sendRaidbossNotifications(bot, raidbossId, gymname, target, starttime)
 }
 
 module.exports = AddRaidWizard

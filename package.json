@@ -12,7 +12,7 @@
     "dev": "./node_modules/.bin/forever --minUptime 1000 --spinSleepTime 500 -w --watchIgnore node_modules --watchIgnore logs -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
     "eslint": "eslint ./*.js ./models ./wizards ./util",
     "eslintfix": "eslint --fix ./*.js ./models ./wizards ./util",
-    "updatedb": "node_modules/.bin/sequelize db:migrate"
+    "dbupdate": "node_modules/.bin/sequelize db:migrate"
   },
   "author": "rob verhoef",
   "license": "MIT",
