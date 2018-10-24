@@ -48,7 +48,7 @@ function AddRaidbossWizard (bot) {
 
     // Handle recommended number of accounts
     async (ctx) => {
-      ctx.session.newboss.accounts = parseInt(ctx.update.message.text.trim())
+      ctx.session.newboss.accounts = ctx.update.message.text.trim()
       ctx.session.savebtns = ['Ja', 'Nee']
       ctx.replyWithMarkdown(`Raidboss: ${ctx.session.newboss.name}\nLevel: ${ctx.session.newboss.level}\nAanbevolen aantal accounts: ${ctx.session.newboss.accounts}\n\n*Opslaan?*`, Markup.keyboard(ctx.session.savebtns)
         .oneTime()
