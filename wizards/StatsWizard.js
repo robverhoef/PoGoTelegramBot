@@ -374,9 +374,9 @@ var StatsWizard = function () {
   return new WizardScene('stats-wizard',
     // Step 0: Get the info requested
     async (ctx) => {
-      ctx.session.notificatiesbtns = [`Mijn raid statistieken`, `Totale raid statistieken`]
+      ctx.session.statbtns = [`Mijn raid statistieken`, `Totale raid statistieken`]
 
-      return ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.keyboard(ctx.session.notificatiesbtns)
+      return ctx.replyWithMarkdown('Welke statistieken wil je inzien?', Markup.keyboard(ctx.session.statbtns)
         .oneTime()
         .resize()
         .extra()
@@ -385,7 +385,7 @@ var StatsWizard = function () {
     },
 
     async (ctx) => {
-      ctx.session.chosenStat = ctx.session.notificatiesbtns.indexOf(ctx.update.message.text)
+      ctx.session.chosenStat = ctx.session.statbtns.indexOf(ctx.update.message.text)
       if (ctx.session.chosenStat === -1) {
         return ctx.replyWithMarkdown(`Hier ging iets niet goed…\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
       }
