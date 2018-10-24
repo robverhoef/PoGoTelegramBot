@@ -9,6 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
+const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -131,7 +132,7 @@ function EditRaidWizard (bot) {
             break
           case 'target':
             ctx.session.editattr = 'target'
-            question = `*Hoe heet de nieuwe raidboss of ei?*\nBijvoorbeeld 'Kyogre' of 'Lvl 5 ei'`
+            question = `*Hoe heet de nieuwe raidboss of ei?*\nBijvoorbeeld 'Mewtwo' of 'Lvl 5 ei'`
             break
           case 'gym':
             ctx.session.editattr = 'gym'
@@ -236,6 +237,9 @@ function EditRaidWizard (bot) {
             )
             let out = await listRaids(`*Raid bij ${ctx.session.editraid.gymname} gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n`)
             bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+
+            await sendRaidbosses(ctx, bot)
+
             return ctx.replyWithMarkdown('Dankjewel.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           } catch (error) {
@@ -335,4 +339,16 @@ function EditRaidWizard (bot) {
     }
   )
 }
+async function sendRaidbosses (ctx, bot) {
+  let raidbossId = ctx.session.editraid.bossid
+  if (!raidbossId) {
+    return
+  }
+  let gymname = ctx.session.editraid.gymname
+  let target = ctx.session.editraid.target
+  let starttime = ctx.session.editraid.start1
+
+  await sendRaidbossNotifications(bot, raidbossId, gymname, target, starttime)
+}
+
 module.exports = EditRaidWizard

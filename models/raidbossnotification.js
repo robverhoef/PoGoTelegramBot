@@ -1,6 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  var Notification = sequelize.define('Notification', {
+  var RaidbossNotification = sequelize.define('RaidbossNotification', {
     id: {
       type: DataTypes.INTEGER.UNSIGNED,
       autoIncrement: true,
@@ -10,18 +10,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false
     },
-    gymId: {
+    raidbossId: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false
     }
-  }, {tableName: 'notifications'})
-  Notification.associate = function (models) {
-    models.Notification.belongsTo(models.Gym, {
+  }, {tableName: 'raidboss-notifications'})
+  RaidbossNotification.associate = function (models) {
+    models.RaidbossNotification.belongsTo(models.Raidboss, {
       onDelete: 'NO ACTION'
     })
-    models.Notification.belongsTo(models.User, {
+    models.RaidbossNotification.belongsTo(models.User, {
       onDelete: 'NO ACTION'
     })
   }
-  return Notification
+  return RaidbossNotification
 }
