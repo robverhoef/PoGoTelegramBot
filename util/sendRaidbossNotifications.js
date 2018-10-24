@@ -20,6 +20,6 @@ module.exports = async (bot, raidbossId, gymname, target, starttime) => {
   })
 
   for (let notification of notifications) {
-    bot.telegram.sendMessage(notification.User.tId, `Psst.. Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${moment.unix(starttime).format('H:mm')}*.`, {parse_mode: 'Markdown', disable_web_page_preview: true})
+    bot.telegram.sendMessage(notification.User.tId, `Hey.. Jij was toch geïnteresseerd in *${target}* raids? Er is er zojuist een toegevoegd bij *${gymname}* om *${moment.unix(starttime).format('H:mm')}*.`, {parse_mode: 'Markdown', disable_web_page_preview: true})
   }
 }
