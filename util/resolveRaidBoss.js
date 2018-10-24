@@ -24,8 +24,13 @@ module.exports = async (bossname) => {
       if (boss) {
        return {raidboss: boss}
       } else {
-      // last resort; try soundex query in DB
-
+      // last resort; try soundex
+      // default soundex query in DB is not sufficient; meditite and mewtwo are he same…
+        sequelize.query('SELECT * FROM raidbosses WHERE SOUNDEX('+bossname+') = SOUNDEX(raidbosses.name)', { model: models.Raidboss }).then(bosses => {
+            if(bosses.length > 0) {
+              return {raidboss: bosses[0]}
+            }
+        })
 
     }
 }
