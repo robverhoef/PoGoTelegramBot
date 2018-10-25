@@ -12,8 +12,8 @@
     "dev": "./node_modules/.bin/forever --minUptime 1000 --spinSleepTime 500 -w --watchIgnore node_modules --watchIgnore logs -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
     "eslint": "eslint ./*.js ./models ./wizards ./util",
     "eslintfix": "eslint --fix ./*.js ./models ./wizards ./util",
-    "dbupdate": "node_modules/.bin/sequelize db:migrate"
-
+    "dbupdate": "node_modules/.bin/sequelize db:migrate",
+    "test": "cross-env NODE_ENV=test node_modules/.bin/mocha --reporter spec --exit tests"
   },
   "author": "rob verhoef",
   "license": "MIT",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "cross-env": "^5.2.0",
     "eslint": "^5.4.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.14.0",

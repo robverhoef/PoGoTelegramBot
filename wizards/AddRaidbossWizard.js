@@ -4,6 +4,7 @@
 const WizardScene = require('telegraf/scenes/wizard')
 const {Markup} = require('telegraf')
 var models = require('../models')
+const metaphone = require('metaphone')
 
 function AddRaidbossWizard (bot) {
   return new WizardScene('add-raidboss-wizard',
@@ -67,8 +68,10 @@ function AddRaidbossWizard (bot) {
         let newboss = models.Raidboss.build({
           name: ctx.session.newboss.name,
           level: ctx.session.newboss.level,
-          accounts: ctx.session.newboss.accounts
+          accounts: ctx.session.newboss.accounts,
+          metaphone: metaphone(ctx.session.newboss.name)
         })
+        console.log('new boss', newboss)
         try {
           await newboss.save()
         } catch (error) {

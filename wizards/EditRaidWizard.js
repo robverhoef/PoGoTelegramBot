@@ -10,6 +10,7 @@ const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
 const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
+const resolveRaidBoss = require('../util/resolveRaidBoss')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -176,11 +177,7 @@ function EditRaidWizard (bot) {
       if (key === 'target') {
         const target = ctx.update.message.text.trim()
         // let's see if we can find the raidboss…
-        let boss = await models.Raidboss.find({
-          where: {
-            name: target
-          }
-        })
+        const boss = await resolveRaidBoss(target)
         if (boss !== null) {
           ctx.session.editraid.target = boss.name
           ctx.session.editraid.bossid = boss.id
