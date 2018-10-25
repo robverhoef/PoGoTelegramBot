@@ -15,7 +15,6 @@ function parseDateString (element) {
 
 /**
 * Gets the latest EX Raid passes waves from https://www.p337.info/pokemongo/pages/ex-invites/
-*
 */
 module.exports = async () => {
   if (!lastExwaveDate || moment().add(-refreshRate, 'minutes').unix() > lastExwaveParseCheck) {

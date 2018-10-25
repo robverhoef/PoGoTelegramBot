@@ -28,6 +28,9 @@ function sortRaidsOnGymcount (raids) {
   let gyms = {}
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
+    if (raids[a].Gym.exRaidTrigger) {
+      key += ' 💳'
+    }
     let count = gyms[key]
     if (!count) {
       count = 1
