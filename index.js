@@ -43,7 +43,7 @@ function cancelConversation (ctx) {
   // Since something might be failing… reset session
   ctx.session = {}
   return ctx.scene.leave()
-    .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage')))
+    .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra()))
 }
 
 // Setup for all wizards
@@ -87,6 +87,10 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AddNotificationWizard = require('./wizards/NotificationWizard')
+const addNotificationWizard = AddNotificationWizard(bot)
+addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -97,7 +101,8 @@ const stage = new Stage([
   editGymWizard,
   addRaidbossWizard,
   editRaidbossWizard,
-  statsWizard
+  statsWizard,
+  addNotificationWizard
 ])
 
 /**
@@ -138,20 +143,30 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_edit_raid'))
   btns.push(ctx.i18n.t('btn_find_gym'))
 
-  // admin only:
-  const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
-
+  // group admins:
+  let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+  // or marked admin from database
+  let dbAdmin = await models.User.find({
+    where: {
+      tId: {
+        [Op.eq]: user.id
+      },
+      [Op.and]: {
+        isAdmin: true
+      }
+    }
+  })
   for (let a = 0; a < admins.length; a++) {
-    if (admins[a].user.id === user.id) {
+    if (admins[a].user.id === user.id || dbAdmin !== null) {
       btns.push(ctx.i18n.t('btn_add_gym'))
       btns.push(ctx.i18n.t('btn_edit_gym'))
       btns.push(ctx.i18n.t('btn_add_boss'))
       btns.push(ctx.i18n.t('btn_edit_boss'))
-
       break
     }
   }
 
+  btns.push(ctx.i18n.t('btn_notifications'))
   btns.push(ctx.i18n.t('btn_stats'))
 
   return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.keyboard(
@@ -181,7 +196,6 @@ bot.command('/start', async (ctx) => {
 
 // set cancel command here too, not only in wizards
 bot.command('cancel', (ctx) => cancelConversation(ctx))
-
 bot.hears(match('btn_join_raid'), Stage.enter('join-raid-wizard'))
 bot.hears(match('btn_exit_raid'), Stage.enter('exit-raid-wizard'))
 bot.hears(match('btn_add_raid'), Stage.enter('add-raid-wizard'))
@@ -192,6 +206,7 @@ bot.hears(match('btn_edit_gym'), Stage.enter('edit-gym-wizard'))
 bot.hears(match('btn_add_boss'), Stage.enter('add-raidboss-wizard'))
 bot.hears(match('btn_edit_boss'), Stage.enter('edit-raidboss-wizard'))
 bot.hears(match('btn_stats'), Stage.enter('stats-wizard'))
+bot.hears(match('btn_notifications'), Stage.enter('notification-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode

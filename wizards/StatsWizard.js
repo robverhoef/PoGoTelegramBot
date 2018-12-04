@@ -6,6 +6,7 @@ var models = require('../models')
 const moment = require('moment-timezone')
 const {Markup} = require('telegraf')
 const Sequelize = require('sequelize')
+const lastExRaidPassDate = require('../util/lastExRaidPassDate')
 const Op = Sequelize.Op
 
 const personalTop = 10
@@ -27,6 +28,9 @@ function sortRaidsOnGymcount (raids) {
   let gyms = {}
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
+    if (raids[a].Gym.exRaidTrigger) {
+      key += ' 💳'
+    }
     let count = gyms[key]
     if (!count) {
       count = 1
@@ -54,7 +58,7 @@ async function processPersonalOwnRaids (user, time, ctx) {
 
   let statMessage = ''
   if (ownraids.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_stats_your_total_raids_reported', {ownraids: ownraids})} \n`
+    statMessage += `${ctx.i18n.t('stats_your_total_raids_reported', {ownraids: ownraids})} \n`
     let ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
     if (ownedRaids.length > 0) {
       statMessage += `_${ctx.i18n.t('stats_your_most_reported_gyms')}:_\n`
@@ -63,6 +67,22 @@ async function processPersonalOwnRaids (user, time, ctx) {
       statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
     }
     statMessage += '\n'
+  }
+  return statMessage
+}
+
+function processPersonalRaids (raids, splice, ctx) {
+  let statMessage = ''
+  if (raids.length > 0) {
+    statMessage += `${ctx.i18n.t('stats_total_times_joined') + ': *' + raids.length + '* \n'}`
+    let gymcount = sortRaidsOnGymcount(raids)
+    let joinedRaids = splice ? gymcount.splice(0, personalTop) : gymcount
+    if (joinedRaids.length > 0) {
+      statMessage += `_${ctx.i18n.t('stats_your_most_visited_gyms')}:_\n`
+    }
+    for (var i = 0; i < joinedRaids.length; i++) {
+      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}${ctx.i18n.t('stats_times_visited')}*\n`
+    }
   }
   return statMessage
 }
@@ -84,24 +104,49 @@ async function processPersonalJoinedRaids (user, time, ctx) {
       }
     ]
   })
-  let statMessage = ''
-  if (raids.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_total_times_joined')}: *${raids.length}* \n`
-    let joinedRaids = sortRaidsOnGymcount(raids).slice(0, personalTop)
-    if (joinedRaids.length > 0) {
-      statMessage += `_${ctx.i18n.t('stats_your_most_visited_gyms')}:_\n`
-    }
-    for (var i = 0; i < joinedRaids.length; i++) {
-      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}${ctx.i18n.t('stats_times_visted')}*\n`
-    }
-  }
-  return statMessage
+  return processPersonalRaids(raids, true, ctx)
+}
+
+async function processPersonalExRaidGyms (user, start, end, ctx) {
+  let raids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: start.unix()
+      },
+      [Op.and]: {
+        endtime: {
+          [Op.lt]: end.unix()
+        }
+      }
+    },
+    include: [
+      {
+        model: models.Gym,
+        where: {
+          'exRaidTrigger': true
+        }
+      },
+      {
+        model: models.Raiduser,
+        where: {
+          'uid': user.id
+        }
+      }
+    ]
+  })
+  return processPersonalRaids(raids, false, ctx)
 }
 
 async function determinePersonalStats (user, time, ctx) {
   let statMessage = ''
   statMessage += await processPersonalOwnRaids(user, time, ctx)
   statMessage += await processPersonalJoinedRaids(user, time, ctx)
+  return statMessage
+}
+
+async function determinePersonalExRaids (user, start, end, ctx) {
+  let statMessage = ''
+  statMessage += await processPersonalExRaidGyms(user, start, end, ctx)
   return statMessage
 }
 
@@ -112,20 +157,21 @@ function processRaidcount (raids, ctx) {
     statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: *${raids.length}* \n`
     statMessage += `_${ctx.i18n.t('stats_most_reported_gyms')}:_\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t('stats_times_visted')}*\n`
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t('stats_times_visited')}*\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-function processRaidVsRaisusers (raids, ctx) {
+function getGymcounts (raids, countMethod) {
   let gyms = {}
   let total = 0
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
     let count = gyms[key]
-    let totalRaid = raids[a].Raidusers.length
+    let totalRaid = countMethod(raids[a])
+
     if (!count) {
       count = totalRaid
     } else {
@@ -134,24 +180,77 @@ function processRaidVsRaisusers (raids, ctx) {
     gyms[key] = count
     total += totalRaid
   }
+  return {gyms, total}
+}
+
+function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
+  let filteredRaids = filterRaidsOnViability(raids)
+
+  let raidTotals = getGymcounts(filteredRaids, raid => 1)
+  let countMethod = !countAccounts ? raid => raid.Raidusers.length : raid => {
+    let totals = 0
+    for (const raiduser of raid.Raidusers) {
+      totals += raiduser.accounts
+    }
+    return totals
+  }
+
+  let {gyms, total} = getGymcounts(filteredRaids, countMethod)
+
   let statMessage = ''
-  let gymcount = sortDictionaryOnValue(gyms).splice(0, globalTop)
+  let value = sortDictionaryOnValue(gyms)
+  let gymcount = splice ? value.splice(0, globalTop) : value
   if (gymcount.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_total_joins_for_these_raids')}: *${total}* \n`
+    if (countAccounts) {
+      statMessage += `${ctx.i18n.t('stats_total_accounts_for_these_raids')}: *${total}* \n`
+    } else {
+      statMessage += `${ctx.i18n.t('stats_total_joins_for_these_raids')}: *${total}* \n`
+    }
     statMessage += `_${ctx.i18n.t('stats_busiest_gyms_in_period')}:_\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t('stats_times_visted')}*\n`
+      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]} ${countAccounts ? ctx.i18n.t('stats_accounts') : ctx.i18n.t('stats_joins')} ${`${ctx.i18n.t('stats_in')} ${raidTotals.gyms[gymcount[i][0]]} raids`}*\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
+function filterRaidsOnViability (raids) {
+  let viableRaids = []
+  for (const raid of raids) {
+    // No raidusers? dont count
+    if (raid.Raidusers.length === 0) {
+      continue
+    }
+
+    // if raidboss is unknown, count it anyways:
+    if (!raid.Raidboss) {
+      viableRaids.push(raid)
+      continue
+    } else {
+      // get the first number of accounts and compare it!
+      let regex = /(\d)/g
+      let match = regex.exec(raid.Raidboss.accounts)
+      let minAccounts = match[1]
+      let totals = 0
+      for (const raiduser of raid.Raidusers) {
+        totals += raiduser.accounts
+      }
+
+      // count the raid if it has one less than the required minimum
+      if ((minAccounts - 1) <= totals) {
+        viableRaids.push(raid)
+      } else {
+        console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
+      }
+    }
+  }
+  return viableRaids
+}
+
 function processAllRaids (raids, ctx) {
   let statMessage = processRaidcount(raids, ctx)
-
-  statMessage += processRaidVsRaisusers(raids, ctx)
-
+  statMessage += processRaidVsRaidusers(raids, false, true, ctx)
   return statMessage
 }
 
@@ -173,7 +272,7 @@ function processRaidusers (raids, ctx) {
     }
   }
 
-  let userCount = sortDictionaryOnValue(users).slice(0, globalTop)
+  let userCount = sortDictionaryOnValue(users).splice(0, globalTop)
   if (userCount.length > 0) {
     statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
     for (let i = 0; i < userCount.length; i++) {
@@ -199,7 +298,7 @@ async function processRaidreporters (raids, ctx) {
     }
     reporters[reporterKey] = reporterCount
   }
-  let reporterCount = sortDictionaryOnValue(reporters).slice(0, globalTop)
+  let reporterCount = sortDictionaryOnValue(reporters).splice(0, globalTop)
   if (reporterCount.length > 0) {
     statMessage += `_${ctx.i18n.t('stats_heroes_most_reported')}:_\n`
     for (let i = 0; i < reporterCount.length; i++) {
@@ -225,11 +324,36 @@ async function determineGlobalStats (time, ctx) {
         [Op.gt]: time
       }
     },
-    include: [models.Gym, models.Raiduser]
+    include: [models.Gym, models.Raiduser, models.Raidboss]
   })
   let statMessage = processAllRaids(raids, ctx)
   statMessage += processRaidusers(raids, ctx)
   statMessage += await processRaidreporters(raids, ctx)
+
+  return statMessage
+}
+
+async function determineGlobalExRaids (start, end, ctx) {
+  let raids = await models.Raid.findAll({
+    where: {
+      endtime: {
+        [Op.gt]: start.unix()
+      },
+      [Op.and]: {
+        endtime: {
+          [Op.lt]: end.unix()
+        }
+      }
+    },
+    include: [
+      {
+        model: models.Gym,
+        where: {
+          'exRaidTrigger': true
+        }
+      }, models.Raiduser, models.Raidboss]
+  })
+  let statMessage = processRaidVsRaidusers(raids, true, false, ctx)
 
   return statMessage
 }
@@ -268,11 +392,16 @@ var StatsWizard = function () {
       if (ctx.session.chosenStat === -1) {
         return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong'), Markup.removeKeyboard().extra())
       }
+
+      let dates = await lastExRaidPassDate()
+
       ctx.session.periodbtns = [
         ctx.i18n.t('stats_today'),
         ctx.i18n.t('stats_this_week'),
         ctx.i18n.t('stats_this_month'),
-        ctx.i18n.t('stats_this_year')
+        ctx.i18n.t('stats_this_year'),
+        ctx.i18n.t('stats_expass_today', {dates: dates}),
+        ctx.i18n.t('stats_expass_prev_period', {dates: dates})
       ]
 
       return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_period_question'), Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
@@ -282,27 +411,44 @@ var StatsWizard = function () {
     async (ctx) => {
       let chosenStat = ctx.session.chosenStat
       let chosenTime = ctx.session.periodbtns.indexOf(ctx.update.message.text)
-
-      let time = determineChosenTime(chosenTime)
-
       let statMessage = ''
-      if (chosenStat === 0) {
-        statMessage = await determinePersonalStats(ctx.from, time, ctx)
-      }
-      if (chosenStat === 1) {
-        statMessage = await determineGlobalStats(time, ctx)
+      if (chosenTime < 4) {
+        let time = determineChosenTime(chosenTime)
+        if (chosenStat === 0) {
+          statMessage = await determinePersonalStats(ctx.from, time, ctx)
+        }
+        if (chosenStat === 1) {
+          statMessage = await determineGlobalStats(time, ctx)
+        }
+        statMessage = `*${ctx.i18n.t('stats_since', {
+          timestr: moment.unix(time).format('DD-MM-YYYY')
+        })}*\n\n` + statMessage
+      } else { // ex raid stats
+        let start
+        let end
+        let dates = await lastExRaidPassDate()
+        if (chosenTime === 4) {
+          start = dates.lastExwaveDate
+          end = moment()
+        }
+        if (chosenTime === 5) {
+          start = dates.secondToLastExwaveDate
+          end = dates.lastExwaveDate
+        }
+        if (chosenStat === 0) {
+          statMessage = await determinePersonalExRaids(ctx.from, start, end, ctx)
+        }
+        if (chosenStat === 1) {
+          statMessage = await determineGlobalExRaids(start, end, ctx)
+        }
+        statMessage = `*${ctx.i18n.t('stats_exraid_since', {timestr: start.format('DD-MM-YYYY HH:mm'), endtimestr: end.format('DD-MM-YYYY HH:mm')})}:*\n\n` + statMessage
       }
 
       if (statMessage === '') {
         statMessage = ctx.i18n.t('stats_no_stat_identified')
-      } else {
-        statMessage = `*${ctx.i18n.t('stats_since', {
-          timestr: moment.unix(time).format('DD-MM-YYYY')
-        })}*\n\n` + statMessage
       }
 
       let message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
-
       return ctx.replyWithMarkdown(message, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }

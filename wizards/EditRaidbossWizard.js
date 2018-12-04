@@ -6,6 +6,7 @@ const {Markup} = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const metaphone = require('metaphone')
 
 function EditRaidbossWizard (bot) {
   return new WizardScene('edit-raidboss-wizard',
@@ -137,7 +138,8 @@ function EditRaidbossWizard (bot) {
               {
                 name: ctx.session.editboss.name,
                 level: ctx.session.editboss.level,
-                accounts: ctx.session.editboss.accounts
+                accounts: ctx.session.editboss.accounts,
+                metaphone: metaphone(ctx.session.editboss.name)
               },
               {
                 where: {

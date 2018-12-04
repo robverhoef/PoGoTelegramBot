@@ -53,7 +53,6 @@ function JoinRaidWizard (bot) {
 
     async (ctx) => {
       // retrieve selected candidate  from session…
-
       let ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
       if (ind === -1) {
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_not_found'), Markup.removeKeyboard().extra())
@@ -75,7 +74,8 @@ function JoinRaidWizard (bot) {
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
-      const accounts = parseInt(ctx.update.message.text)
+      // some people manage to enter a NaN… so: || 1
+      const accounts = parseInt(ctx.update.message.text) || 1
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
 
       const user = ctx.from

@@ -26,7 +26,6 @@ function AddGymWizard (bot) {
         }
       })
       if (oldgyms.length > 0) {
-
         return ctx.replyWithMarkdown(ctx.i18n.t('gym_exists_warning'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }

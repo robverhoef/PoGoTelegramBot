@@ -46,7 +46,7 @@ module.exports = async (reason) => {
       out += `${raids[a].Gym.gymname}\n`
     }
     if (raids[a].Gym.exRaidTrigger) {
-      out += `ExRaid Trigger\n`
+      out += `💳 ExRaid Trigger\n`
     }
     const strtime = moment.unix(raids[a].start1)
     out += `Start: ${strtime.format('H:mm')} `

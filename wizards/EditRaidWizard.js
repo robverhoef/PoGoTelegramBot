@@ -9,6 +9,8 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
+const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
+const resolveRaidBoss = require('../util/resolveRaidBoss')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -37,7 +39,7 @@ function EditRaidWizard (bot) {
       ctx.session.raidcandidates = []
       for (var a = 0; a < raids.length; a++) {
         ctx.session.raidcandidates[a] = {
-          gymname: raids[a].Gym.gymname,
+          gymname: raids[a].Gym.gymname.trim(),
           id: raids[a].id,
           start1: raids[a].start1,
           endtime: raids[a].endtime,
@@ -65,13 +67,22 @@ function EditRaidWizard (bot) {
     async (ctx) => {
       // retrieve selected candidate from session…
       if (ctx.session.more !== true) {
-        let selectedraid
+        let selectedraid = null
         for (let i = 0; i < ctx.session.raidbtns.length; i++) {
           if (ctx.session.raidbtns[i] === ctx.update.message.text) {
             selectedraid = ctx.session.raidcandidates[i]
             break
           }
         }
+        // Catch gym not found errors…
+        if (selectedraid === null) {
+          return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+            .then(() => {
+              ctx.session = {}
+              return ctx.scene.leave()
+            })
+        }
+
         if (selectedraid.id === 0) {
           return ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra())
             .then(() => {
@@ -118,7 +129,7 @@ function EditRaidWizard (bot) {
             ctx.session.editattr = 'start1'
             let endtimestr = moment.unix(ctx.session.editraid.endtime).format('HH:mm')
             let start1str = moment.unix(ctx.session.editraid.endtime).subtract(45, 'minutes').format('HH:mm')
-            question = ctx.i18n.t('', {
+            question = ctx.i18n.t('edit_raid_question_starttime_range', {
               start1str: start1str,
               endtimestr: endtimestr
             })
@@ -169,11 +180,7 @@ function EditRaidWizard (bot) {
       if (key === 'target') {
         const target = ctx.update.message.text.trim()
         // let's see if we can find the raidboss…
-        let boss = await models.Raidboss.find({
-          where: {
-            name: target
-          }
-        })
+        const boss = await resolveRaidBoss(target)
         if (boss !== null) {
           ctx.session.editraid.target = boss.name
           ctx.session.editraid.bossid = boss.id
@@ -192,7 +199,7 @@ function EditRaidWizard (bot) {
 
     // step 4: do more or save?
     async (ctx) => {
-      let out = `${ctx.i18n.t('until')}: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ctx.i18n.t('edit_raidboss_overview_accounts') + ': ' + (ctx.session.editraid.accounts !== undefined ? ctx.session.editraid.accounts:'')  + '\n' : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
+      let out = `${ctx.i18n.t('until')}: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ctx.i18n.t('edit_raidboss_overview_accounts') + ': ' + (ctx.session.editraid.accounts !== undefined ? ctx.session.editraid.accounts : '') + '\n' : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
       ctx.session.savebtns = [
         ctx.i18n.t('edit_raidboss_btn_save_close'),
         ctx.i18n.t('edit_raid_edit_more'),
@@ -235,6 +242,7 @@ function EditRaidWizard (bot) {
               user: user
             }))
             bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+            await sendRaidbosses(ctx, bot)
             return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           } catch (error) {
@@ -336,4 +344,16 @@ function EditRaidWizard (bot) {
     }
   )
 }
+async function sendRaidbosses (ctx, bot) {
+  let raidbossId = ctx.session.editraid.bossid
+  if (!raidbossId) {
+    return
+  }
+  let gymname = ctx.session.editraid.gymname
+  let target = ctx.session.editraid.target
+  let starttime = ctx.session.editraid.start1
+
+  await sendRaidbossNotifications(bot, raidbossId, gymname, target, starttime)
+}
+
 module.exports = EditRaidWizard

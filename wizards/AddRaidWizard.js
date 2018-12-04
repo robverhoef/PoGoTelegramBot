@@ -9,6 +9,9 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
+const sendGymNotifications = require('../util/sendGymNotifications')
+const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
+const resolveRaidBoss = require('../util/resolveRaidBoss')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -41,7 +44,7 @@ function AddRaidWizard (bot) {
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
           ctx.session.gymcandidates.push([
-            candidates[i].gymname,
+            candidates[i].gymname.trim(),
             candidates[i].id
           ])
         }
@@ -61,6 +64,14 @@ function AddRaidWizard (bot) {
           selectedIndex = i
           break
         }
+      }
+      // Catch gym not found errors…
+      if (selectedIndex === -1) {
+        return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+          .then(() => {
+            ctx.session = {}
+            return ctx.scene.leave()
+          })
       }
       // User can't find the gym
 
@@ -167,9 +178,9 @@ function AddRaidWizard (bot) {
       let message = ctx.update.message.text.trim()
       let start1
       if (message === 'x' || message === 'X') {
-        // default starttime of 15 before endtime or right now, when time is short:
+        // default starttime of 30 before endtime or right now, when time is short:
         let start1time = moment.unix(endtime)
-        start1time.subtract(15, 'minutes')
+        start1time.subtract(30, 'minutes')
         if (start1time < moment()) {
           start1time = moment()
         }
@@ -182,8 +193,10 @@ function AddRaidWizard (bot) {
         if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
           return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')}))
         }
+        if (moment.unix(endtime).diff(moment.unix(start1)) < 5) {
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('invalid_time_range_too_early')}${ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')})}`)
+        }
       }
-
       ctx.session.newraid.start1 = start1
       ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'))
         .then(() => ctx.wizard.next())
@@ -192,11 +205,12 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       const target = ctx.update.message.text.trim()
       // let's see if we can find the raidboss…
-      let boss = await models.Raidboss.find({
-        where: {
-          name: target
-        }
-      })
+      // let boss = await models.Raidboss.find({
+      //   where: {
+      //     name: target
+      //   }
+      // })
+      const boss = await resolveRaidBoss(target)
       if (boss !== null) {
         ctx.session.newraid.target = boss.name
         ctx.session.newraid.bossid = boss.id
@@ -252,7 +266,6 @@ function AddRaidWizard (bot) {
         try {
           await newraid.save()
             .then((saved) => {
-              // console.log('saved', saved)
               ctx.session.savedraid = saved
             })
         } catch (error) {
@@ -273,6 +286,10 @@ function AddRaidWizard (bot) {
           return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
+        // send alert to subscribed users of this Gym
+        await sendGyms(ctx, bot)
+        // send alert to subscribed users of the Raidboss
+        await sendRaidbosses(ctx, bot)
         ctx.session.participateOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
         return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
           .then(() => {
@@ -357,4 +374,26 @@ function AddRaidWizard (bot) {
     }
   )
 }
+
+async function sendGyms (ctx, bot) {
+  let gymId = ctx.session.newraid.gymId
+  let gymname = ctx.session.newraid.gymname
+  let target = ctx.session.newraid.target
+  let starttime = ctx.session.newraid.start1
+
+  await sendGymNotifications(bot, gymId, gymname, target, starttime)
+}
+
+async function sendRaidbosses (ctx, bot) {
+  let raidbossId = ctx.session.newraid.bossid
+  if (!raidbossId) {
+    return
+  }
+  let gymname = ctx.session.newraid.gymname
+  let target = ctx.session.newraid.target
+  let starttime = ctx.session.newraid.start1
+
+  await sendRaidbossNotifications(bot, raidbossId, gymname, target, starttime)
+}
+
 module.exports = AddRaidWizard
