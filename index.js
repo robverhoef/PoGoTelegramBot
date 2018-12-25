@@ -84,6 +84,10 @@ const AddNotificationWizard = require('./wizards/NotificationWizard')
 const addNotificationWizard = AddNotificationWizard(bot)
 addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const UserDelayedWizard = require('./wizards/UserDelayedWizard')
+const userDelayedWizard = UserDelayedWizard(bot)
+userDelayedWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -95,7 +99,8 @@ const stage = new Stage([
   addRaidbossWizard,
   editRaidbossWizard,
   statsWizard,
-  addNotificationWizard
+  addNotificationWizard,
+  userDelayedWizard
 ])
 
 /**
@@ -136,6 +141,7 @@ async function showMainMenu (ctx, user) {
   btns.push(`Meedoen met een raid`)
   if (raids.length > 0) {
     btns.push(`Afmelden bij een raid`)
+    btns.push(`Ik kom te laat voor een raid…`)
   }
   btns.push(`Een nieuwe raid melden`)
   btns.push(`Een raid wijzigen`)
@@ -205,6 +211,7 @@ bot.hears('Een raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
 bot.hears('Een raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
 bot.hears('Statistieken', Stage.enter('stats-wizard'))
 bot.hears('Notificaties van gyms of raidbosses', Stage.enter('notification-wizard'))
+bot.hears('Ik kom te laat voor een raid…', Stage.enter('user-delayed-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode

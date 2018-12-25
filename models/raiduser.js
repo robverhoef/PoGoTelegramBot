@@ -11,7 +11,11 @@ module.exports = (sequelize, DataTypes) => {
     accounts: {
       type: DataTypes.INTEGER, defaultValue: 1
     },
-    raidId: DataTypes.INTEGER.UNSIGNED
+    raidId: DataTypes.INTEGER.UNSIGNED,
+    delayed: {
+      type: DataTypes.STRING(32),
+      allowNull: true
+    }
   }, {tableName: 'raidusers'})
 
   Raiduser.associate = function (models) {
