@@ -19,14 +19,17 @@ function AddRaidWizard (bot) {
   return new WizardScene('add-raid-wizard',
     // step 0
     async (ctx) => {
+      console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
+      ctx.i18n.locale(ctx.session.__language_code)
       return ctx.replyWithMarkdown(ctx.i18n.t('add_raid_welcome'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
       // console.log('step 1', ctx.update.message.text)
+      ctx.i18n.locale(ctx.session.__language_code)
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
         return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
@@ -281,7 +284,7 @@ function AddRaidWizard (bot) {
         let out = await listRaids(ctx.i18n.t('raid_added_list', {
           gymname: ctx.session.newraid.gymname,
           user: user
-        }))
+        }), ctx)
         if (out === null) {
           return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
@@ -357,7 +360,7 @@ function AddRaidWizard (bot) {
       let out = await listRaids(ctx.i18n.t('raid_user_added_list', {
         user: user,
         gymname: ctx.session.newraid.gymname
-      }))
+      }), ctx)
       if (out === null) {
         ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())

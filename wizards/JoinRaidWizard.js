@@ -115,7 +115,7 @@ function JoinRaidWizard (bot) {
       let out = await listRaids(`${ctx.i18n.t('join_raid_list_reason', {
         user: user,
         gymname: joinedraid.gymname
-      })}\n\n`)
+      })}\n\n`, ctx)
       if (out === null) {
         return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())

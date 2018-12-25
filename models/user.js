@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     isAdmin: {
       type: DataTypes.BOOLEAN
+    },
+    locale: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {tableName: 'users'})
   User.associate = function (models) {

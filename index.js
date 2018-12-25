@@ -12,6 +12,7 @@ const path = require('path')
 const i18n = new TelegrafI18n({
   defaultLanguage: 'nl',
   useSession: true,
+  sessionName: 'session',
   allowMissing: true,
   directory: path.resolve(__dirname, 'locales')
 })
@@ -91,6 +92,10 @@ const AddNotificationWizard = require('./wizards/NotificationWizard')
 const addNotificationWizard = AddNotificationWizard(bot)
 addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const LocaleWizard = require('./wizards/LocaleWizard')
+const localeWizard = LocaleWizard(bot)
+localeWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -102,7 +107,8 @@ const stage = new Stage([
   addRaidbossWizard,
   editRaidbossWizard,
   statsWizard,
-  addNotificationWizard
+  addNotificationWizard,
+  localeWizard
 ])
 
 /**
@@ -118,6 +124,7 @@ bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
+  console.log('showmainmenu user', user)
   let raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -176,9 +183,12 @@ async function showMainMenu (ctx, user) {
 // This runs after the user has 'start'ed from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
   // check if start is not directly coming from the group
+  console.log('from: ', ctx.update.message.from)
+
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
     return
   }
+
   let user = ctx.update.message.from
   // validate the user
   var fuser = await models.User.find({
@@ -186,8 +196,12 @@ bot.command('/start', async (ctx) => {
       tId: user.id
     }
   })
+
   // if (ctx.message.text === '/start help_fromgroup') {
   if (fuser !== null) {
+    console.log('setting user locale session', fuser.locale)
+    ctx.session.__language_code = fuser.locale // ?
+    ctx.i18n.locale(fuser.locale)
     return showMainMenu(ctx, user)
   } else {
     return ctx.replyWithMarkdown(ctx.i18n.t('help_from_group'))
@@ -207,6 +221,7 @@ bot.hears(match('btn_add_boss'), Stage.enter('add-raidboss-wizard'))
 bot.hears(match('btn_edit_boss'), Stage.enter('edit-raidboss-wizard'))
 bot.hears(match('btn_stats'), Stage.enter('stats-wizard'))
 bot.hears(match('btn_notifications'), Stage.enter('notification-wizard'))
+bot.command('lang', Stage.enter('locale-wizard'))
 
 /**
 * Check if valid user and show START button to switch to private mode
@@ -225,6 +240,7 @@ bot.on('inline_query', async ctx => {
     console.log(`NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name}`)
     return
   }
+
   // if (ctx.inlineQuery.query === 'actie') {
   return ctx.answerInlineQuery([],
     {
@@ -313,11 +329,22 @@ bot.on('new_chat_members', async (ctx) => {
     console.log('A bot tried to become a group member…')
     return
   }
+  let lang = newuser.language_code
+  let locales = []
+  let rawlocales = process.env.LOCALES.split(',')
+  for (const rawlocale of rawlocales) {
+        var loc = rawlocale.trim().split(' ')
+        locales.push(loc[0])
+  }
+  if(locales.indexOf(lang) < 0) {
+    lang = process.env.LOCALE
+  }
   if (ctx.message.chat.id.toString() === process.env.GROUP_ID) {
     let newuser = models.User.build({
       tId: newusr.id,
       tUsername: newusr.first_name,
-      tGroupID: process.env.GROUP_ID.toString()
+      tGroupID: process.env.GROUP_ID.toString(),
+      locale: lang
     })
     try {
       await newuser.save()
@@ -394,7 +421,17 @@ bot.hears(/\/raids/i, async (ctx) => {
   }
   return ctx.replyWithMarkdown(out, {disable_web_page_preview: true})
 })
+bot.on('text', function (ctx) {
+  console.log('ON MESSAGE', ctx.message)
+  ctx.i18n.locale(ctx.session.__language_code || process.env.LOCALE)
 
+  switch (ctx.message.text) {
+    case 'Report a new raid':
+      console.log('yep...', ctx, Stage)
+      return ctx.scene.enter('add-raid-wizard')
+      break
+  }
+})
 // Let's fire up!
 bot.telegram.setWebhook(process.env.BOT_URL)
   .then((data) => {

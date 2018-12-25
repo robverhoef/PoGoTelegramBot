@@ -87,7 +87,7 @@ function ExitRaidWizard (bot) {
         ctx.i18n.t('exit_raid_list_message', {
           user: user,
           gymname: ctx.session.gymnames[selectedraid]
-        }))
+        }), ctx)
       if (out === null) {
         ctx.replyWithMarkdown(ctx.i18n.t('no_raids_found'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
