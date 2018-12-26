@@ -15,13 +15,22 @@ var UserDelayedGymWizard = function (bot) {
   return new WizardScene('user-delayed-wizard',
     async (ctx) => {
       ctx.session.delayedraid = null
+      const user = ctx.from
       let raids = await models.Raid.findAll({
-        include: [models.Gym, models.Raiduser],
         where: {
           endtime: {
             [Op.gt]: moment().unix()
           }
-        }
+        },
+        include: [
+          models.Gym,
+          {
+            model: models.Raiduser,
+            where: {
+              'uid': user.id
+            }
+          }
+        ]
       })
       if (raids.length === 0) {
         return ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard())
