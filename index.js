@@ -96,6 +96,10 @@ const LocaleWizard = require('./wizards/LocaleWizard')
 const localeWizard = LocaleWizard(bot)
 localeWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const UserDelayedWizard = require('./wizards/UserDelayedWizard')
+const userDelayedWizard = UserDelayedWizard(bot)
+userDelayedWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -109,6 +113,7 @@ const stage = new Stage([
   statsWizard,
   addNotificationWizard,
   localeWizard
+  userDelayedWizard
 ])
 
 /**
@@ -145,6 +150,8 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_join_raid'))
   if (raids.length > 0) {
     btns.push(ctx.i18n.t('btn_exit_raid'))
+    btns.push(`Ik kom te laat voor een raid…`)
+
   }
   btns.push(ctx.i18n.t('btn_add_raid'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
@@ -221,7 +228,9 @@ bot.hears(match('btn_add_boss'), Stage.enter('add-raidboss-wizard'))
 bot.hears(match('btn_edit_boss'), Stage.enter('edit-raidboss-wizard'))
 bot.hears(match('btn_stats'), Stage.enter('stats-wizard'))
 bot.hears(match('btn_notifications'), Stage.enter('notification-wizard'))
+bot.hears('btn_user_delayed', Stage.enter('user-delayed-wizard'))
 bot.command('lang', Stage.enter('locale-wizard'))
+
 
 /**
 * Check if valid user and show START button to switch to private mode
