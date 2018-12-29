@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       gymId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER.UNSIGNED
       },
       createdAt: {
         allowNull: false,
@@ -30,7 +30,7 @@ module.exports = {
         ['userId'],
         {
           type: 'foreign key',
-          name: 'FBK_userId',
+          name: 'FBK_notification_userId',
           references: { //Required field
             table: 'users',
             field: 'id'
