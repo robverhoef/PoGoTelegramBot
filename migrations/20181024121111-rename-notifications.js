@@ -46,7 +46,7 @@ module.exports = {
         ['raidbossId'],
         {
           type: 'foreign key',
-          name: 'FBK_raidbossId',
+          name: 'FBK_raidboss-notificationsRaidbossId',
           references: { //Required field
             table: 'raidbosses',
             field: 'id'
