@@ -9,31 +9,41 @@ module.exports = {
         name: 'Level 1 egg',
         accounts: '1',
         level: 1,
-        metaphone: metaphone('Level 1 egg')
+        metaphone: metaphone('Level 1 egg'),
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
       },
       {
         name: 'Level 2 egg',
         accounts: '1',
         level: 2,
-        metaphone: metaphone('Level 2 egg')
+        metaphone: metaphone('Level 2 egg'),
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
       },
       {
         name: 'Level 3 egg',
         accounts: '2',
         level: 3,
-        metaphone: metaphone('Level 3 egg')
+        metaphone: metaphone('Level 3 egg'),
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
       },
       {
         name: 'Level 4 egg',
         accounts: '3-?',
         level: 4,
-        metaphone: metaphone('Level 4 egg')
+        metaphone: metaphone('Level 4 egg'),
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
       },
       {
         name: 'Level 5 egg',
         accounts: '4-?',
         level: 5,
-        metaphone: metaphone('Level 5 egg')
+        metaphone: metaphone('Level 5 egg'),
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
       }
     ])
   },
