@@ -167,6 +167,14 @@ join_raid_accounts_question: "With how many accounts/people are you comming to *
 join_raid_list_reason: "[${user.first_name}](tg://user?id=${user.id}) added to raid at ${gymname}"
 join_raid_finished: "You are registered for ${joinedraid.gymname} at ${joinedraid.startsat} 👍\n\n*You can now return to the group. Do you want to take another action? Click here on */start"
 join_raid_not_found: "Raid not found!\n*You can now return to the group. Do you want to take another action? Click here on */start"
+
+#  UserDelayedWizard
+btn_user_delayed: "I will be late for a raid…"
+user_delayed_dont_change_status: "…I don't want to change my status"
+user_delayed_select_raid: "You are about to change your status for a raid.\n*Select a raid…*"
+user_delayed_is_on_time: "…I'll be on time anyway!"
+user_delayed_how_much_later: "How many minutes will you be late for *${gymname}*?"
+
 #  StatsWizard
 stats_your_total_raids_reported: "Total number of raids reported by you: *${ownraids.length}*"
 stats_your_most_reported_gyms: "Your topmost reported gyms"

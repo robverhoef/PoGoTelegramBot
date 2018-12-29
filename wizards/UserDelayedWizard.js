@@ -49,13 +49,13 @@ var UserDelayedGymWizard = function (bot) {
         ctx.session.raidbtns.push(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`)
       }
       candidates.push({
-        gymname: '…ik wil mijn status toch niet veranderen',
+        gymname: ctx.i18.t('user_delayed_dont_change_status'),
         raidid: 0
       })
-      ctx.session.raidbtns.push('…ik wil mijn status toch niet veranderen')
+      ctx.session.raidbtns.push(ctx.i18.t('user_delayed_dont_change_status'))
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
-      return ctx.replyWithMarkdown('Je gaat je status voor een raid veranderen.\n*Kies een raid…*', Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(ctx.i18n.t('user_delayed_select_raid'), Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
@@ -63,11 +63,11 @@ var UserDelayedGymWizard = function (bot) {
       // retrieve selected candidate  from session…
       let ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
       if (ind === -1) {
-        return ctx.replyWithMarkdown('Raid niet gevonden!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_not_found'), Markup.removeKeyboard().extra())
       }
       let selectedraid = ctx.session.raidcandidates[ind]
       if (selectedraid.raidid === 0) {
-        return ctx.replyWithMarkdown('Jammer! \n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_cancel'), Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session.raidcandidates = null
             return ctx.scene.leave()
@@ -75,8 +75,8 @@ var UserDelayedGymWizard = function (bot) {
       }
       // save selected index to session
       ctx.session.delayedraid = parseInt(ind)
-      ctx.session.accountbtns = [['2','5'], ['…ik kom toch op tijd!']]
-      return ctx.replyWithMarkdown(`Hoeveel minuten ga je te laat komen? *${selectedraid.gymname}*?`, Markup.keyboard(ctx.session.accountbtns).extra())
+      ctx.session.accountbtns = [['2','5'], [ctx.i18n.t('user_delayed_is_on_time')]]
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_how_much_later', {gymname: selectedraid.gymname})}`, Markup.keyboard(ctx.session.accountbtns).extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {

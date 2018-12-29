@@ -19,6 +19,7 @@ function AddRaidWizard (bot) {
   return new WizardScene('add-raid-wizard',
     // step 0
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
@@ -61,6 +62,7 @@ function AddRaidWizard (bot) {
     },
     // step 2
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       let selectedIndex = -1
       for (var i = 0; i < ctx.session.gymcandidates.length; i++) {
         if (ctx.session.gymcandidates[i][0] === ctx.update.message.text) {
@@ -103,6 +105,7 @@ function AddRaidWizard (bot) {
     },
     // step 3: get the time; either start or end of the raid itself, or in minutes
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       let timemode = ''
       for (var a = 0; a < ctx.session.timeOptions.length; a++) {
         if (ctx.session.timeOptions[a][0] === ctx.update.message.text) {
@@ -126,6 +129,7 @@ function AddRaidWizard (bot) {
     },
     // step 4
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       const message = ctx.update.message.text.trim()
 
       let tmptime
@@ -173,6 +177,7 @@ function AddRaidWizard (bot) {
     },
     // step 4
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       let endtime = ctx.session.newraid.endtime
       // calculate minimum start time
       let starttime = moment.unix(endtime)
@@ -206,6 +211,7 @@ function AddRaidWizard (bot) {
     },
     // step 5
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       const target = ctx.update.message.text.trim()
       // let's see if we can find the raidboss…
       // let boss = await models.Raidboss.find({
@@ -233,6 +239,7 @@ function AddRaidWizard (bot) {
     },
     // step 6
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       const user = ctx.from
       let saveme = ctx.session.saveOptions.indexOf(ctx.update.message.text) === 0
       if (saveme) {
@@ -306,6 +313,7 @@ function AddRaidWizard (bot) {
     },
     // Step 7
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       let participate = ctx.session.participateOptions.indexOf(ctx.update.message.text)
       if (participate === 1) {
         // user does NOT participate, exit
@@ -322,6 +330,7 @@ function AddRaidWizard (bot) {
 
     // Step 8
     async (ctx) => {
+      ctx.i18n.locale(ctx.session.__language_code)
       const accounts = parseInt(ctx.update.message.text)
       const user = ctx.from
       // Check already registered? If so; update else store new

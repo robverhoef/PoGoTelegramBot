@@ -112,7 +112,7 @@ const stage = new Stage([
   editRaidbossWizard,
   statsWizard,
   addNotificationWizard,
-  localeWizard
+  localeWizard,
   userDelayedWizard
 ])
 
@@ -150,7 +150,7 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_join_raid'))
   if (raids.length > 0) {
     btns.push(ctx.i18n.t('btn_exit_raid'))
-    btns.push(`Ik kom te laat voor een raid…`)
+    btns.push(ctx.i18n.t('btn_user_delayed'))
 
   }
   btns.push(ctx.i18n.t('btn_add_raid'))
@@ -203,7 +203,6 @@ bot.command('/start', async (ctx) => {
       tId: user.id
     }
   })
-
   // if (ctx.message.text === '/start help_fromgroup') {
   if (fuser !== null) {
     console.log('setting user locale session', fuser.locale)
@@ -211,26 +210,30 @@ bot.command('/start', async (ctx) => {
     ctx.i18n.locale(fuser.locale)
     return showMainMenu(ctx, user)
   } else {
+    // ToDo: check if user language is available
+    ctx.i18n.locale(ctx.from.language_code)
     return ctx.replyWithMarkdown(ctx.i18n.t('help_from_group'))
   }
 })
 
 // set cancel command here too, not only in wizards
 bot.command('cancel', (ctx) => cancelConversation(ctx))
-bot.hears(match('btn_join_raid'), Stage.enter('join-raid-wizard'))
-bot.hears(match('btn_exit_raid'), Stage.enter('exit-raid-wizard'))
-bot.hears(match('btn_add_raid'), Stage.enter('add-raid-wizard'))
-bot.hears(match('btn_edit_raid'), Stage.enter('edit-raid-wizard'))
-bot.hears(match('btn_find_gym'), Stage.enter('find-gym-wizard'))
-bot.hears(match('btn_add_gym'), Stage.enter('add-gym-wizard'))
-bot.hears(match('btn_edit_gym'), Stage.enter('edit-gym-wizard'))
-bot.hears(match('btn_add_boss'), Stage.enter('add-raidboss-wizard'))
-bot.hears(match('btn_edit_boss'), Stage.enter('edit-raidboss-wizard'))
-bot.hears(match('btn_stats'), Stage.enter('stats-wizard'))
-bot.hears(match('btn_notifications'), Stage.enter('notification-wizard'))
-bot.hears('btn_user_delayed', Stage.enter('user-delayed-wizard'))
 bot.command('lang', Stage.enter('locale-wizard'))
-
+// iterate over languages
+for (var key in i18n.repository) {
+  bot.hears(i18n.repository[key]['btn_add_raid'].call(), Stage.enter('add-raid-wizard'))
+  bot.hears(i18n.repository[key]['btn_join_raid'].call(), Stage.enter('join-raid-wizard'))
+  bot.hears(i18n.repository[key]['btn_exit_raid'].call(), Stage.enter('exit-raid-wizard'))
+  bot.hears(i18n.repository[key]['btn_edit_raid'].call(), Stage.enter('edit-raid-wizard'))
+  bot.hears(i18n.repository[key]['btn_find_gym'].call(), Stage.enter('find-gym-wizard'))
+  bot.hears(i18n.repository[key]['btn_add_gym'].call(), Stage.enter('add-gym-wizard'))
+  bot.hears(i18n.repository[key]['btn_edit_gym'].call(), Stage.enter('edit-gym-wizard'))
+  bot.hears(i18n.repository[key]['btn_add_boss'].call(), Stage.enter('add-raidboss-wizard'))
+  bot.hears(i18n.repository[key]['btn_edit_boss'].call(), Stage.enter('edit-raidboss-wizard'))
+  bot.hears(i18n.repository[key]['btn_stats'].call(), Stage.enter('stats-wizard'))
+  bot.hears(i18n.repository[key]['btn_notifications'].call(), Stage.enter('notification-wizard'))
+  bot.hears(i18n.repository[key]['btn_user_delayed'].call(), Stage.enter('user-delayed-wizard'))
+}
 
 /**
 * Check if valid user and show START button to switch to private mode
@@ -430,17 +433,18 @@ bot.hears(/\/raids/i, async (ctx) => {
   }
   return ctx.replyWithMarkdown(out, {disable_web_page_preview: true})
 })
-bot.on('text', function (ctx) {
-  console.log('ON MESSAGE', ctx.message)
-  ctx.i18n.locale(ctx.session.__language_code || process.env.LOCALE)
+// bot.on('text', function (ctx) {
+//   console.log('ON MESSAGE', ctx.message)
+//   ctx.i18n.locale(ctx.session.__language_code || process.env.LOCALE)
 
-  switch (ctx.message.text) {
-    case 'Report a new raid':
-      console.log('yep...', ctx, Stage)
-      return ctx.scene.enter('add-raid-wizard')
-      break
-  }
-})
+//   switch (ctx.message.text) {
+//     case 'Report a new raid':
+//     case 'Een nieuwe raid melden':
+//       console.log('yep...', ctx, Stage)
+//       return ctx.scene.enter('add-raid-wizard')
+//       break
+//   }
+// })
 // Let's fire up!
 bot.telegram.setWebhook(process.env.BOT_URL)
   .then((data) => {
