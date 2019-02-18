@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -87,7 +87,7 @@ function ExitRaidWizard (bot) {
         ctx.replyWithMarkdown(`Mmmm, geen raid te vinden`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
-      bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+      bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
       return ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }

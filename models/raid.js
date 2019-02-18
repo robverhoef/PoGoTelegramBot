@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     reporterName: DataTypes.STRING,
     reporterId: DataTypes.INTEGER,
     raidbossId: DataTypes.INTEGER
-  }, {tableName: 'raids'})
+  }, { tableName: 'raids' })
 
   Raid.associate = function (models) {
     models.Raid.belongsTo(models.Gym, {

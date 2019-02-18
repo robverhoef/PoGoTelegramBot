@@ -4,7 +4,7 @@
 const WizardScene = require('telegraf/scenes/wizard')
 var models = require('../models')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 const Sequelize = require('sequelize')
 const lastExRaidPassDate = require('../util/lastExRaidPassDate')
 const Op = Sequelize.Op
@@ -181,7 +181,7 @@ function getGymcounts (raids, countMethod) {
     gyms[key] = count
     total += totalRaid
   }
-  return {gyms, total}
+  return { gyms, total }
 }
 
 function processRaidVsRaidusers (raids, countAccounts, splice) {
@@ -196,7 +196,7 @@ function processRaidVsRaidusers (raids, countAccounts, splice) {
     return totals
   }
 
-  let {gyms, total} = getGymcounts(filteredRaids, countMethod)
+  let { gyms, total } = getGymcounts(filteredRaids, countMethod)
 
   let statMessage = ''
   let value = sortDictionaryOnValue(gyms)
@@ -215,17 +215,17 @@ function processRaidVsRaidusers (raids, countAccounts, splice) {
 function filterRaidsOnViability (raids) {
   let viableRaids = []
   for (const raid of raids) {
-    //No raidusers? dont count
+    // No raidusers? dont count
     if (raid.Raidusers.length === 0) {
       continue
     }
 
-    //if raidboss is unknown, count it anyways:
+    // if raidboss is unknown, count it anyways:
     if (!raid.Raidboss) {
       viableRaids.push(raid)
       continue
     } else {
-      //get the first number of accounts and compare it!
+      // get the first number of accounts and compare it!
       let regex = /(\d)/g
       let match = regex.exec(raid.Raidboss.accounts)
       let minAccounts = match[1]
@@ -234,7 +234,7 @@ function filterRaidsOnViability (raids) {
         totals += raiduser.accounts
       }
 
-      //count the raid if it has one less than the required minimum
+      // count the raid if it has one less than the required minimum
       if ((minAccounts - 1) <= totals) {
         viableRaids.push(raid)
       } else {
@@ -422,7 +422,7 @@ var StatsWizard = function () {
           statMessage = await determineGlobalStats(time)
         }
         statMessage = `*Statistieken vanaf ${moment.unix(time).format('DD-MM-YYYY')}*\n\n` + statMessage
-      } else { //ex raid stats
+      } else { // ex raid stats
         let start
         let end
         let dates = await lastExRaidPassDate()

@@ -2,7 +2,7 @@
 // add raidboss wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -24,7 +24,7 @@ function EditRaidbossWizard (bot) {
       let term = ctx.update.message.text.trim()
       let bosses = await models.Raidboss.findAll({
         where: {
-          name: {[Op.like]: '%' + term + '%'}
+          name: { [Op.like]: '%' + term + '%' }
         }
       })
       if (bosses.length === 0) {
@@ -40,7 +40,7 @@ function EditRaidbossWizard (bot) {
           accounts: bosses[i].accounts
         })
       }
-      ctx.session.bosscandidates.push({name: 'Ik wil niets wijzigen en niets bewaren…', id: 0})
+      ctx.session.bosscandidates.push({ name: 'Ik wil niets wijzigen en niets bewaren…', id: 0 })
       return ctx.replyWithMarkdown('Kies een raidboss.', Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },

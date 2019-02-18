@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -34,11 +34,11 @@ function AddRaidWizard (bot) {
       } else {
         const candidates = await models.Gym.findAll({
           where: {
-            gymname: {[Op.like]: '%' + term + '%'}
+            gymname: { [Op.like]: '%' + term + '%' }
           }
         })
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
+          return ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
           return
         }
         ctx.session.gymcandidates = []
@@ -75,9 +75,11 @@ function AddRaidWizard (bot) {
       }
       // User can't find the gym
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
-        ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
-        ctx.wizard.selectStep(0)
-        return ctx.wizard.steps[0](ctx)
+        return ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
+        .then(() => {
+          ctx.wizard.selectStep(0)
+          return ctx.wizard.steps[0](ctx)
+        })
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
@@ -167,7 +169,7 @@ function AddRaidWizard (bot) {
         starttime = moment()
       }
 
-      ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten`)
+      return ctx.replyWithMarkdown(`*Welke starttijd stel je voor?*\nGeef de tijd tussen *${starttime.format('HH:mm')}* en *${moment.unix(endtime).format('HH:mm')}* of vul een *x* in om deze leeg te laten`)
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -202,18 +204,12 @@ function AddRaidWizard (bot) {
       }
 
       ctx.session.newraid.start1 = start1
-      ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Mewtwo* of *Level 5 ei*`)
+      return ctx.replyWithMarkdown(`*Wat is de raid boss?*\nBijvoorbeeld *Mewtwo* of *Level 5 ei*`)
         .then(() => ctx.wizard.next())
     },
     // step 5
     async (ctx) => {
       const target = ctx.update.message.text.trim()
-      // let's see if we can find the raidboss…
-      // let boss = await models.Raidboss.find({
-      //   where: {
-      //     name: target
-      //   }
-      // })
       const boss = await resolveRaidBoss(target)
       if (boss !== null) {
         ctx.session.newraid.target = boss.name
@@ -240,13 +236,13 @@ function AddRaidWizard (bot) {
       if (saveme) {
         // Sometimes a new raid is getting submitted multiple times
         // ToDo: adapt this when multiple starttimes are getting implemented
-        var raidexists = await models.Raid.find({
+        var raidexists = await models.Raid.findOne({
           where: {
             [Op.and]: [
-              {gymId: ctx.session.newraid.gymId},
-              {target: ctx.session.newraid.target},
-              {start1: ctx.session.newraid.start1},
-              {endtime: ctx.session.newraid.endtime}
+              { gymId: ctx.session.newraid.gymId },
+              { target: ctx.session.newraid.target },
+              { start1: ctx.session.newraid.start1 },
+              { endtime: ctx.session.newraid.endtime }
             ]
           }
         })
@@ -294,7 +290,7 @@ function AddRaidWizard (bot) {
         await sendRaidbosses(ctx, bot)
 
         ctx.session.participateOptions = ['Ja', 'Nee']
-        return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+        return bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
           .then(() => {
             ctx.replyWithMarkdown('Dankjewel!\n*Doe je zelf mee met deze raid?*', Markup.keyboard(ctx.session.participateOptions).resize().oneTime().extra())
           })
@@ -313,7 +309,7 @@ function AddRaidWizard (bot) {
           .then(() => ctx.scene.leave())
       }
       // user does participate
-      return ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${ctx.session.newraid.gymname}*?`, Markup.keyboard(['1', '2', '3', '4', '5'])
+      return ctx.replyWithMarkdown(`Met hoeveel accounts/mensen kom je naar *${ctx.session.newraid.gymname}*?`, Markup.keyboard([['1'], ['2', '3', '4', '5']])
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
@@ -324,9 +320,9 @@ function AddRaidWizard (bot) {
 
       const user = ctx.from
       // Check already registered? If so; update else store new
-      let raiduser = await models.Raiduser.find({
+      let raiduser = await models.Raiduser.findOne({
         where: {
-          [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}]
+          [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }]
         }
       })
       if (raiduser) {
@@ -334,7 +330,7 @@ function AddRaidWizard (bot) {
         try {
           await models.Raiduser.update(
             { accounts: accounts },
-            { where: { [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}] } }
+            { where: { [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }] } }
           )
         } catch (error) {
           return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*', Markup.removeKeyboard().extra())
@@ -358,12 +354,12 @@ function AddRaidWizard (bot) {
       }
       let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${ctx.session.newraid.gymname}\n\n`)
       if (out === null) {
-        ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       return ctx.replyWithMarkdown(`Je bent aangemeld voor ${ctx.session.newraid.gymname} om ${moment.unix(ctx.session.newraid.start1).format('HH:mm')} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
         .then(async () => {
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
         })
         .then(() => ctx.scene.leave())
     }

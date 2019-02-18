@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -78,9 +78,9 @@ function JoinRaidWizard (bot) {
 
       const user = ctx.from
       // Check already registered? If so; update else store new
-      let raiduser = await models.Raiduser.find({
+      let raiduser = await models.Raiduser.findOne({
         where: {
-          [Op.and]: [{uid: user.id}, {raidId: joinedraid.raidid}]
+          [Op.and]: [{ uid: user.id }, { raidId: joinedraid.raidid }]
         }
       })
       if (raiduser) {
@@ -88,7 +88,7 @@ function JoinRaidWizard (bot) {
         try {
           await models.Raiduser.update(
             { accounts: accounts },
-            { where: { [Op.and]: [{uid: user.id}, {raidId: joinedraid.raidid}] } }
+            { where: { [Op.and]: [{ uid: user.id }, { raidId: joinedraid.raidid }] } }
           )
         } catch (error) {
           return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*', Markup.removeKeyboard().extra())
@@ -117,7 +117,7 @@ function JoinRaidWizard (bot) {
       }
       return ctx.replyWithMarkdown(`Je bent aangemeld voor ${joinedraid.gymname} om ${joinedraid.startsat} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
         .then(async () => {
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
         })
         .then(() => ctx.scene.leave())
     }

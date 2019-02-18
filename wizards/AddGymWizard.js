@@ -2,7 +2,7 @@
 // add gym wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 
 function AddGymWizard (bot) {

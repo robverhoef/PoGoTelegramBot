@@ -2,7 +2,7 @@
 // add gym wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -40,7 +40,7 @@ var FindGymWizard = function () {
           }
           out += '\n\n'
         }
-        ctx.replyWithMarkdown(`Ik heb ${l} gym${l === 1 ? '' : 's'} gevonden voor '${term}' 🤓\n\n${out}*Gebruik */start* als je nog een actie wilt uitvoeren. Of ga terug naar de groep.*`, {disable_web_page_preview: true})
+        ctx.replyWithMarkdown(`Ik heb ${l} gym${l === 1 ? '' : 's'} gevonden voor '${term}' 🤓\n\n${out}*Gebruik */start* als je nog een actie wilt uitvoeren. Of ga terug naar de groep.*`, { disable_web_page_preview: true })
           .then(() => ctx.scene.leave())
       }
     }

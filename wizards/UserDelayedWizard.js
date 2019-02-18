@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -75,7 +75,7 @@ var UserDelayedGymWizard = function (bot) {
       }
       // save selected index to session
       ctx.session.delayedraid = parseInt(ind)
-      ctx.session.accountbtns = [['2','5'], ['…ik kom toch op tijd!']]
+      ctx.session.accountbtns = [['2', '5'], ['…ik kom toch op tijd!']]
       return ctx.replyWithMarkdown(`Hoeveel minuten ga je te laat komen? *${selectedraid.gymname}*?`, Markup.keyboard(ctx.session.accountbtns).extra())
         .then(() => ctx.wizard.next())
     },
@@ -84,15 +84,15 @@ var UserDelayedGymWizard = function (bot) {
       const delayedraid = ctx.session.raidcandidates[ctx.session.delayedraid]
       const user = ctx.from
       // Check already registered? If so; update
-      let raiduser = await models.Raiduser.find({
+      let raiduser = await models.Raiduser.findOne({
         where: {
-          [Op.and]: [{uid: user.id}, {raidId: delayedraid.raidid}]
+          [Op.and]: [{ uid: user.id }, { raidId: delayedraid.raidid }]
         }
       })
       if (raiduser) {
         let reason = ''
         let val = null
-        switch(delay){
+        switch (delay) {
           case '2':
             reason = `[${user.first_name}](tg://user?id=${user.id}) komt 2 minuten later bij ${delayedraid.gymname}`
             val = '2 min.'
@@ -109,19 +109,18 @@ var UserDelayedGymWizard = function (bot) {
         try {
           await models.Raiduser.update(
             { delayed: val },
-            { where: { [Op.and]: [{uid: user.id}, {raidId: delayedraid.raidid}] } }
+            { where: { [Op.and]: [{ uid: user.id }, { raidId: delayedraid.raidid }] } }
           )
-
         } catch (error) {
           return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*', Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
         let out = await listRaids(`${reason}\n\n`)
         return ctx.replyWithMarkdown(`Je status voor ${delayedraid.gymname} is gewijzigd 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
-        .then(async () => {
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
-        })
-        .then(() => ctx.scene.leave())
+          .then(async () => {
+            bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+          })
+          .then(() => ctx.scene.leave())
       }
     }
   )

@@ -2,7 +2,7 @@
 // add raidboss wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const metaphone = require('metaphone')
 
@@ -20,7 +20,7 @@ function AddRaidbossWizard (bot) {
       let bossname = ctx.update.message.text.trim()
       ctx.session.newboss.name = bossname
       // lookup raidboss, prevent double bosses
-      let oldboss = await models.Raidboss.find({
+      let oldboss = await models.Raidboss.findOne({
         where: {
           name: bossname
         }

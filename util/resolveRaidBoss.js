@@ -9,13 +9,13 @@ const metaphone = require('metaphone')
 module.exports = async (bossname) => {
   // first start by checking for eggs -might save us a DB query-
   // match 'level 5', 'lvl 5', 'level5', 'lvl5'
-  if(bossname.toLowerCase().indexOf('lvl') > -1 || bossname.toLowerCase().indexOf('level') > -1){
+  if (bossname.toLowerCase().indexOf('lvl') > -1 || bossname.toLowerCase().indexOf('level') > -1) {
     let egg = bossname.match(/(?:^lvl|^level)\s*(\d)/i)
     if (egg !== null && egg.length > 1 && parseInt(egg[1]) > 0) {
       // Let's see if the egg is defined…
-      const boss = await models.Raidboss.find({
+      const boss = await models.Raidboss.findOne({
         where: {
-          name: {[Op.like]: 'Level '+parseInt(egg[1])+ ' egg'}
+          name: { [Op.like]: 'Level ' + parseInt(egg[1]) + ' egg' }
         }
       })
       if (boss) {
@@ -30,21 +30,21 @@ module.exports = async (bossname) => {
     }
   } else {
     // next; search DB
-    let boss = await models.Raidboss.find({
+    let boss = await models.Raidboss.findOne({
       where: {
-        name: {[Op.like]: bossname}
+        name: { [Op.like]: bossname }
       }
     })
     if (boss) {
-     return boss
+      return boss
     } else {
       // last resort; try metaphone
-      const boss = await models.Raidboss.find({
+      const boss = await models.Raidboss.findOne({
         where: {
           metaphone: metaphone(bossname)
         }
       })
-      if(boss) {
+      if (boss) {
         return boss
       } else {
         return null

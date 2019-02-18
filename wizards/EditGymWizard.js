@@ -2,7 +2,7 @@
 // Edit raid wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -24,7 +24,7 @@ function EditGymWizard (bot) {
       } else {
         const candidates = await models.Gym.findAll({
           where: {
-            gymname: {[Op.like]: '%' + term + '%'}
+            gymname: { [Op.like]: '%' + term + '%' }
           }
         })
         if (candidates.length === 0) {
@@ -43,7 +43,7 @@ function EditGymWizard (bot) {
           ctx.session.gymbtns.push(candidates[i].gymname)
         }
         ctx.session.gymbtns.push('Mijn gym staat er niet bij…')
-        ctx.session.gymcandidates.push({gymname: 'Mijn gym staat er niet bij…', id: 0})
+        ctx.session.gymcandidates.push({ gymname: 'Mijn gym staat er niet bij…', id: 0 })
         return ctx.replyWithMarkdown('Kies een gym.', Markup.keyboard(ctx.session.gymbtns).resize().oneTime().extra())
           .then(() => ctx.wizard.next())
       }

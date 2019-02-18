@@ -4,7 +4,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const moment = require('moment-timezone')
 const Telegraf = require('telegraf')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 // const MySQLSession = require('telegraf-session-mysql')
 const Stage = require('telegraf/stage')
 // const {session} = require('telegraf')
@@ -88,6 +88,10 @@ const UserDelayedWizard = require('./wizards/UserDelayedWizard')
 const userDelayedWizard = UserDelayedWizard(bot)
 userDelayedWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const FieldresearchWizard = require('./wizards/FieldresearchWizard')
+const fieldresearchWizard = FieldresearchWizard(bot)
+fieldresearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -100,7 +104,8 @@ const stage = new Stage([
   editRaidbossWizard,
   statsWizard,
   addNotificationWizard,
-  userDelayedWizard
+  userDelayedWizard,
+  fieldresearchWizard
 ])
 
 /**
@@ -120,6 +125,8 @@ bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
+  ctx.session = {}
+  ctx.scene.leave()
   let raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -145,12 +152,13 @@ async function showMainMenu (ctx, user) {
   }
   btns.push(`Een nieuwe raid melden`)
   btns.push(`Een raid wijzigen`)
+  btns.push(`Field researches`)
   btns.push(`Vind een gymlocatie`)
 
   // group admins:
   let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database
-  let dbAdmin = await models.User.find({
+  let dbAdmin = await models.User.findOne({
     where: {
       tId: {
         [Op.eq]: user.id
@@ -177,7 +185,7 @@ async function showMainMenu (ctx, user) {
     btns).oneTime().resize().extra())
 }
 
-// This runs after the user has 'start'ed from an inline query in the group or /start in private mode
+// This runs after the user has started from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
   // check if start is not directly coming from the group
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
@@ -185,7 +193,7 @@ bot.command('/start', async (ctx) => {
   }
   let user = ctx.update.message.from
   // validate the user
-  var fuser = await models.User.find({
+  var fuser = await models.User.findOne({
     where: {
       tId: user.id
     }
@@ -207,6 +215,7 @@ bot.hears('Een raid wijzigen', Stage.enter('edit-raid-wizard'))
 bot.hears('Vind een gymlocatie', Stage.enter('find-gym-wizard'))
 bot.hears('Een gym toevoegen', Stage.enter('add-gym-wizard'))
 bot.hears('Een gym wijzigen', Stage.enter('edit-gym-wizard'))
+bot.hears(`Field researches`, Stage.enter('fieldresearch-wizard'))
 bot.hears('Een raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
 bot.hears('Een raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
 bot.hears('Statistieken', Stage.enter('stats-wizard'))
@@ -218,11 +227,11 @@ bot.hears('Ik kom te laat voor een raid…', Stage.enter('user-delayed-wizard'))
 */
 bot.on('inline_query', async ctx => {
   // console.log('inline_query', ctx.update)
-  let user = await models.User.find({
+  let user = await models.User.findOne({
     where: {
       [Op.and]: [
-        {tId: ctx.inlineQuery.from.id},
-        {tGroupID: process.env.GROUP_ID.toString()}
+        { tId: ctx.inlineQuery.from.id },
+        { tGroupID: process.env.GROUP_ID.toString() }
       ]
     }
   })
@@ -256,18 +265,18 @@ bot.hears(/\/hi/i, async (ctx) => {
     return ctx.replyWithMarkdown(`Nee joh… doe dit vanuit de groep!`)
   }
   console.log('Iemand zei hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
-  let olduser = await models.User.find({
+  let olduser = await models.User.findOne({
     where: {
       [Op.and]: [
-        {tGroupID: process.env.GROUP_ID.toString()},
-        {tId: ctx.update.message.from.id}
+        { tGroupID: process.env.GROUP_ID.toString() },
+        { tId: ctx.update.message.from.id }
       ]
     }
   })
   // console.log('olduser', olduser)
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(olduser.tId, `Dag ${ctx.from.first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*`, {parse_mode: 'Markdown'})
+    bot.telegram.sendMessage(olduser.tId, `Dag ${ctx.from.first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*`, { parse_mode: 'Markdown' })
     return
   }
   // console.log(
@@ -291,7 +300,7 @@ bot.hears(/\/hi/i, async (ctx) => {
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      await bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
+      await bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, { parse_mode: 'Markdown' })
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
@@ -404,7 +413,7 @@ bot.hears(/\/raids/i, async (ctx) => {
     out += `Deelnemers: ${userlist}`
     out += '\n\n'
   }
-  return ctx.replyWithMarkdown(out, {disable_web_page_preview: true})
+  return ctx.replyWithMarkdown(out, { disable_web_page_preview: true })
 })
 
 // Let's fire up!

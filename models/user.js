@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     isAdmin: {
       type: DataTypes.BOOLEAN
     }
-  }, {tableName: 'users'})
+  }, { tableName: 'users' })
   User.associate = function (models) {
     // associations can be defined here
   }

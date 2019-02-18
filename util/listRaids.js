@@ -62,8 +62,8 @@ module.exports = async (reason) => {
     }
     out += `Aantal: ${accounter}\n`
     out += `Deelnemers: ${userlist}`
-    out += '\n\n'
+    out += `\n\n`
   }
-  // console.log('listRaids output:', out)
+  // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
   return out
 }

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false
     }
-  }, {tableName: 'gym-notifications'})
+  }, { tableName: 'gym-notifications' })
   GymNotification.associate = function (models) {
     models.GymNotification.belongsTo(models.Gym, {
       onDelete: 'NO ACTION'
