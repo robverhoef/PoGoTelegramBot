@@ -64,6 +64,18 @@ module.exports = async (reason) => {
     out += `Deelnemers: ${userlist}`
     out += `\n\n`
   }
+  let today = moment()
+  today.hours(0)
+  today.minutes(0)
+  today.seconds(0)
+  let researchcount = await models.Fieldresearch.count({
+    where: {
+      createdAt: {
+        [Op.gt]: today
+      }
+    }
+  })
+  out += `De bot kent nu ${researchcount} Field Researches\r\n`
   // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
   return out
 }
