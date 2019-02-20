@@ -51,20 +51,18 @@ async function listResearches () {
   return researches
 }
 // List research options
-function listResearchOptionButtons () {
-  return [
-    'Catch 3 Grass-, Water-, or Fire Type Pokémon',
-    'Catch 10 Pokémon',
-    'Hatch 3 Eggs',
-    'Hatch 5 Eggs',
-    'Make 3 Excellent Throws in a Row',
-    'Make 5 Great Curveball Throws in a Row',
-    'Spin 10 Pokéstops/Gyms',
-    'Use an item to evolve a Pokémon',
-    'Use 5 Berries to catch a Pokémon',
-    'Win a Level 3 or Higher Raid',
-    'Win 5 Gym Battles'
-  ]
+async function listResearchOptionButtons () {
+  const frkeys = await models.Fieldresearchkey.findAll({
+    order: [
+      ['label', 'ASC']
+    ]
+  })
+  let out = []
+  for (let key of frkeys) {
+
+    out.push(key.label)
+  }
+  return out
 }
 
 function FielresearchWizard (bot) {
@@ -218,8 +216,9 @@ function FielresearchWizard (bot) {
             })
         }
       }
+      const frkeys= await listResearchOptionButtons()
       return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
-        Markup.keyboard(listResearchOptionButtons()).oneTime().resize().extra()
+        Markup.keyboard(frkeys).oneTime().resize().extra()
       )
         .then(() => ctx.wizard.next())
     },
@@ -330,8 +329,9 @@ function FielresearchWizard (bot) {
           break
         }
       }
+      const  frkeys= await listResearchOptionButtons()
       return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
-        Markup.keyboard(listResearchOptionButtons()).oneTime().resize().extra()
+        Markup.keyboard(frkeys()).oneTime().resize().extra()
       )
         .then(() => ctx.wizard.next())
     },
