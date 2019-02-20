@@ -11,7 +11,7 @@ moment.tz.setDefault('Europe/Amsterdam')
 * @param reason {string} - The reason why a new list raid was generated
 */
 module.exports = async (reason) => {
-  let out = ''
+  let out = reason
   let raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
       include: [
@@ -28,11 +28,6 @@ module.exports = async (reason) => {
         ['start1', 'ASC']
       ]
     }))
-
-  if (raids.length === 0) {
-    return null
-  }
-  out += reason
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment.unix(raids[a].endtime)
     out += `Tot: ${endtime.format('H:mm')} `

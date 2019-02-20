@@ -5,6 +5,7 @@ const WizardScene = require('telegraf/scenes/wizard')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const moment = require('moment-timezone')
+const listRaids = require('../util/listRaids')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
@@ -260,10 +261,12 @@ function FielresearchWizard (bot) {
         }
         out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
-          .then(() => {
+          .then(async () => {
             ctx.session = {}
-            return ctx.scene.leave()
-          })
+            let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research toegevoegd\n\n`)
+            bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
+            })
+          .then(() => ctx.scene.leave())
       } else if (ctx.update.message.text === 'Nee') {
         out += `OK.\r\n\r\n`
         let researches = await listResearches()
@@ -356,10 +359,12 @@ function FielresearchWizard (bot) {
       out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
 
       return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
-        .then(() => {
-          ctx.session = {}
-          return ctx.scene.leave()
-        })
+        .then(async () => {
+            ctx.session = {}
+            let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research gewijzigd\n\n`)
+            bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
+            })
+        .then(() => ctx.scene.leave())
     },
     // -----------------
     // remove fieldresearch
