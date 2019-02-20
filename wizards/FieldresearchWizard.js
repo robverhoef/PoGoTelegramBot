@@ -136,7 +136,7 @@ function FielresearchWizard (bot) {
     // add fieldresearch
     // -----------------
     async (ctx) => {
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe Field Research toevoegen. We gaan eerst de stop zoeken.\n\n*Gebruik de knop 'Zoek stops in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens… \r\n`, Markup.keyboard([{ text: 'Zoek stops in mijn omgeving…', request_location: true }]).resize().extra())
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe Field Research toevoegen. Hier vind je een [lijst met Field Researches en beloningen ↗️](https://thesilphroad.com/research-tasks). \r\n\r\nWe gaan eerst de stop zoeken.\n\n*Gebruik de knop 'Zoek stops in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens… \r\n`, Markup.keyboard([{ text: 'Zoek stops in mijn omgeving…', request_location: true }]).resize().extra({disable_web_page_preview: true}))
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
