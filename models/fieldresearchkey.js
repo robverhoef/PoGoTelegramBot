@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    label: DataTypes.STRING,
-  }, { tableName: 'fieldresearchkeys'})
+    label: DataTypes.STRING
+  }, { tableName: 'fieldresearchkeys' })
   return Fieldresearchkey
 }

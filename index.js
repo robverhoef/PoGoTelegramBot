@@ -92,6 +92,10 @@ const FieldresearchWizard = require('./wizards/FieldresearchWizard')
 const fieldresearchWizard = FieldresearchWizard(bot)
 fieldresearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AdminFieldResearchWizard = require('./wizards/AdminFieldResearchWizard')
+const adminFieldResearchWizard = AdminFieldResearchWizard(bot)
+adminFieldResearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -105,7 +109,8 @@ const stage = new Stage([
   statsWizard,
   addNotificationWizard,
   userDelayedWizard,
-  fieldresearchWizard
+  fieldresearchWizard,
+  adminFieldResearchWizard
 ])
 
 /**
@@ -154,6 +159,8 @@ async function showMainMenu (ctx, user) {
   btns.push(`Een raid wijzigen`)
   btns.push(`Field researches`)
   btns.push(`Vind een gymlocatie`)
+  btns.push(`Notificaties van gyms of raidbosses`)
+  btns.push(`Statistieken`)
 
   // group admins:
   let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
@@ -170,16 +177,14 @@ async function showMainMenu (ctx, user) {
   })
   for (let a = 0; a < admins.length; a++) {
     if ((admins[a].user.id === user.id) || dbAdmin !== null) {
-      btns.push(`Een gym toevoegen`)
-      btns.push(`Een gym wijzigen`)
-      btns.push(`Een raidboss toevoegen`)
-      btns.push(`Een raidboss wijzigen`)
+      btns.push('Admin: field Researches beheren')
+      btns.push(`Admin: gym toevoegen`)
+      btns.push(`Admin: gym wijzigen`)
+      btns.push(`Admin: raidboss toevoegen`)
+      btns.push(`Admin: raidboss wijzigen`)
       break
     }
   }
-
-  btns.push(`Notificaties van gyms of raidbosses`)
-  btns.push(`Statistieken`)
 
   return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.keyboard(
     btns).oneTime().resize().extra())
@@ -213,15 +218,16 @@ bot.hears('Afmelden bij een raid', Stage.enter('exit-raid-wizard'))
 bot.hears('Een nieuwe raid melden', Stage.enter('add-raid-wizard'))
 bot.hears('Een raid wijzigen', Stage.enter('edit-raid-wizard'))
 bot.hears('Vind een gymlocatie', Stage.enter('find-gym-wizard'))
-bot.hears('Een gym toevoegen', Stage.enter('add-gym-wizard'))
-bot.hears('Een gym wijzigen', Stage.enter('edit-gym-wizard'))
 bot.hears(`Field researches`, Stage.enter('fieldresearch-wizard'))
-bot.hears('Een raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
-bot.hears('Een raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
 bot.hears('Statistieken', Stage.enter('stats-wizard'))
 bot.hears('Notificaties van gyms of raidbosses', Stage.enter('notification-wizard'))
 bot.hears('Ik kom te laat voor een raid…', Stage.enter('user-delayed-wizard'))
-
+// admin:
+bot.hears('Admin: field Researches beheren', Stage.enter('admin-field-research-wizard'))
+bot.hears('Admin: gym toevoegen', Stage.enter('add-gym-wizard'))
+bot.hears('Admin: gym wijzigen', Stage.enter('edit-gym-wizard'))
+bot.hears('Admin: raidboss toevoegen', Stage.enter('add-raidboss-wizard'))
+bot.hears('Admin: raidboss wijzigen', Stage.enter('edit-raidboss-wizard'))
 /**
 * Check if valid user and show START button to switch to private mode
 */

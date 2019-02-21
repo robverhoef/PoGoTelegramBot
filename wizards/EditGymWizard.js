@@ -6,11 +6,17 @@ const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const adminCheck = require('../util/adminCheck')
 
 function EditGymWizard (bot) {
   return new WizardScene('edit-gym-wizard',
     // step 0
     async (ctx) => {
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
+
       return ctx.replyWithMarkdown(`We gaan de gym zoeken die je wilt wijzigen.\n*Voer een deel van de naam in, minimaal 2 tekens…*`)
         .then(() => ctx.wizard.next())
     },

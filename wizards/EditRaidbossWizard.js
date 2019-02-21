@@ -7,12 +7,18 @@ var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const metaphone = require('metaphone')
+const adminCheck = require('../util/adminCheck')
 
 function EditRaidbossWizard (bot) {
   return new WizardScene('edit-raidboss-wizard',
     // Step 0
     // Raidboss name request
     async (ctx) => {
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
+
       ctx.session.editboss = {}
       return ctx.replyWithMarkdown(`Je wilt een raidboss wijzigen.\n*Voer een deel van de naam in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())

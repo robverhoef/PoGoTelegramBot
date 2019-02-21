@@ -39,7 +39,6 @@ function AddRaidWizard (bot) {
         })
         if (candidates.length === 0) {
           return ctx.replyWithMarkdown(`Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
-          return
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
@@ -76,10 +75,10 @@ function AddRaidWizard (bot) {
       // User can't find the gym
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
         return ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
-        .then(() => {
-          ctx.wizard.selectStep(0)
-          return ctx.wizard.steps[0](ctx)
-        })
+          .then(() => {
+            ctx.wizard.selectStep(0)
+            return ctx.wizard.steps[0](ctx)
+          })
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]

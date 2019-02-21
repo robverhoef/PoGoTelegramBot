@@ -5,11 +5,17 @@ const WizardScene = require('telegraf/scenes/wizard')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const metaphone = require('metaphone')
+const adminCheck = require('../util/adminCheck')
 
 function AddRaidbossWizard (bot) {
   return new WizardScene('add-raidboss-wizard',
     // Step 0: Raidboss name request
     async (ctx) => {
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
+
       ctx.session.newboss = {}
       return ctx.replyWithMarkdown(`Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())

@@ -59,7 +59,6 @@ async function listResearchOptionButtons () {
   })
   let out = []
   for (let key of frkeys) {
-
     out.push(key.label)
   }
   return out
@@ -136,7 +135,7 @@ function FielresearchWizard (bot) {
     // add fieldresearch
     // -----------------
     async (ctx) => {
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe Field Research toevoegen. Hier vind je een [lijst met Field Researches en beloningen ↗️](https://thesilphroad.com/research-tasks). \r\n\r\nWe gaan eerst de stop zoeken.\n\n*Gebruik de knop 'Zoek stops in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens… \r\n`, Markup.keyboard([{ text: 'Zoek stops in mijn omgeving…', request_location: true }]).resize().extra({disable_web_page_preview: true}))
+      return ctx.replyWithMarkdown(`Je wilt een nieuwe Field Research toevoegen. Hier vind je een [lijst met Field Researches en beloningen ↗️](https://thesilphroad.com/research-tasks). \r\n\r\nWe gaan eerst de stop zoeken.\n\n*Gebruik de knop 'Zoek stops in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens… \r\n`, Markup.keyboard([{ text: 'Zoek stops in mijn omgeving…', request_location: true }]).resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -216,7 +215,7 @@ function FielresearchWizard (bot) {
             })
         }
       }
-      const frkeys= await listResearchOptionButtons()
+      const frkeys = await listResearchOptionButtons()
       return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
         Markup.keyboard(frkeys).oneTime().resize().extra()
       )
@@ -264,7 +263,7 @@ function FielresearchWizard (bot) {
             ctx.session = {}
             let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research toegevoegd\n\n`)
             bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
-            })
+          })
           .then(() => ctx.scene.leave())
       } else if (ctx.update.message.text === 'Nee') {
         out += `OK.\r\n\r\n`
@@ -329,7 +328,7 @@ function FielresearchWizard (bot) {
           break
         }
       }
-      const  frkeys= await listResearchOptionButtons()
+      const frkeys = await listResearchOptionButtons()
       return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
         Markup.keyboard(frkeys()).oneTime().resize().extra()
       )
@@ -360,10 +359,10 @@ function FielresearchWizard (bot) {
 
       return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
         .then(async () => {
-            ctx.session = {}
-            let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research gewijzigd\n\n`)
-            bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
-            })
+          ctx.session = {}
+          let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research gewijzigd\n\n`)
+          bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
+        })
         .then(() => ctx.scene.leave())
     },
     // -----------------
