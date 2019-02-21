@@ -86,7 +86,8 @@ To seed the list of raid bosses:
 
 ## Usage
 
-Make sure that there is a group admin. Only group admins are allowed to add / modify gyms.  
+Make sure that there is a group admin. Group admins are allowed to add / modify gyms. 
+There is also an isAdmin column in the users table. Setting this column to 1 (manually) will also grant admin privileges to a user. 
 The bot will detect addition and removal of users in a group. But all *existing* users in a group will have to say:	  
 >/hi@your_bot_name  
 
