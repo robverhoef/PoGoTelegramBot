@@ -4,6 +4,7 @@ This project is based on [Telegraf](https://telegraf.js.org/).
 You will need to have some experience with Telegram bots; know how to initialize a bot with Botfather, set inline mode, etc.  
 
 How you run this bot is entirely up to you. This version does run behind a SSL enabled proxy or, for example, [ngrok](https://ngrok.com) out of the box. But for a real standalone version additional code will be required to handle SSL certificates since this bot is using a [Webhook](https://core.telegram.org/bots/api#getting-updates).
+There is a [Wiki](https://github.com/robverhoef/PoGoTelegramBot/wiki) page that explains how to run this bot from systemd (Linux) instead of forever.js. Using systemd is a more reliable way of automatically restarting your bot.
 
 ## So what does this bot thing do?
 This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid requires multiple people at the same time and place. This bot offers an easy way to:
