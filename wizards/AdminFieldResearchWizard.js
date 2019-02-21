@@ -196,7 +196,7 @@ function AdminFieldResearchWizard (bot) {
     },
     // done
     async (ctx) => {
-      return ctx.replyWithMarkdown(`OK, gebruik /start enzo als je nog iets wilt doen.`, Markup.removeKeyboard().extra)
+      return ctx.replyWithMarkdown(`OK, gebruik /start enzo als je nog iets wilt doen.`, Markup.removeKeyboard().extra())
         .then(() => {
           return ctx.scene.leave()
         })
