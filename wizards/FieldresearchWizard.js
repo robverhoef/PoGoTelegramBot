@@ -330,7 +330,7 @@ function FielresearchWizard (bot) {
       }
       const frkeys = await listResearchOptionButtons()
       return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
-        Markup.keyboard(frkeys()).oneTime().resize().extra()
+        Markup.keyboard(frkeys).oneTime().resize().extra()
       )
         .then(() => ctx.wizard.next())
     },
