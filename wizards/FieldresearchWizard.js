@@ -70,8 +70,8 @@ function FielresearchWizard (bot) {
     listresearch: 2,
     addresearch: 3,
     editresearch: 8,
-    deleteresearch: 11,
-    cancelresearch: 14
+    deleteresearch: 12,
+    cancelresearch: 15
   }
 
   return new WizardScene('fieldresearch-wizard',
@@ -334,36 +334,46 @@ function FielresearchWizard (bot) {
       )
         .then(() => ctx.wizard.next())
     },
-
     async (ctx) => {
       ctx.session.editresearch.name = ctx.update.message.text
+      ctx.replyWithMarkdown(`Wijziging opslaan?`, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
+      .then(() => ctx.wizard.next())
+    },
+    async (ctx) => {
+      let confirm = ctx.update.message.text
       // console.log('altered: ', ctx.session.editresearch)
-      try {
-        await ctx.session.editresearch.save()
-      } catch (error) {
-        console.log('Whoops… saving new Field Research failed', error)
-        return ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`, Markup.removeKeyboard().extra())
-          .then(() => {
-            ctx.session = {}
-            return ctx.scene.leave()
-          })
-      }
-      let researches = await listResearches()
-      let out = `OK, je wijziging is opgeslagen.\r\n\r\n*Field Researches voor vandaag:*\r\n`
-      for (let res of researches) {
-        out += `\r\n*${res.name}*\r\n`
-        out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
-        out += `\r\n`
-      }
-      out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+      if (confirm === 'Ja') {
+        try {
+          await ctx.session.editresearch.save()
 
-      return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
-        .then(async () => {
-          ctx.session = {}
-          let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research gewijzigd\n\n`)
-          bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
-        })
+          let researches = await listResearches()
+          let out = `OK, je wijziging is opgeslagen.\r\n\r\n*Field Researches voor vandaag:*\r\n`
+          for (let res of researches) {
+            out += `\r\n*${res.name}*\r\n`
+            out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
+            out += `\r\n`
+          }
+          out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+
+          return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
+            .then(async () => {
+              ctx.session = {}
+              let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research gewijzigd\n\n`)
+              bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
+            })
+            .then(() => ctx.scene.leave())
+        } catch (error) {
+          console.log('Whoops… saving new Field Research failed', error)
+          return ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`, Markup.removeKeyboard().extra())
+            .then(() => {
+              ctx.session = {}
+             return ctx.scene.leave()
+            })
+        }
+      } else {
+        ctx.replyWithMarkdown(`OK.\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
+      }
     },
     // -----------------
     // remove fieldresearch
@@ -437,20 +447,25 @@ function FielresearchWizard (bot) {
           // Delete…
           try {
             console.log('User wants to destroy ', ctx.session.destroyresearch.id)
-            await models.Fieldresearch.destroy({
+            const deleted = await models.Fieldresearch.destroy({
               where: {
                 id: ctx.session.destroyresearch.id
               }
             })
+            if (deleted) {
+              let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research verwijderd\n\n`)
+              bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
+              console.log(`Research deleted ${JSON.stringify(ctx.session.destroyresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
+            }
           } catch (error) {
-            console.log(`Kon ${JSON.stringify(ctx.session.destroyresearch)} niet verwijderen`, error)
+            console.log(`Could not delete ${JSON.stringify(ctx.session.destroyresearch)}`, error)
             return ctx.replyWithMarkdown(`Mmmm, vreemd. Verwijderen is niet gelukt.\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`)
               .then(() => {
                 ctx.session = {}
                 return ctx.scene.leave()
               })
           }
-          console.log(`Research verwijderd ${JSON.stringify(ctx.session.destroyresearch)} door ${ctx.from.first_name}, ${ctx.from.id}`)
+
           break
         default:
           console.log('removal canceled')
