@@ -4,7 +4,7 @@
 const WizardScene = require('telegraf/scenes/wizard')
 var models = require('../models')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 const Sequelize = require('sequelize')
 const lastExRaidPassDate = require('../util/lastExRaidPassDate')
 const Op = Sequelize.Op
@@ -180,7 +180,7 @@ function getGymcounts (raids, countMethod) {
     gyms[key] = count
     total += totalRaid
   }
-  return {gyms, total}
+  return { gyms, total }
 }
 
 function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
@@ -195,7 +195,7 @@ function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
     return totals
   }
 
-  let {gyms, total} = getGymcounts(filteredRaids, countMethod)
+  let { gyms, total } = getGymcounts(filteredRaids, countMethod)
 
   let statMessage = ''
   let value = sortDictionaryOnValue(gyms)

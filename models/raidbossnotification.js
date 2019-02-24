@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false
     }
-  }, {tableName: 'raidboss-notifications'})
+  }, { tableName: 'raidboss-notifications' })
   RaidbossNotification.associate = function (models) {
     models.RaidbossNotification.belongsTo(models.Raidboss, {
       onDelete: 'NO ACTION'

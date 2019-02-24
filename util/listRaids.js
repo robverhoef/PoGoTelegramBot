@@ -29,11 +29,6 @@ module.exports = async (reason, ctx) => {
         ['start1', 'ASC']
       ]
     }))
-
-  if (raids.length === 0) {
-    return null
-  }
-  out += reason
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment.unix(raids[a].endtime)
     out += `${ctx.i18n.t('until', lang)}: ${endtime.format('H:mm')} `
@@ -65,6 +60,18 @@ module.exports = async (reason, ctx) => {
     out += `${ctx.i18n.t('participants', lang)}: ${userlist}`
     out += '\n\n'
   }
-  // console.log('listRaids output:', out)
+  let today = moment()
+  today.hours(0)
+  today.minutes(0)
+  today.seconds(0)
+  let researchcount = await models.Fieldresearch.count({
+    where: {
+      createdAt: {
+        [Op.gt]: today
+      }
+    }
+  })
+  out += `De bot kent nu ${researchcount} Field Researches\r\n`
+  // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
   return out
 }

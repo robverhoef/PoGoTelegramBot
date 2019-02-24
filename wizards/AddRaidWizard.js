@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -38,7 +38,7 @@ function AddRaidWizard (bot) {
       } else {
         const candidates = await models.Gym.findAll({
           where: {
-            gymname: {[Op.like]: '%' + term + '%'}
+            gymname: { [Op.like]: '%' + term + '%' }
           }
         })
         if (candidates.length === 0) {
@@ -82,8 +82,10 @@ function AddRaidWizard (bot) {
 
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
         ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.removeKeyboard().extra())
-        ctx.wizard.selectStep(0)
-        return ctx.wizard.steps[0](ctx)
+        .then(() => {
+          ctx.wizard.selectStep(0)
+          return ctx.wizard.steps[0](ctx)
+        })
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
@@ -171,7 +173,6 @@ function AddRaidWizard (bot) {
       if (starttime < moment()) {
         starttime = moment()
       }
-
       ctx.replyWithMarkdown(ctx.i18n.t('starttime_proposal', {starttm: starttime.format('HH:mm'), endtm: moment.unix(endtime).format('HH:mm')}))
         .then(() => ctx.wizard.next())
     },
@@ -213,12 +214,6 @@ function AddRaidWizard (bot) {
     async (ctx) => {
       ctx.i18n.locale(ctx.session.__language_code)
       const target = ctx.update.message.text.trim()
-      // let's see if we can find the raidboss…
-      // let boss = await models.Raidboss.find({
-      //   where: {
-      //     name: target
-      //   }
-      // })
       const boss = await resolveRaidBoss(target)
       if (boss !== null) {
         ctx.session.newraid.target = boss.name
@@ -245,13 +240,13 @@ function AddRaidWizard (bot) {
       if (saveme) {
         // Sometimes a new raid is getting submitted multiple times
         // ToDo: adapt this when multiple starttimes are getting implemented
-        var raidexists = await models.Raid.find({
+        var raidexists = await models.Raid.findOne({
           where: {
             [Op.and]: [
-              {gymId: ctx.session.newraid.gymId},
-              {target: ctx.session.newraid.target},
-              {start1: ctx.session.newraid.start1},
-              {endtime: ctx.session.newraid.endtime}
+              { gymId: ctx.session.newraid.gymId },
+              { target: ctx.session.newraid.target },
+              { start1: ctx.session.newraid.start1 },
+              { endtime: ctx.session.newraid.endtime }
             ]
           }
         })
@@ -334,9 +329,9 @@ function AddRaidWizard (bot) {
       const accounts = parseInt(ctx.update.message.text)
       const user = ctx.from
       // Check already registered? If so; update else store new
-      let raiduser = await models.Raiduser.find({
+      let raiduser = await models.Raiduser.findOne({
         where: {
-          [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}]
+          [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }]
         }
       })
       if (raiduser) {
@@ -344,7 +339,7 @@ function AddRaidWizard (bot) {
         try {
           await models.Raiduser.update(
             { accounts: accounts },
-            { where: { [Op.and]: [{uid: user.id}, {raidId: ctx.session.savedraid.id}] } }
+            { where: { [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }] } }
           )
         } catch (error) {
           return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
@@ -380,7 +375,7 @@ function AddRaidWizard (bot) {
       }), Markup.removeKeyboard().extra())
 
         .then(async () => {
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
         })
         .then(() => ctx.scene.leave())
     }

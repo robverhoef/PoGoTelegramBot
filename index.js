@@ -4,7 +4,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const moment = require('moment-timezone')
 const Telegraf = require('telegraf')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 // const MySQLSession = require('telegraf-session-mysql')
 const Stage = require('telegraf/stage')
 const TelegrafI18n = require('telegraf-i18n')
@@ -100,6 +100,14 @@ const UserDelayedWizard = require('./wizards/UserDelayedWizard')
 const userDelayedWizard = UserDelayedWizard(bot)
 userDelayedWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const FieldresearchWizard = require('./wizards/FieldresearchWizard')
+const fieldresearchWizard = FieldresearchWizard(bot)
+fieldresearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const AdminFieldResearchWizard = require('./wizards/AdminFieldResearchWizard')
+const adminFieldResearchWizard = AdminFieldResearchWizard(bot)
+adminFieldResearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -113,7 +121,9 @@ const stage = new Stage([
   statsWizard,
   addNotificationWizard,
   localeWizard,
-  userDelayedWizard
+  userDelayedWizard,
+  fieldresearchWizard,
+  adminFieldResearchWizard
 ])
 
 /**
@@ -129,7 +139,8 @@ bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
-  console.log('showmainmenu user', user)
+  ctx.session = {}
+  ctx.scene.leave()
   let raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -156,11 +167,12 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_add_raid'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
   btns.push(ctx.i18n.t('btn_find_gym'))
-
+  btns.push(ctx.i18n.t('btn_notifications')
+  btns.push(ctx.i18n.t('btn_stats')
   // group admins:
   let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database
-  let dbAdmin = await models.User.find({
+  let dbAdmin = await models.User.findOne({
     where: {
       tId: {
         [Op.eq]: user.id
@@ -172,6 +184,7 @@ async function showMainMenu (ctx, user) {
   })
   for (let a = 0; a < admins.length; a++) {
     if (admins[a].user.id === user.id || dbAdmin !== null) {
+      btns.push(ctx.i18n.t('btn_manage_fieldresearches'))
       btns.push(ctx.i18n.t('btn_add_gym'))
       btns.push(ctx.i18n.t('btn_edit_gym'))
       btns.push(ctx.i18n.t('btn_add_boss'))
@@ -179,15 +192,11 @@ async function showMainMenu (ctx, user) {
       break
     }
   }
-
-  btns.push(ctx.i18n.t('btn_notifications'))
-  btns.push(ctx.i18n.t('btn_stats'))
-
   return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.keyboard(
     btns).oneTime().resize().extra())
 }
 
-// This runs after the user has 'start'ed from an inline query in the group or /start in private mode
+// This runs after the user has started from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
   // check if start is not directly coming from the group
   console.log('from: ', ctx.update.message.from)
@@ -198,7 +207,7 @@ bot.command('/start', async (ctx) => {
 
   let user = ctx.update.message.from
   // validate the user
-  var fuser = await models.User.find({
+  var fuser = await models.User.findOne({
     where: {
       tId: user.id
     }
@@ -221,18 +230,21 @@ bot.command('cancel', (ctx) => cancelConversation(ctx))
 bot.command('lang', Stage.enter('locale-wizard'))
 // iterate over languages
 for (var key in i18n.repository) {
-  bot.hears(i18n.repository[key]['btn_add_raid'].call(), Stage.enter('add-raid-wizard'))
   bot.hears(i18n.repository[key]['btn_join_raid'].call(), Stage.enter('join-raid-wizard'))
   bot.hears(i18n.repository[key]['btn_exit_raid'].call(), Stage.enter('exit-raid-wizard'))
+  bot.hears(i18n.repository[key]['btn_add_raid'].call(), Stage.enter('add-raid-wizard'))
   bot.hears(i18n.repository[key]['btn_edit_raid'].call(), Stage.enter('edit-raid-wizard'))
   bot.hears(i18n.repository[key]['btn_find_gym'].call(), Stage.enter('find-gym-wizard'))
+  bot.hears(i18n.repository[key]['btn_field_researches'].call(), Stage.enter('fieldresearch-wizard'))
+  bot.hears(i18n.repository[key]['btn_stats'].call(), Stage.enter('stats-wizard'))
+  bot.hears(i18n.repository[key]['btn_notifications'].call(), Stage.enter('notification-wizard'))
+  bot.hears(i18n.repository[key]['btn_user_delayed'].call(), Stage.enter('user-delayed-wizard'))
+  // Admin
+  bot.hears(i18n.repository[key]['btn_manage_fieldresearches'].call(), Stage.enter('admin-field-research-wizard'))
   bot.hears(i18n.repository[key]['btn_add_gym'].call(), Stage.enter('add-gym-wizard'))
   bot.hears(i18n.repository[key]['btn_edit_gym'].call(), Stage.enter('edit-gym-wizard'))
   bot.hears(i18n.repository[key]['btn_add_boss'].call(), Stage.enter('add-raidboss-wizard'))
   bot.hears(i18n.repository[key]['btn_edit_boss'].call(), Stage.enter('edit-raidboss-wizard'))
-  bot.hears(i18n.repository[key]['btn_stats'].call(), Stage.enter('stats-wizard'))
-  bot.hears(i18n.repository[key]['btn_notifications'].call(), Stage.enter('notification-wizard'))
-  bot.hears(i18n.repository[key]['btn_user_delayed'].call(), Stage.enter('user-delayed-wizard'))
 }
 
 /**
@@ -240,11 +252,11 @@ for (var key in i18n.repository) {
 */
 bot.on('inline_query', async ctx => {
   // console.log('inline_query', ctx.update)
-  let user = await models.User.find({
+  let user = await models.User.findOne({
     where: {
       [Op.and]: [
-        {tId: ctx.inlineQuery.from.id},
-        {tGroupID: process.env.GROUP_ID.toString()}
+        { tId: ctx.inlineQuery.from.id },
+        { tGroupID: process.env.GROUP_ID.toString() }
       ]
     }
   })
@@ -275,8 +287,8 @@ bot.hears(/\/hi/i, async (ctx) => {
   let olduser = await models.User.find({
     where: {
       [Op.and]: [
-        {tGroupID: process.env.GROUP_ID.toString()},
-        {tId: ctx.update.message.from.id}
+        { tGroupID: process.env.GROUP_ID.toString() },
+        { tId: ctx.update.message.from.id }
       ]
     }
   })
@@ -431,7 +443,7 @@ bot.hears(/\/raids/i, async (ctx) => {
     out += `${ctx.i18n.t('participants')}: ${userlist}`
     out += '\n\n'
   }
-  return ctx.replyWithMarkdown(out, {disable_web_page_preview: true})
+  return ctx.replyWithMarkdown(out, { disable_web_page_preview: true })
 })
 // bot.on('text', function (ctx) {
 //   console.log('ON MESSAGE', ctx.message)

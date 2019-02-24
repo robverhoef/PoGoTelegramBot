@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -290,7 +290,7 @@ function EditRaidWizard (bot) {
       } else {
         const candidates = await models.Gym.findAll({
           where: {
-            gymname: {[Op.like]: '%' + term + '%'}
+            gymname: { [Op.like]: '%' + term + '%' }
           }
         })
         if (candidates.length === 0) {

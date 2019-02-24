@@ -2,14 +2,20 @@
 // add gym wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
+const adminCheck = require('../util/adminCheck')
 
 function AddGymWizard (bot) {
   return new WizardScene('add-gym-wizard',
     // Step 0
     // Gym name
     async (ctx) => {
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
+
       ctx.session.newgym = {}
       return ctx.replyWithMarkdown(ctx.i18n.t('add_gym_welcome'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())

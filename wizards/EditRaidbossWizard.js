@@ -2,17 +2,23 @@
 // add raidboss wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const metaphone = require('metaphone')
+const adminCheck = require('../util/adminCheck')
 
 function EditRaidbossWizard (bot) {
   return new WizardScene('edit-raidboss-wizard',
     // Step 0
     // Raidboss name request
     async (ctx) => {
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
+
       ctx.session.editboss = {}
       return ctx.replyWithMarkdown(ctx.i18n.t('edit_raiddboss_intro'), Markup.removeKeyboard())
 
@@ -25,7 +31,7 @@ function EditRaidbossWizard (bot) {
       let term = ctx.update.message.text.trim()
       let bosses = await models.Raidboss.findAll({
         where: {
-          name: {[Op.like]: '%' + term + '%'}
+          name: { [Op.like]: '%' + term + '%' }
         }
       })
       if (bosses.length === 0) {
@@ -43,7 +49,7 @@ function EditRaidbossWizard (bot) {
           accounts: bosses[i].accounts
         })
       }
-      ctx.session.bosscandidates.push({name: ctx.i18n.t('edit_raidboss_not_listed'), id: 0})
+      ctx.session.bosscandidates.push({name: ctx.i18n.t('edit_raidboss_cancel'), id: 0})
       return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_select'), Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },

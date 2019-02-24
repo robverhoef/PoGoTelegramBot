@@ -2,15 +2,20 @@
 // Edit raid wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const adminCheck = require('../util/adminCheck')
 
 function EditGymWizard (bot) {
   return new WizardScene('edit-gym-wizard',
     // step 0
     async (ctx) => {
+      const invalidAdmin = await adminCheck(ctx, bot)
+        if (invalidAdmin !== false) {
+          return invalidAdmin
+        }
       return ctx.replyWithMarkdown(ctx.i18n.t(ctx.i18n.t('edit_gym_intro'), Markup.removeKeyboard().extra()))
         .then(() => ctx.wizard.next())
     },
@@ -24,7 +29,7 @@ function EditGymWizard (bot) {
       } else {
         const candidates = await models.Gym.findAll({
           where: {
-            gymname: {[Op.like]: '%' + term + '%'}
+            gymname: { [Op.like]: '%' + term + '%' }
           }
         })
         if (candidates.length === 0) {

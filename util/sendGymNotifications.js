@@ -20,6 +20,10 @@ module.exports = async (bot, gymId, gymname, target, starttime) => {
   })
 
   for (let notification of notifications) {
-    bot.telegram.sendMessage(notification.User.tId, `Psst.. Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${moment.unix(starttime).format('H:mm')}*.`, {parse_mode: 'Markdown', disable_web_page_preview: true})
+    try {
+      bot.telegram.sendMessage(notification.User.tId, `Psst.. Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${moment.unix(starttime).format('H:mm')}*.`, { parse_mode: 'Markdown', disable_web_page_preview: true })
+    } catch (error) {
+      console.log('Error while sending gym notification to ', notification.User.tId, error.message)
+    }
   }
 }

@@ -1,12 +1,10 @@
 # Pogo Telegram Bot
 
-Please note: *Early Work In Progress*
-
 This project is based on [Telegraf](https://telegraf.js.org/).  
 You will need to have some experience with Telegram bots; know how to initialize a bot with Botfather, set inline mode, etc.  
-Although it is being used in the wild; there are no guarantees this will work for you, yet. Your mileage may vary…
 
 How you run this bot is entirely up to you. This version does run behind a SSL enabled proxy or, for example, [ngrok](https://ngrok.com) out of the box. But for a real standalone version additional code will be required to handle SSL certificates since this bot is using a [Webhook](https://core.telegram.org/bots/api#getting-updates).
+There is a [Wiki](https://github.com/robverhoef/PoGoTelegramBot/wiki) page that explains how to run this bot from systemd (Linux) instead of forever.js. Using systemd is a more reliable way of automatically restarting your bot.
 
 ## So what does this bot thing do?
 This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid requires multiple people at the same time and place. This bot offers an easy way to:
@@ -17,13 +15,16 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * join a raid
 * cancel raid participation
 * show the users who will participate in a raid, including the total number of accounts 
+* statistics! Which gyms are raided most, which player report the most raids, etc.
+* report Field Researches on stops, most of the time without typing
 * add gyms or change gym properties (admins only)
 * add or modify raidbosses (admins only)
-
+* add, remove or modify predefined Field Research keys (admins only)
 ## Features
 
 * Easy to use for end users; no more copy/pasting lists of raid users.
 * Predefined gym locations with optional Google Maps link
+* Predefined stop locations with Google Maps link
 * Restricted to a specific Telegram supergroup (…might not be watertight yet)
 * Starts as inline bot and moves users to a private chat to prevent littering the group 
 * Keeps track of the number of accounts per raid
@@ -35,12 +36,11 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 ## Requirements
 
 * Node v8 or 9
-* MySQL or MariaDB
+* MySQL or MariaDB (with InnoDB and utf8mb4 charset)
 
 ## ToDo
 
 * I18n; it is currently Dutch only
-* Add code tests
 * Make timezones configurable, currently using Europe/Amsterdam
 
 ## Install
@@ -87,7 +87,8 @@ To seed the list of raid bosses:
 
 ## Usage
 
-Make sure that there is a group admin. Only group admins are allowed to add / modify gyms.  
+Make sure that there is a group admin. Group admins are allowed to add / modify gyms. 
+There is also an isAdmin column in the users table. Setting this column to 1 (manually) will also grant admin privileges to a user. 
 The bot will detect addition and removal of users in a group. But all *existing* users in a group will have to say:	  
 >/hi@your_bot_name  
 

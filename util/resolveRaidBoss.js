@@ -13,7 +13,7 @@ module.exports = async (bossname) => {
     let egg = bossname.match(/(?:^lvl|^level)\s*(\d)/i)
     if (egg !== null && egg.length > 1 && parseInt(egg[1]) > 0) {
       // Let's see if the egg is defined…
-      const boss = await models.Raidboss.find({
+      const boss = await models.Raidboss.findOne({
         where: {
           name: {[Op.like]: 'Level ' + parseInt(egg[1]) + ' egg'}
         }
@@ -30,16 +30,16 @@ module.exports = async (bossname) => {
     }
   } else {
     // next; search DB
-    let boss = await models.Raidboss.find({
+    let boss = await models.Raidboss.findOne({
       where: {
-        name: {[Op.like]: bossname}
+        name: { [Op.like]: bossname }
       }
     })
     if (boss) {
       return boss
     } else {
       // last resort; try metaphone
-      const boss = await models.Raidboss.find({
+      const boss = await models.Raidboss.findOne({
         where: {
           metaphone: metaphone(bossname)
         }

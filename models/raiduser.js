@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(32),
       allowNull: true
     }
-  }, {tableName: 'raidusers'})
+  }, { tableName: 'raidusers' })
 
   Raiduser.associate = function (models) {
     models.Raiduser.belongsTo(models.Raid, {

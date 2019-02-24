@@ -1,6 +1,10 @@
 {
   "name": "telegrampogobot",
+<<<<<<< HEAD
   "version": "0.7.13",
+=======
+  "version": "0.8.0",
+>>>>>>> master
   "description": "A Telegram Pokemon Go Raid Bot",
   "repository": {
     "type": "git",
@@ -10,8 +14,8 @@
   "scripts": {
     "start": "./node_modules/.bin/forever --minUptime 1000 --spinSleepTime 500 -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
     "dev": "./node_modules/.bin/forever --minUptime 1000 --spinSleepTime 500 -w --watchIgnore node_modules --watchIgnore logs -e logs/err.log -o logs/stdout.log -l logs/forever.log -a index.js",
-    "eslint": "eslint ./*.js ./models ./wizards ./util",
-    "eslintfix": "eslint --fix ./*.js ./models ./wizards ./util",
+    "eslint": "node_modules/.bin/eslint ./*.js ./models ./wizards ./util; exit 0",
+    "eslintfix": "node_modules/.bin/eslint --fix ./*.js ./models ./wizards ./util; exit 0",
     "dbupdate": "node_modules/.bin/sequelize db:migrate",
     "test": "cross-env NODE_ENV=test node_modules/.bin/mocha --reporter spec --exit tests"
   },

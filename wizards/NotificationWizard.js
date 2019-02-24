@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 var models = require('../models')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 
@@ -97,13 +97,13 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
         if (ctx.session.chosenGymNotification) {
           candidates = await models.Gym.findAll({
             where: {
-              gymname: {[Op.like]: '%' + term + '%'}
+              gymname: { [Op.like]: '%' + term + '%' }
             }
           })
         } else {
           candidates = await models.Raidboss.findAll({
             where: {
-              name: {[Op.like]: '%' + term + '%'}
+              name: { [Op.like]: '%' + term + '%' }
             }
           })
         }

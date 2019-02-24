@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     level: DataTypes.INTEGER,
     accounts: DataTypes.STRING,
     metaphone: DataTypes.STRING
-  }, {tableName: 'raidbosses'})
+  }, { tableName: 'raidbosses' })
 
   Raidboss.associate = function (models) {
     models.Raidboss.hasMany(models.Raid)
