@@ -80,13 +80,13 @@ function FielresearchWizard (bot) {
       ctx.session.newresearch = {}
       // ToDo: delete all researches from previous days?
       ctx.session.mainreseachbtns = [
-        ['Lijst tonen', 'listresearch'],
-        ['Research toevoegen', 'addresearch'],
-        ['Research aanpassen', 'editresearch'],
-        ['Research verwijderen', 'deleteresearch'],
-        ['Annuleren', 'cancelresearch']
+        [ctx.i18n.t('fres_btn_mainmenu_showlist'), 'listresearch'],
+        [ctx.i18n.t('fres_btn_mainmenu_add_research'), 'addresearch'],
+        [ctx.i18n.t('fres_btn_mainmenu_edit_research'), 'editresearch'],
+        [ctx.i18n.t('fres_btn_mainmenu_remove_research'), 'deleteresearch'],
+        [ctx.i18n.t('fres_btn_mainmenu_cancel'), 'cancelresearch']
       ]
-      return ctx.replyWithMarkdown(`Hallo ${ctx.from.first_name}! \r\n\r\n*Wat wil je doen?*`, Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: ctx.from}), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
