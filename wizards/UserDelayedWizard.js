@@ -75,8 +75,8 @@ var UserDelayedGymWizard = function (bot) {
       }
       // save selected index to session
       ctx.session.delayedraid = parseInt(ind)
-      ctx.session.accountbtns = [['2','5'], [ctx.i18n.t('user_delayed_is_on_time')]]
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_how_much_later', {gymname: selectedraid.gymname})}`, Markup.keyboard(ctx.session.accountbtns).extra())
+      ctx.session.accountbtns = [['2', '5'], [ctx.i18n.t('user_delayed_is_on_time')]]
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_how_much_later', { gymname: selectedraid.gymname })}`, Markup.keyboard(ctx.session.accountbtns).extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {

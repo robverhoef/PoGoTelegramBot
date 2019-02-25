@@ -58,7 +58,7 @@ async function processPersonalOwnRaids (user, time, ctx) {
 
   let statMessage = ''
   if (ownraids.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_your_total_raids_reported', {ownraids: ownraids})} \n`
+    statMessage += `${ctx.i18n.t('stats_your_total_raids_reported', { ownraids: ownraids })} \n`
     let ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
     if (ownedRaids.length > 0) {
       statMessage += `_${ctx.i18n.t('stats_your_most_reported_gyms')}:_\n`
@@ -400,8 +400,8 @@ var StatsWizard = function () {
         ctx.i18n.t('stats_this_week'),
         ctx.i18n.t('stats_this_month'),
         ctx.i18n.t('stats_this_year'),
-        ctx.i18n.t('stats_expass_today', {dates: dates}),
-        ctx.i18n.t('stats_expass_prev_period', {dates: dates})
+        ctx.i18n.t('stats_expass_today', { dates: dates }),
+        ctx.i18n.t('stats_expass_prev_period', { dates: dates })
       ]
 
       return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_period_question'), Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
@@ -441,7 +441,7 @@ var StatsWizard = function () {
         if (chosenStat === 1) {
           statMessage = await determineGlobalExRaids(start, end, ctx)
         }
-        statMessage = `*${ctx.i18n.t('stats_exraid_since', {timestr: start.format('DD-MM-YYYY HH:mm'), endtimestr: end.format('DD-MM-YYYY HH:mm')})}:*\n\n` + statMessage
+        statMessage = `*${ctx.i18n.t('stats_exraid_since', { timestr: start.format('DD-MM-YYYY HH:mm'), endtimestr: end.format('DD-MM-YYYY HH:mm') })}:*\n\n` + statMessage
       }
 
       if (statMessage === '') {

@@ -1,10 +1,6 @@
 {
   "name": "telegrampogobot",
-<<<<<<< HEAD
-  "version": "0.7.13",
-=======
   "version": "0.8.0",
->>>>>>> master
   "description": "A Telegram Pokemon Go Raid Bot",
   "repository": {
     "type": "git",
@@ -32,6 +28,7 @@
     "mysql2": "^1.6.5",
     "sequelize": "^4.42.0",
     "telegraf": "^3.27.1",
+    "telegraf-i18n": "^6.4.0",
     "telegraf-session-mysql": "^5.1.0"
   },
   "devDependencies": {

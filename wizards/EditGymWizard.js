@@ -13,9 +13,9 @@ function EditGymWizard (bot) {
     // step 0
     async (ctx) => {
       const invalidAdmin = await adminCheck(ctx, bot)
-        if (invalidAdmin !== false) {
-          return invalidAdmin
-        }
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
       return ctx.replyWithMarkdown(ctx.i18n.t(ctx.i18n.t('edit_gym_intro'), Markup.removeKeyboard().extra()))
         .then(() => ctx.wizard.next())
     },
@@ -33,7 +33,7 @@ function EditGymWizard (bot) {
           }
         })
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {term: term}))
+          ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: term }))
           return
         }
         ctx.session.gymcandidates = []
@@ -48,7 +48,7 @@ function EditGymWizard (bot) {
           ctx.session.gymbtns.push(candidates[i].gymname)
         }
         ctx.session.gymbtns.push(ctx.i18n.t('btn_gym_not_found'))
-        ctx.session.gymcandidates.push({gymname: ctx.i18n.t('btn_gym_not_found'), id: 0})
+        ctx.session.gymcandidates.push({ gymname: ctx.i18n.t('btn_gym_not_found'), id: 0 })
         return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymbtns).resize().oneTime().extra())
           .then(() => ctx.wizard.next())
       }

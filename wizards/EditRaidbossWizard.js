@@ -49,7 +49,7 @@ function EditRaidbossWizard (bot) {
           accounts: bosses[i].accounts
         })
       }
-      ctx.session.bosscandidates.push({name: ctx.i18n.t('edit_raidboss_cancel'), id: 0})
+      ctx.session.bosscandidates.push({ name: ctx.i18n.t('edit_raidboss_cancel'), id: 0 })
       return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_select'), Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },

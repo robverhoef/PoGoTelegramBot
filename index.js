@@ -167,8 +167,8 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_add_raid'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
   btns.push(ctx.i18n.t('btn_find_gym'))
-  btns.push(ctx.i18n.t('btn_notifications')
-  btns.push(ctx.i18n.t('btn_stats')
+  btns.push(ctx.i18n.t('btn_notifications'))
+  btns.push(ctx.i18n.t('btn_stats'))
   // group admins:
   let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database

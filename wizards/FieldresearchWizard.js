@@ -86,7 +86,7 @@ function FielresearchWizard (bot) {
         [ctx.i18n.t('fres_btn_mainmenu_remove_research'), 'deleteresearch'],
         [ctx.i18n.t('fres_btn_mainmenu_cancel'), 'cancelresearch']
       ]
-      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: ctx.from}), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: ctx.from }), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -337,7 +337,7 @@ function FielresearchWizard (bot) {
     async (ctx) => {
       ctx.session.editresearch.name = ctx.update.message.text
       ctx.replyWithMarkdown(`Wijziging opslaan?`, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
-      .then(() => ctx.wizard.next())
+        .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       let confirm = ctx.update.message.text
@@ -367,12 +367,12 @@ function FielresearchWizard (bot) {
           return ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`, Markup.removeKeyboard().extra())
             .then(() => {
               ctx.session = {}
-             return ctx.scene.leave()
+              return ctx.scene.leave()
             })
         }
       } else {
         ctx.replyWithMarkdown(`OK.\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`, Markup.removeKeyboard().extra())
-        .then(() => ctx.scene.leave())
+          .then(() => ctx.scene.leave())
       }
     },
     // -----------------

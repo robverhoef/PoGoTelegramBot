@@ -15,7 +15,7 @@ module.exports = async (bossname) => {
       // Let's see if the egg is defined…
       const boss = await models.Raidboss.findOne({
         where: {
-          name: {[Op.like]: 'Level ' + parseInt(egg[1]) + ' egg'}
+          name: { [Op.like]: 'Level ' + parseInt(egg[1]) + ' egg' }
         }
       })
       if (boss) {

@@ -43,7 +43,7 @@ var FindGymWizard = function () {
           out: out,
           term: term,
           l: l
-        }), {disable_web_page_preview: true})
+        }), { disable_web_page_preview: true })
           .then(() => ctx.scene.leave())
       }
     }

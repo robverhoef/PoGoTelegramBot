@@ -42,7 +42,7 @@ function AddRaidWizard (bot) {
           }
         })
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {term: term}))
+          ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: term }))
           return
         }
         ctx.session.gymcandidates = []
@@ -82,10 +82,10 @@ function AddRaidWizard (bot) {
 
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
         ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.removeKeyboard().extra())
-        .then(() => {
-          ctx.wizard.selectStep(0)
-          return ctx.wizard.steps[0](ctx)
-        })
+          .then(() => {
+            ctx.wizard.selectStep(0)
+            return ctx.wizard.steps[0](ctx)
+          })
       } else {
         // retrieve selected candidate from session
         let selectedgym = ctx.session.gymcandidates[selectedIndex]
@@ -173,7 +173,7 @@ function AddRaidWizard (bot) {
       if (starttime < moment()) {
         starttime = moment()
       }
-      ctx.replyWithMarkdown(ctx.i18n.t('starttime_proposal', {starttm: starttime.format('HH:mm'), endtm: moment.unix(endtime).format('HH:mm')}))
+      ctx.replyWithMarkdown(ctx.i18n.t('starttime_proposal', { starttm: starttime.format('HH:mm'), endtm: moment.unix(endtime).format('HH:mm') }))
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -197,13 +197,13 @@ function AddRaidWizard (bot) {
       } else {
         start1 = inputTime(message)
         if (start1 === false) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')}))
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', { range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm') }))
         }
         if (starttime.diff(moment.unix(start1)) > 0 || moment.unix(endtime).diff(moment.unix(start1)) < 0) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')}))
+          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_range', { range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm') }))
         }
         if (moment.unix(endtime).diff(moment.unix(start1)) < 5) {
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('invalid_time_range_too_early')}${ctx.i18n.t('invalid_time_range', {range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm')})}`)
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('invalid_time_range_too_early')}${ctx.i18n.t('invalid_time_range', { range_start: starttime.format('HH:mm'), range_end: moment.unix(endtime).format('HH:mm') })}`)
         }
       }
       ctx.session.newraid.start1 = start1
@@ -296,7 +296,7 @@ function AddRaidWizard (bot) {
         // send alert to subscribed users of the Raidboss
         await sendRaidbosses(ctx, bot)
         ctx.session.participateOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
-        return bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
+        return bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
           .then(() => {
             ctx.replyWithMarkdown(ctx.i18n.t('do_you_participate'), Markup.keyboard(ctx.session.participateOptions).resize().oneTime().extra())
           })
