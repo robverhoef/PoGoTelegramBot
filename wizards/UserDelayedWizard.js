@@ -33,7 +33,7 @@ var UserDelayedGymWizard = function (bot) {
         ]
       })
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown('Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard())
+        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_no_raids_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
       // buttons to show, with index from candidates as data (since maxlength of button data is 64 bytes…)
@@ -94,15 +94,27 @@ var UserDelayedGymWizard = function (bot) {
         let val = null
         switch (delay) {
           case '2':
-            reason = `[${user.first_name}](tg://user?id=${user.id}) komt 2 minuten later bij ${delayedraid.gymname}`
+            reason = `${ctx.i18n.t('user_delayed_by_2min', {
+              first_name: user.first_name,
+              uid: user.id,
+              gymname: delayedraid.gymname
+            })}`
             val = '2 min.'
             break
           case '5':
-            reason = `[${user.first_name}](tg://user?id=${user.id}) komt 5 minuten later bij ${delayedraid.gymname}`
+            reason = `${ctx.i18n.t('user_delayed_by_5min', {
+              first_name: user.first_name,
+              uid: user.id,
+              gymname: delayedraid.gymname
+            })}`
             val = '5 min.'
             break
-          case '…ik kom toch op tijd!':
-            reason = `[${user.first_name}](tg://user?id=${user.id}) komt toch op tijd bij ${delayedraid.gymname}`
+          case ctx.i18n.t('user_delayed_is_on_time'):
+            reason = `${ctx.i18n.t('user_delayed_on_time', {
+              first_name: user.first_name,
+              uid: user.id,
+              gymname: delayedraid.gymname
+            })}`
             val = null
             break
         }
@@ -112,11 +124,13 @@ var UserDelayedGymWizard = function (bot) {
             { where: { [Op.and]: [{ uid: user.id }, { raidId: delayedraid.raidid }] } }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown('Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*', Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_selection_wrong')})`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
         let out = await listRaids(`${reason}\n\n`)
-        return ctx.replyWithMarkdown(`Je status voor ${delayedraid.gymname} is gewijzigd 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_status_changed', {
+          gymname: delayedraid.gymname
+        })}`, Markup.removeKeyboard().extra())
           .then(async () => {
             bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })

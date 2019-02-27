@@ -20,14 +20,14 @@ var NotificationWizard = function () {
         }
       })
       if (!dbuser) {
-        return ctx.replyWithMarkdown(`Hier ging iets *niet* met het ophalen van jouw gebruiker…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_something_wrong_finding_user')}`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
 
       ctx.session.userId = dbuser.id
-      ctx.session.notificatiesbtns = [`Gym notificaties`, `Raisboss notificaties`]
+      ctx.session.notificatiesbtns = [`${ctx.i18n.t('noti_gyms')}`, `${ctx.i18n.t('noti_raidbosses')}`]
 
-      return ctx.replyWithMarkdown(`*Welke type notificaties gaan we mee aan de slag?*`, Markup.keyboard(ctx.session.notificatiesbtns)
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_which_notification')}`, Markup.keyboard(ctx.session.notificatiesbtns)
         .oneTime()
         .resize()
         .extra())
@@ -41,7 +41,7 @@ var NotificationWizard = function () {
       ctx.session.chosenNotificationSingleString = ctx.session.chosenGymNotification ? 'gym' : 'raidboss'
 
       if (ctx.session.chosenNotificatie === -1) {
-        return ctx.replyWithMarkdown(`Hier ging iets niet goed…\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('something_wrong')}`, Markup.removeKeyboard().extra())
       }
 
       let existingNotifications = []
@@ -76,14 +76,16 @@ var NotificationWizard = function () {
       }
 
       if (message === '') {
-        message = '\n- Je hebt geen notificaties ingesteld'
+        message = `\n${ctx.i18n.t('noti_nothing_set')}`
       }
 
       message += '\n\n'
 
-      return ctx.replyWithMarkdown(`*Je hebt momenteel op de volgende ${ctx.session.chosenNotificationString} notificaties ingesteld als er raids gemeld worden:*\n${message}
-Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleString} of juist afmelden? Dan gaan we deze eerst zoeken.\n
-*Voer een deel van de naam in, minimaal 2 tekens in…*`, Markup.removeKeyboard())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_current_notifications', {
+        noti_string: ctx.session.chosenNotificationString,
+        message: message,
+        noti_single_string: ctx.session.chosenNotificationSingleString
+      })}`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 2
@@ -91,7 +93,7 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
       // console.log('step 1', ctx.update.message.text)
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
-        return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de naam…\n*Probeer het nog eens of gebruik /cancel om te annuleren* 🤨`)
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_min_2_chars')}`)
       } else {
         let candidates = []
         if (ctx.session.chosenGymNotification) {
@@ -108,8 +110,10 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
           })
         }
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(`Ik kon geen ${ctx.session.chosenNotificationString} vinden met '${term}' in de naam… \nWellicht staat deze nog niet geregistreerd… Een van de admins kan deze wellicht toevoegen…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens*`)
-          return
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_subject_not_found', {
+            noti_string: ctx.session.chosenNotificationString,
+            term: term
+          })}`)
         }
         ctx.session.candidates = []
         for (let i = 0; i < candidates.length; i++) {
@@ -119,9 +123,13 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
           ])
         }
         ctx.session.candidates.push([
-          `Mijn ${ctx.session.chosenNotificationSingleString} staat er niet bij…`, 0
+          `${ctx.i18n.t('noti_subject_not_listed', {
+            noti_single_string: ctx.session.chosenNotificationSingleString
+          })}`, 0
         ])
-        return ctx.replyWithMarkdown(`Kies een ${ctx.session.chosenNotificationSingleString}.`, Markup.keyboard(ctx.session.candidates.map(el => el[0])).oneTime().resize().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_select_subject', {
+          noti_single_string: ctx.session.chosenNotificationSingleString
+        })}.`, Markup.keyboard(ctx.session.candidates.map(el => el[0])).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
@@ -136,7 +144,9 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
       }
       // Catch gym not found errors…
       if (selectedIndex === -1) {
-        return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de ${ctx.session.chosenNotificationSingleString}.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_select_something_wrong', {
+          noti_single_string: ctx.session.chosenNotificationSingleString
+        })}`, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -144,7 +154,7 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
       }
       // User can't find the gym/raidboss
       if (ctx.session.candidates[selectedIndex][1] === 0) {
-        return ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('retry_or_cancel')}`, Markup.removeKeyboard().extra())
       } else {
         // retrieve selected candidate from session
         let selectedCandidate = ctx.session.candidates[selectedIndex]
@@ -173,22 +183,26 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
             }
           })
         }
-        let message = `Wil je een notificatie van ${selectedCandidate[0]} als er wat te raiden valt?`
+        let message = `${ctx.i18n.t('noti_want_notification', {
+          selected_candidate: selectedCandidate[0]
+        })}`
         if (existingNotification) {
           ctx.session.existingNotificationId = existingNotification.id
-          message = `Wil je je notificaties uitzetten van ${selectedCandidate[0]}?`
+          message = `${ctx.i18n.t('noti_turn_off', {
+            selected_candidate: selectedCandidate[0]
+          })}`
         } else {
           ctx.session.existingNotificationId = null
         }
 
-        return ctx.replyWithMarkdown(message, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
+        return ctx.replyWithMarkdown(message, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
     // step 3
     async (ctx) => {
-      if (ctx.update.message.text === 'Nee') {
-        return ctx.replyWithMarkdown(`Prima.\n*Gebruik */start* om het nog een opdracht uit te voeren…*\n`, Markup.removeKeyboard().extra())
+      if (ctx.update.message.text === ctx.i18n.t('no')) {
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_no_save')}`, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -209,10 +223,12 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
             await gymNotification.save()
           } catch (error) {
             console.log('Woops… registering gymNotification failed', error)
-            return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende gym: ${selected[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_gym_finished', {
+            selected: selected[0]
+          })}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         } else {
           let raidbossNotification = models.RaidbossNotification.build({
@@ -223,10 +239,12 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
             await raidbossNotification.save()
           } catch (error) {
             console.log('Woops… registering raidbossNotification failed', error)
-            return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`Je bent aangemeld voor notificaties op de volgende raidboss: ${selected[0]}. Zodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_raidboss_finished', {
+            selected: selected[0]
+          })}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       } else {
@@ -242,10 +260,12 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
             })
           } catch (error) {
             console.log('Woops… deleting gymNotification failed', error)
-            return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`Je bent afgemeld voor notificaties op de volgende gym: ${selected[0]}. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${('noti_finished_gym_removal', {
+            selected: selected[0]
+          })}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         } else {
           try {
@@ -258,10 +278,12 @@ Wil je notificaties toevoegen op een ${ctx.session.chosenNotificationSingleStrin
             })
           } catch (error) {
             console.log('Woops… deleting raidbossNotification failed', error)
-            return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het bewaren…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep.`, Markup.removeKeyboard().extra())
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`Je bent afgemeld voor notificaties op de volgende raidboss: ${selected[0]}. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`, Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_finished_raidboss_removal', {
+            selected: selected[0]
+          })}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       }

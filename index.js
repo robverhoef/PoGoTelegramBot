@@ -16,7 +16,7 @@ const i18n = new TelegrafI18n({
   allowMissing: true,
   directory: path.resolve(__dirname, 'locales')
 })
-const { match } = require('telegraf-i18n')
+// const { match } = require('telegraf-i18n')
 var models = require('./models')
 
 // var env = process.env.NODE_ENV || 'development'
@@ -162,7 +162,6 @@ async function showMainMenu (ctx, user) {
   if (raids.length > 0) {
     btns.push(ctx.i18n.t('btn_exit_raid'))
     btns.push(ctx.i18n.t('btn_user_delayed'))
-
   }
   btns.push(ctx.i18n.t('btn_add_raid'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
@@ -193,7 +192,7 @@ async function showMainMenu (ctx, user) {
       break
     }
   }
-  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', {user: user}), Markup.keyboard(
+  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: user }), Markup.keyboard(
     btns).oneTime().resize().extra())
 }
 
@@ -296,7 +295,7 @@ bot.hears(/\/hi/i, async (ctx) => {
   // console.log('olduser', olduser)
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', {first_name: ctx.from.first_name, me: me, chattitle: chattitle}), {parse_mode: 'Markdown'})
+    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
     return
   }
   // console.log(
@@ -320,12 +319,12 @@ bot.hears(/\/hi/i, async (ctx) => {
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', {first_name: ctx.from.first_name, me: me, chattitle: chattitle}), {parse_mode: 'Markdown'})
+      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
   } else {
-    return ctx.replyWithMarkdown(ctx.i18n.t('user_unknown_warning', {me: me}))
+    return ctx.replyWithMarkdown(ctx.i18n.t('user_unknown_warning', { me: me }))
   }
 })
 
@@ -354,14 +353,14 @@ bot.on('new_chat_members', async (ctx) => {
     console.log('A bot tried to become a group member…')
     return
   }
-  let lang = newuser.language_code
+  let lang = newusr.language_code
   let locales = []
   let rawlocales = process.env.LOCALES.split(',')
   for (const rawlocale of rawlocales) {
-        var loc = rawlocale.trim().split(' ')
-        locales.push(loc[0])
+    var loc = rawlocale.trim().split(' ')
+    locales.push(loc[0])
   }
-  if(locales.indexOf(lang) < 0) {
+  if (locales.indexOf(lang) < 0) {
     lang = process.env.LOCALE
   }
   if (ctx.message.chat.id.toString() === process.env.GROUP_ID) {

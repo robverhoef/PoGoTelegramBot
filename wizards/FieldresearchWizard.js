@@ -84,7 +84,7 @@ function FielresearchWizard (bot) {
         [ctx.i18n.t('fres_btn_mainmenu_add_research'), 'addresearch'],
         [ctx.i18n.t('fres_btn_mainmenu_edit_research'), 'editresearch'],
         [ctx.i18n.t('fres_btn_mainmenu_remove_research'), 'deleteresearch'],
-        [ctx.i18n.t('fres_btn_mainmenu_cancel'), 'cancelresearch']
+        [ctx.i18n.t('cancel'), 'cancelresearch']
       ]
       return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: ctx.from }), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
@@ -109,21 +109,19 @@ function FielresearchWizard (bot) {
       let researches = await listResearches()
       let out = ''
       if (researches.length === 0) {
-        out = 'Er zijn voor vandaag nog geen Field Researches gemeld…\r\n\r\n'
-        out += '*Wil je nog een actie uitvoeren? Klik dan op */start'
+        out = ctx.i18n.t('fres_no_fres_yet')
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
           })
       }
-      out = `*Field Researches voor vandaag:*\r\n`
+      out = `${ctx.i18n.t('fres_today')}`
       for (let res of researches) {
         out += `\r\n*${res.name}*\r\n`
-        out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
-        out += `\r\n`
+        out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n\r\n`
       }
-      out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+      out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
 
       return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
         .then(() => {
@@ -135,7 +133,7 @@ function FielresearchWizard (bot) {
     // add fieldresearch
     // -----------------
     async (ctx) => {
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe Field Research toevoegen. Hier vind je een [lijst met Field Researches en beloningen ↗️](https://thesilphroad.com/research-tasks). \r\n\r\nWe gaan eerst de stop zoeken.\n\n*Gebruik de knop 'Zoek stops in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens… \r\n`, Markup.keyboard([{ text: 'Zoek stops in mijn omgeving…', request_location: true }]).resize().extra({ disable_web_page_preview: true }))
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_intro')}\r\n`, Markup.keyboard([{ text: ctx.i18n.t('fres_btn_find_location'), request_location: true }]).resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -155,7 +153,7 @@ function FielresearchWizard (bot) {
       } else {
         let term = ctx.update.message.text.trim()
         if (term.length < 2) {
-          return ctx.replyWithMarkdown(`Geef minimaal 2 tekens van de stopnaam…\n*Probeer het nog eens.* 🧐`)
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_minimum_2_chars')}`)
         }
         candidates = await models.Stop.findAll({
           where: {
@@ -164,7 +162,7 @@ function FielresearchWizard (bot) {
         })
       }
       if (candidates.length === 0) {
-        return ctx.replyWithMarkdown(`Ik kon geen stop vinden…\nGebruik /cancel om te stoppen.\n*Of probeer het nog eens door de naam in te vullen*`)
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_stop_not_found')}`)
       }
       ctx.session.stopcandidates = []
       for (let i = 0; i < candidates.length; i++) {
@@ -174,10 +172,10 @@ function FielresearchWizard (bot) {
         ])
       }
       ctx.session.stopcandidates.push([
-        'Mijn stop staat er niet bij…', 0
+        ctx.i18n.t('fres_stop_not_listed'), 0
       ])
 
-      return ctx.replyWithMarkdown('Kies een stop.', Markup.keyboard(ctx.session.stopcandidates.map(el => el[0])).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(ctx.i18n.t('fres_select_stop'), Markup.keyboard(ctx.session.stopcandidates.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
@@ -191,7 +189,7 @@ function FielresearchWizard (bot) {
       }
       // Catch stop not found errors…
       if (selectedIndex === -1) {
-        return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de stop.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_select_something_wrong')}\n`, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -199,7 +197,7 @@ function FielresearchWizard (bot) {
       }
       // User can't find the stop
       if (ctx.session.stopcandidates[selectedIndex][1] === 0) {
-        ctx.replyWithMarkdown(`*Probeer het nog eens…*\nJe kan ook altijd stoppen door /cancel te typen`, Markup.removeKeyboard().extra())
+        ctx.replyWithMarkdown(`${ctx.i18n.t('retry_or_cancel')}`, Markup.removeKeyboard().extra())
         ctx.wizard.selectStep(wizsteps.addresearch)
         return ctx.wizard.steps[wizsteps.addresearch](ctx)
       } else {
@@ -208,7 +206,7 @@ function FielresearchWizard (bot) {
         ctx.session.newresearch.stopId = selectedstop[1]
         ctx.session.newresearch.stopName = selectedstop[0]
         if (await researchExists(ctx.session.newresearch.stopId)) {
-          return ctx.replyWithMarkdown(`Er is al een Field Research op deze stop gemeld!\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`)
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_exists')}`)
             .then(() => {
               ctx.session = {}
               return ctx.scene.leave()
@@ -216,7 +214,7 @@ function FielresearchWizard (bot) {
         }
       }
       const frkeys = await listResearchOptionButtons()
-      return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_what_to_do')}`,
         Markup.keyboard(frkeys).oneTime().resize().extra()
       )
         .then(() => ctx.wizard.next())
@@ -224,12 +222,12 @@ function FielresearchWizard (bot) {
 
     async (ctx) => {
       ctx.session.newresearch.what = ctx.update.message.text
-      return ctx.replyWithMarkdown(`*${ctx.session.newresearch.what}*\r\n${ctx.session.newresearch.stopName}\r\n\r\n*Opslaan?*`, Markup.keyboard(['Ja', 'Nee']).resize().extra())
+      return ctx.replyWithMarkdown(`*${ctx.session.newresearch.what}*\r\n${ctx.session.newresearch.stopName}\r\n\r\n${ctx.i18n.t('save_question')}`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       let out = ''
-      if (ctx.update.message.text === 'Ja') {
+      if (ctx.update.message.text === ctx.i18n.t('yes')) {
         // console.log('USER SAYS YES TO SAVING RESEARCH')
         let research = models.Fieldresearch.build({
           StopId: ctx.session.newresearch.stopId,
@@ -241,7 +239,7 @@ function FielresearchWizard (bot) {
           await research.save()
         } catch (error) {
           console.log('Whoops… saving new Field Research failed', error)
-          return ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`, Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_save_failed')}`, Markup.removeKeyboard().extra())
             .then(() => {
               ctx.session = {}
               return ctx.scene.leave()
@@ -249,32 +247,41 @@ function FielresearchWizard (bot) {
         }
         console.log(`Research toegevoegd ${JSON.stringify(ctx.session.newresearch)} door ${ctx.from.first_name}, ${ctx.from.id}`)
         // success...
-        out += `*Top!*\r\nDe nieuwe Field Research voor ${ctx.session.newresearch.stopName} is opgeslagen\r\n\r\n`
+        out += `${ctx.i18n.t('fres_save_success')}\r\n\r\n`
         let researches = await listResearches()
-        out += `*Field Researches voor vandaag:*\r\n`
+        out += `${ctx.i18n.t('fres_fres_today')}\r\n`
         for (let res of researches) {
           out += `\r\n*${res.name}*\r\n`
-          out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
+          ctx.i18n.t('fres_added_fres', {
+            stopname: res.Stop.name,
+            stoplink: res.Stop.googleMapsLink,
+            reportername: res.reporterName,
+            reporterid: res.reporterId
+          })
           out += `\r\n`
         }
-        out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+        out += `\r\n\r\n*${ctx.i18n.t('fres_done')}`
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(async () => {
             ctx.session = {}
-            let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research toegevoegd\n\n`)
+            let raidlist = await listRaids(``)
+            ctx.i18n.t('fres_list_reason', {
+              firstname: ctx.from.first_name,
+              uid: ctx.from.id
+            })
             bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })
           .then(() => ctx.scene.leave())
-      } else if (ctx.update.message.text === 'Nee') {
-        out += `OK.\r\n\r\n`
+      } else if (ctx.update.message.text === ctx.i18n.t('no')) {
+        out += `${ctx.i18n.t('ok')}.\r\n\r\n`
         let researches = await listResearches()
-        out += `*Field Researches voor vandaag:*\r\n`
+        out += `${ctx.i18n.t('fres_fres_today')}\r\n`
         for (let res of researches) {
           out += `\r\n*${res.name}*\r\n`
-          out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
+          out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n\r\n`
           out += `\r\n`
         }
-        out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+        out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(() => {
             ctx.session = {}
@@ -302,8 +309,7 @@ function FielresearchWizard (bot) {
       })
       let out = ''
       if (researches.length === 0) {
-        out = 'Er zijn voor vandaag nog geen Field Researches gemeld…\r\n\r\n'
-        out += '*Wil je nog een actie uitvoeren? Klik dan op */start'
+        out = `${ctx.i18n.t('fres_no_fres_yet')}`
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
@@ -311,7 +317,7 @@ function FielresearchWizard (bot) {
           })
       }
       ctx.session.candidates = []
-      out = `*Welke Field Research wil je wijzigen?*`
+      out = `${ctx.i18n.t('fres_edit_which')}`
       for (let res of researches) {
         ctx.session.candidates.push(res)
       }
@@ -329,49 +335,52 @@ function FielresearchWizard (bot) {
         }
       }
       const frkeys = await listResearchOptionButtons()
-      return ctx.replyWithMarkdown(`*Wat moet je doen voor deze quest?*\r\nKlik op een knop of typ de quest als het niet in de lijst staat.`,
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_what_to_do_location')}`,
         Markup.keyboard(frkeys).oneTime().resize().extra()
       )
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       ctx.session.editresearch.name = ctx.update.message.text
-      ctx.replyWithMarkdown(`Wijziging opslaan?`, Markup.keyboard(['Ja', 'Nee']).oneTime().resize().extra())
+      ctx.replyWithMarkdown(`${ctx.i18n.t('fres_save_edit')}`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       let confirm = ctx.update.message.text
       // console.log('altered: ', ctx.session.editresearch)
-      if (confirm === 'Ja') {
+      if (confirm === ctx.i18n.t('yes')) {
         try {
           await ctx.session.editresearch.save()
 
           let researches = await listResearches()
-          let out = `OK, je wijziging is opgeslagen.\r\n\r\n*Field Researches voor vandaag:*\r\n`
+          let out = `${ctx.i18n.t('fres_saved_edit')}\r\n`
           for (let res of researches) {
             out += `\r\n*${res.name}*\r\n`
-            out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
+            out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n\r\n`
             out += `\r\n`
           }
-          out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+          out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
 
           return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
             .then(async () => {
               ctx.session = {}
-              let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research gewijzigd\n\n`)
+              let raidlist = await listRaids(`${ctx.i18n.t('fres_list_reason_modified', {
+                firstname: ctx.from.first_name,
+                uid: ctx.from.id
+              })}\n\n`)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
             })
             .then(() => ctx.scene.leave())
         } catch (error) {
           console.log('Whoops… saving new Field Research failed', error)
-          return ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`, Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('something_wrong')}`, Markup.removeKeyboard().extra())
             .then(() => {
               ctx.session = {}
               return ctx.scene.leave()
             })
         }
       } else {
-        ctx.replyWithMarkdown(`OK.\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`, Markup.removeKeyboard().extra())
+        ctx.replyWithMarkdown(`${ctx.i18n.t('finished_procedure_without_saving')}`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
     },
@@ -396,8 +405,7 @@ function FielresearchWizard (bot) {
       })
       let out = ''
       if (researches.length === 0) {
-        out = 'Er zijn voor vandaag nog geen Field Researches gemeld…\r\n\r\n'
-        out += '*Wil je nog een actie uitvoeren? Klik dan op */start'
+        out = ctx.i18n.t('fres_no_fres_yet')
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
@@ -405,12 +413,12 @@ function FielresearchWizard (bot) {
           })
       }
       ctx.session.candidates = []
-      out = `Je wilt een Field Research verwijderen…\r\n\r\n*Welke Field Research wil je verwijderen?*`
+      out = `${ctx.i18n.t('fres_delete_which')}`
       for (let res of researches) {
         ctx.session.candidates.push(res)
       }
       // the escape option
-      ctx.session.candidates.push({ Stop: { name: 'Annuleren', id: 0 } })
+      ctx.session.candidates.push({ Stop: { name: ctx.i18n.t('cancel'), id: 0 } })
 
       return ctx.replyWithMarkdown(out, Markup.keyboard(ctx.session.candidates.map(el => el.Stop.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
@@ -418,8 +426,8 @@ function FielresearchWizard (bot) {
 
     async (ctx) => {
       ctx.session.destroyresearch = null
-      if (ctx.update.message.text === 'Annuleren') {
-        return ctx.replyWithMarkdown(`OK\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`, Markup.removeKeyboard().extra())
+      if (ctx.update.message.text === ctx.i18n.t('cancel')) {
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('ok')}\r\n\r\n${ctx.i18n.t('fres_done')}`, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -432,18 +440,18 @@ function FielresearchWizard (bot) {
         }
       }
       if (ctx.session.destroyresearch === null) {
-        return ctx.replyWithMarkdown(`*Wil je nog een actie uitvoeren? Klik dan op */start`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_done')}`, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
           })
       }
-      return ctx.replyWithMarkdown(`Weet je zeker dat je deze wilt verwijderen?`, Markup.keyboard([['Ja', 'Nee, toch niet']]).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_delete_confirm')}`, Markup.keyboard([[ctx, ctx.i18n.t('yes'), ctx.i18n.t('no')]]).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       switch (ctx.update.message.text) {
-        case 'Ja':
+        case ctx.i18n.t('yes'):
           // Delete…
           try {
             console.log('User wants to destroy ', ctx.session.destroyresearch.id)
@@ -453,13 +461,16 @@ function FielresearchWizard (bot) {
               }
             })
             if (deleted) {
-              let raidlist = await listRaids(`[${ctx.from.first_name}](tg://user?id=${ctx.from.id}) heeft een Field Research verwijderd\n\n`)
+              let raidlist = await listRaids(`${ctx.i18n.t('fres_list_reason_delete', {
+                firstname: ctx.from.first_name,
+                uid: ctx.from.id
+              })}\n\n`)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
               console.log(`Research deleted ${JSON.stringify(ctx.session.destroyresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
             }
           } catch (error) {
             console.log(`Could not delete ${JSON.stringify(ctx.session.destroyresearch)}`, error)
-            return ctx.replyWithMarkdown(`Mmmm, vreemd. Verwijderen is niet gelukt.\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`)
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_delete_failed')}`)
               .then(() => {
                 ctx.session = {}
                 return ctx.scene.leave()
@@ -473,21 +484,24 @@ function FielresearchWizard (bot) {
       let researches = await listResearches()
       let out = ''
       if (researches.length === 0) {
-        out = 'Er zijn nu geen Field Researches.\r\n\r\n'
-        out += '*Wil je nog een actie uitvoeren? Klik dan op */start'
+        out = `${ctx.i18n.t('fres_no_fres_now')}`
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
           })
       }
-      out = `OK…\r\n*Field Researches voor vandaag:*\r\n`
+      out = `${ctx.i18n.t('ok')}…\r\n${ctx.i18n.t('fres_fres_today')}\r\n`
       for (let res of researches) {
         out += `\r\n*${res.name}*\r\n`
-        out += `[${res.Stop.name}](${res.Stop.googleMapsLink}) toegevoegd door: [${res.reporterName}](tg://user?id=${res.reporterId})`
+        out += `${ctx.i18n.t('fres_reportedstop', {
+          stopname: res.Stop.name,
+          stoplink: res.Stop.googleMapsLink,
+          reportername: res.reporterName,
+          reporterid: res.reporterId })}\r\n\r\n`
         out += `\r\n`
       }
-      out += `\r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start`
+      out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
 
       return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
         .then(() => {
@@ -499,7 +513,7 @@ function FielresearchWizard (bot) {
     // cancel fieldresearch
     // -----------------
     async (ctx) => {
-      return ctx.replyWithMarkdown('OK… \r\n\r\n*Wil je nog een actie uitvoeren? Klik dan op */start', Markup.removeKeyboard().extra())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('ok')}… \r\n\r\n${ctx.i18n.t('fres_done')}`, Markup.removeKeyboard().extra())
         .then(() => {
           ctx.session = {}
           return ctx.scene.leave()
