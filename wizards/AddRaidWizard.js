@@ -304,7 +304,7 @@ function AddRaidWizard (bot) {
           })
           .then(() => ctx.wizard.next())
       } else {
-        return ctx.replyWithMarkdown('Jammer… \n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start', Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('join_raid_cancel')}`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
     },
