@@ -80,8 +80,7 @@ var NotificationWizard = function () {
       if (message === '') {
         message = `\n${ctx.i18n.t('noti_nothing_set')}`
       }
-
-      message += '\n\n'
+      message += '\n'
 
       return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_current_notifications', {
         noti_string: ctx.session.chosenNotificationString,
@@ -157,6 +156,7 @@ var NotificationWizard = function () {
       // User can't find the gym/raidboss
       if (ctx.session.candidates[selectedIndex][1] === 0) {
         return ctx.replyWithMarkdown(`${ctx.i18n.t('retry_or_cancel')}`, Markup.removeKeyboard().extra())
+        .then(() => ctx.wizard.back())
       } else {
         // retrieve selected candidate from session
         let selectedCandidate = ctx.session.candidates[selectedIndex]
@@ -265,7 +265,7 @@ var NotificationWizard = function () {
             return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`${('noti_finished_gym_removal', {
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_finished_gym_removal', {
             selected: selected[0]
           })}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())

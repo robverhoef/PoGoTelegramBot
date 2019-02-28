@@ -242,7 +242,7 @@ function filterRaidsOnViability (raids) {
       if ((minAccounts - 1) <= totals) {
         viableRaids.push(raid)
       } else {
-        console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
+        // console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
       }
     }
   }
@@ -278,7 +278,7 @@ function processRaidusers (raids, ctx) {
     statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
     for (let i = 0; i < userCount.length; i++) {
       let userId = userCount[i][0]
-      statMessage += `- ${userNames[userId]}: *${userCount[i][1]}${ctx.i18n.t('stats_times_raided')}*\n`
+      statMessage += `- ${userNames[userId]}: *${userCount[i][1]} ${ctx.i18n.t('stats_times_raided')}*\n`
     }
     statMessage += '\n'
   }
@@ -311,8 +311,9 @@ async function processRaidreporters (raids, ctx) {
           }
         }
       })
-
-      statMessage += `- ${user.tUsername}: *${reporterCount[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
+      if (user !== null) {
+        statMessage += `- ${user.tUsername}: *${reporterCount[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
+      }
     }
   }
   return statMessage
