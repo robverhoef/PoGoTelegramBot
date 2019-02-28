@@ -20,9 +20,12 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * add gyms or change gym properties (admins only)
 * add or modify raidbosses (admins only)
 * add, remove or modify predefined Field Research keys (admins only)
+* set your preferred language by sending /lang to the bot
+
 ## Features
 
-* Easy to use for end users; no more copy/pasting lists of raid users.
+* Easy to use for end users; no more copying/pasting lists of raid users.
+* Multilingual; comes with Dutch and English out of the box
 * Predefined gym locations with optional Google Maps link
 * Predefined stop locations with Google Maps link
 * Restricted to a specific Telegram supergroup (…might not be watertight yet)
@@ -40,7 +43,6 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 
 ## ToDo
 
-* I18n; it is currently Dutch only
 * Make timezones configurable, currently using Europe/Amsterdam
 
 ## Install
@@ -58,6 +60,12 @@ npm install
 
 Copy the example.env to .env  
 Edit your .env file  
+
+### Note on languages
+If Dutch is not the standard language you should now modify migrations/20181222145311-useraddlanguage.js and set the locale (defaultLanguage: 'nl') to your language code **before running the migrations**.
+You can also add your own language file to the locales folder. 
+Don't forget to modify your environment variables (DEFAULT_LOCALE and LOCALES) when adding a language or changing your default language.
+
 You will need the Telegram group ID. To obtain this ID; 
 
 * run the bot
@@ -101,5 +109,7 @@ After the bot knows about the user, a conversation can be initiated from the gro
 
 The bot will then show a button that will take the user to a private chat.
 The conversation stays private. The final output will be sent to the group.
+
+Send /lang to the bot to change your language preferrence.
 
 A user can stop any conversation with the bot by entering the **/cancel** command. This is the preferred method of stopping when something appears to go wrong.
