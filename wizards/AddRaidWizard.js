@@ -12,6 +12,7 @@ const listRaids = require('../util/listRaids')
 const sendGymNotifications = require('../util/sendGymNotifications')
 const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
 const resolveRaidBoss = require('../util/resolveRaidBoss')
+const setLocale = require('../util/setLocale')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -19,7 +20,8 @@ function AddRaidWizard (bot) {
   return new WizardScene('add-raid-wizard',
     // step 0
     async (ctx) => {
-      ctx.i18n.locale(ctx.session.__language_code)
+      await setLocale(ctx)
+      console.log('I18N', ctx.i18n)
       console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []

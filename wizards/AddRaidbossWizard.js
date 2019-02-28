@@ -6,11 +6,13 @@ const { Markup } = require('telegraf')
 var models = require('../models')
 const metaphone = require('metaphone')
 const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function AddRaidbossWizard (bot) {
   return new WizardScene('add-raidboss-wizard',
     // Step 0: Raidboss name request
     async (ctx) => {
+      await setLocale(ctx)
       const invalidAdmin = await adminCheck(ctx, bot)
       if (invalidAdmin !== false) {
         return invalidAdmin

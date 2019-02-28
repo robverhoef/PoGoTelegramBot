@@ -7,11 +7,13 @@ var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function EditGymWizard (bot) {
   return new WizardScene('edit-gym-wizard',
     // step 0
     async (ctx) => {
+      await setLocale(ctx)
       const invalidAdmin = await adminCheck(ctx, bot)
       if (invalidAdmin !== false) {
         return invalidAdmin

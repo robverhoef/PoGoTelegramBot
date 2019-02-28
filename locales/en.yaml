@@ -290,3 +290,8 @@ admin_fres_delete_failed: "Deleting has failed…\r\n${message}"
 admin_fres_delete_success: "OK, deleted…"
 admin_fres_delete_canceled: "OK, *not* deleted."
 admin_fres_finished: "OK, use /start if you want to take another action."
+
+# Language wizard
+lang_set: "Your language was set to English\r\n*Click */start* to take another action.*"
+
+list_raids_fres_count: "The bot knows about ${researchcount} Field Researches\r\n"

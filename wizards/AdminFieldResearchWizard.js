@@ -7,6 +7,7 @@ const models = require('../models')
 // const Sequelize = require('sequelize')
 // const Op = Sequelize.Op
 const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function AdminFieldResearchWizard (bot) {
   const wizsteps = {
@@ -23,6 +24,7 @@ function AdminFieldResearchWizard (bot) {
 
     // handle mainmenu input
     async (ctx) => {
+      await setLocale(ctx)
       const invalidAdmin = await adminCheck(ctx, bot)
       if (invalidAdmin !== false) {
         return invalidAdmin

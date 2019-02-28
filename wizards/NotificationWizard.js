@@ -6,11 +6,13 @@ var models = require('../models')
 const { Markup } = require('telegraf')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const setLocale = require('../util/setLocale')
 
 var NotificationWizard = function () {
   return new WizardScene('notification-wizard',
     // step 0
     async (ctx) => {
+      await setLocale(ctx)
       const user = ctx.from
       let dbuser = await models.User.findOne({
         where: {

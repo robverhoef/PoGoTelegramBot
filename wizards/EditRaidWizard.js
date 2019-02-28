@@ -11,6 +11,7 @@ const inputTime = require('../util/inputTime')
 const listRaids = require('../util/listRaids')
 const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
 const resolveRaidBoss = require('../util/resolveRaidBoss')
+const setLocale = require('../util/setLocale')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -19,6 +20,7 @@ function EditRaidWizard (bot) {
 
     // step 0: choose raid
     async (ctx) => {
+      await setLocale(ctx)
       // reset some values for gym editting
       ctx.session.newgymid = null
       ctx.session.editattr = null

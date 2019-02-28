@@ -8,12 +8,14 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const metaphone = require('metaphone')
 const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function EditRaidbossWizard (bot) {
   return new WizardScene('edit-raidboss-wizard',
     // Step 0
     // Raidboss name request
     async (ctx) => {
+      await setLocale(ctx)
       const invalidAdmin = await adminCheck(ctx, bot)
       if (invalidAdmin !== false) {
         return invalidAdmin

@@ -8,12 +8,14 @@ var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
+const setLocale = require('../util/setLocale')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
 function ExitRaidWizard (bot) {
   return new WizardScene('exit-raid-wizard',
     async (ctx) => {
+      await setLocale(ctx)
       const user = ctx.from
       // ToDo: check for endtime
       let raids = await models.Raid.findAll({

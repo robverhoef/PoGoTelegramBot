@@ -6,10 +6,12 @@ const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const setLocale = require('../util/setLocale')
 
 var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
-    (ctx) => {
+    async (ctx) => {
+      await setLocale(ctx)
       return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_intro'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },

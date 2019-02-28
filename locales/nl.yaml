@@ -290,3 +290,8 @@ admin_fres_delete_failed: "Verwijderen is mislukt…\r\n${message}"
 admin_fres_delete_success: "OK, verwijderd…"
 admin_fres_delete_canceled: "OK, *niet* verwijderd."
 admin_fres_finished: "OK, gebruik /start als je nog iets wilt doen."
+
+# Language wizard
+lang_set: "Je taal is nu ingesteld op Nederlands.\r\n*Klik op */start* om nog een actie uit te voeren*"
+
+list_raids_fres_count: "De bot kent nu ${researchcount} Field Researches\r\n"

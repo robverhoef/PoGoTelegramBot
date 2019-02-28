@@ -8,6 +8,7 @@ const { Markup } = require('telegraf')
 const Sequelize = require('sequelize')
 const lastExRaidPassDate = require('../util/lastExRaidPassDate')
 const Op = Sequelize.Op
+const setLocale = require('../util/setLocale')
 
 const personalTop = 10
 const globalTop = 10
@@ -377,8 +378,8 @@ var StatsWizard = function () {
   return new WizardScene('stats-wizard',
     // Step 0: Get the info requested
     async (ctx) => {
+      await setLocale(ctx)
       ctx.session.statbtns = [ctx.i18n.t('stats_my_statistics'), ctx.i18n.t('stats_total_statistics')]
-
       return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_stats_question'), Markup.keyboard(ctx.session.statbtns)
         .oneTime()
         .resize()

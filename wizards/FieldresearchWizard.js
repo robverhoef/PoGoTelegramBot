@@ -8,6 +8,7 @@ const moment = require('moment-timezone')
 const listRaids = require('../util/listRaids')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const setLocale = require('../util/setLocale')
 
 async function researchExists (stopId) {
   let today = moment()
@@ -77,6 +78,7 @@ function FielresearchWizard (bot) {
   return new WizardScene('fieldresearch-wizard',
     // Field Research menu
     async (ctx) => {
+      await setLocale(ctx)
       ctx.session.newresearch = {}
       // ToDo: delete all researches from previous days?
       ctx.session.mainreseachbtns = [

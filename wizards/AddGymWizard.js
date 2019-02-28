@@ -5,12 +5,14 @@ const WizardScene = require('telegraf/scenes/wizard')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function AddGymWizard (bot) {
   return new WizardScene('add-gym-wizard',
     // Step 0
     // Gym name
     async (ctx) => {
+      await setLocale(ctx)
       const invalidAdmin = await adminCheck(ctx, bot)
       if (invalidAdmin !== false) {
         return invalidAdmin

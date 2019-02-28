@@ -35,7 +35,7 @@ module.exports = async (ctx, bot) => {
 
   if (!isAdmin) {
     console.log('Illegal admin attempt', user)
-    return ctx.replyWithMarkdown(`Erg leuk geprobeerd. En slim ook! \r\nMaar admins only hier…`, Markup.removeKeyboard())
+    return ctx.replyWithMarkdown(`Really nice try. And smart too! \r\nBut only admins are allowed here…`, Markup.removeKeyboard())
       .then(() => ctx.scene.leave())
   }
   return false

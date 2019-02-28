@@ -8,12 +8,14 @@ var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
+const setLocale = require('../util/setLocale')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
 var UserDelayedGymWizard = function (bot) {
   return new WizardScene('user-delayed-wizard',
     async (ctx) => {
+      await setLocale(ctx)
       ctx.session.delayedraid = null
       const user = ctx.from
       let raids = await models.Raid.findAll({

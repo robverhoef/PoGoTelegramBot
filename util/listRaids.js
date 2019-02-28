@@ -12,6 +12,10 @@ moment.tz.setDefault('Europe/Amsterdam')
 */
 module.exports = async (reason, ctx) => {
   console.log('listraids', ctx)
+  // save old user language
+  ctx.session.oldlang = ctx.i18n.locale()
+  // list should always be in default locale
+  ctx.i18n.locale(process.env.DEFAULT_LOCALE)
   let out = ''
   let raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
@@ -71,7 +75,11 @@ module.exports = async (reason, ctx) => {
       }
     }
   })
-  out += `De bot kent nu ${researchcount} Field Researches\r\n`
+  out += `${ctx.i18n.t('list_raids_fres_count', {
+    researchcount: researchcount
+  })}`
   // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
+  // restore uses locale
+  ctx.i18n.locale(ctx.session.oldlang)
   return out
 }
