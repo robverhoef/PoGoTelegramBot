@@ -216,6 +216,7 @@ function FielresearchWizard (bot) {
         }
       }
       const frkeys = await listResearchOptionButtons()
+      console.log('frkeys', frkeys)
       return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_what_to_do')}`,
         Markup.keyboard(frkeys).oneTime().resize().extra()
       )
@@ -247,9 +248,11 @@ function FielresearchWizard (bot) {
               return ctx.scene.leave()
             })
         }
-        console.log(`Research toegevoegd ${JSON.stringify(ctx.session.newresearch)} door ${ctx.from.first_name}, ${ctx.from.id}`)
+        console.log(`Research added ${JSON.stringify(ctx.session.newresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
         // success...
-        out += `${ctx.i18n.t('fres_save_success')}\r\n\r\n`
+        out += `${ctx.i18n.t('fres_save_success', {
+          stopname: ctx.session.newresearch.stopName
+        })}\r\n\r\n`
         let researches = await listResearches()
         out += `${ctx.i18n.t('fres_fres_today')}\r\n`
         for (let res of researches) {
@@ -262,15 +265,22 @@ function FielresearchWizard (bot) {
           })
           out += `\r\n`
         }
-        out += `\r\n\r\n*${ctx.i18n.t('fres_done')}`
+        out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
+        console.log('OUT', out)
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(async () => {
             ctx.session = {}
-            let raidlist = await listRaids(`
-            ${ctx.i18n.t('fres_list_reason', {
+            // save users langugage
+            ctx.session.oldlang = ctx.i18n.locale()
+            // reason should always be in default locale
+            ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+            const reason = ctx.i18n.t('fres_list_reason', {
               firstname: ctx.from.first_name,
               uid: ctx.from.id
-            })}`, ctx)
+            })
+            // restore user locale
+            ctx.i18n.locale(ctx.session.oldlang)
+            let raidlist = await listRaids(`${reason}`, ctx)
             bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })
           .then(() => ctx.scene.leave())
@@ -330,7 +340,6 @@ function FielresearchWizard (bot) {
     async (ctx) => {
       ctx.session.editresearch = null
       for (let candidate of ctx.session.candidates) {
-        // console.log(candidate.Stop.name.trim(), '==', ctx.update.message.text)
         if (candidate.Stop.name.trim() === ctx.update.message.text) {
           ctx.session.editresearch = candidate
           break
@@ -349,7 +358,6 @@ function FielresearchWizard (bot) {
     },
     async (ctx) => {
       let confirm = ctx.update.message.text
-      // console.log('altered: ', ctx.session.editresearch)
       if (confirm === ctx.i18n.t('yes')) {
         try {
           await ctx.session.editresearch.save()
@@ -365,14 +373,23 @@ function FielresearchWizard (bot) {
 
           return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
             .then(async () => {
-              ctx.session = {}
-              let raidlist = await listRaids(`${ctx.i18n.t('fres_list_reason_modified', {
+              // save users langugage
+              ctx.session.oldlang = ctx.i18n.locale()
+              // reason should always be in default locale
+              ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+              const reason = ctx.i18n.t('fres_list_reason_modified', {
                 firstname: ctx.from.first_name,
                 uid: ctx.from.id
-              })}\n\n`, ctx)
+              })
+              // restore user locale
+              ctx.i18n.locale(ctx.session.oldlang)
+              let raidlist = await listRaids(`${reason}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
             })
-            .then(() => ctx.scene.leave())
+            .then(() => {
+              ctx.session = {}
+              return ctx.scene.leave()
+            })
         } catch (error) {
           console.log('Whoops… saving new Field Research failed', error)
           return ctx.replyWithMarkdown(`${ctx.i18n.t('something_wrong')}`, Markup.removeKeyboard().extra())
@@ -456,17 +473,23 @@ function FielresearchWizard (bot) {
         case ctx.i18n.t('yes'):
           // Delete…
           try {
-            console.log('User wants to destroy ', ctx.session.destroyresearch.id)
             const deleted = await models.Fieldresearch.destroy({
               where: {
                 id: ctx.session.destroyresearch.id
               }
             })
             if (deleted) {
-              let raidlist = await listRaids(`${ctx.i18n.t('fres_list_reason_delete', {
+              // save users langugage
+              ctx.session.oldlang = ctx.i18n.locale()
+              // reason should always be in default locale
+              ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+              const reason = ctx.i18n.t('fres_list_reason_delete', {
                 firstname: ctx.from.first_name,
                 uid: ctx.from.id
-              })}\n\n`, ctx)
+              })
+              // restore user locale
+              ctx.i18n.locale(ctx.session.oldlang)
+              let raidlist = await listRaids(`${reason}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
               console.log(`Research deleted ${JSON.stringify(ctx.session.destroyresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
             }

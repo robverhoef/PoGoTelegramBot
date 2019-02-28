@@ -94,38 +94,50 @@ var UserDelayedGymWizard = function (bot) {
       if (raiduser) {
         let reason = ''
         let val = null
-        // save users langugage
-        ctx.session.oldlang = ctx.i18n.locale()
-         // reason should always be in default locale
-        ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         switch (delay) {
           case '2':
+            // save users langugage
+            ctx.session.oldlang = ctx.i18n.locale()
+             // reason should always be in default locale
+            ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_2min', {
               first_name: user.first_name,
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
             val = '2 min.'
+             // restore user locale
+            ctx.i18n.locale(ctx.session.oldlang)
             break
           case '5':
+            // save users langugage
+            ctx.session.oldlang = ctx.i18n.locale()
+             // reason should always be in default locale
+            ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_5min', {
               first_name: user.first_name,
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
             val = '5 min.'
+             // restore user locale
+            ctx.i18n.locale(ctx.session.oldlang)
             break
           case ctx.i18n.t('user_delayed_is_on_time'):
+            // save users langugage
+            ctx.session.oldlang = ctx.i18n.locale()
+            // reason should always be in default locale
+            ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_on_time', {
               first_name: user.first_name,
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
             val = null
+            // restore user locale
+            ctx.i18n.locale(ctx.session.oldlang)
             break
         }
-        // restore user locale
-        ctx.i18n.locale(ctx.session.oldlang)
         try {
           await models.Raiduser.update(
             { delayed: val },

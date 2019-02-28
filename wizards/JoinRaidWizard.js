@@ -114,10 +114,18 @@ function JoinRaidWizard (bot) {
             .then(() => ctx.scene.leave())
         }
       }
-      let out = await listRaids(`${ctx.i18n.t('join_raid_list_reason', {
+      // save users langugage
+      ctx.session.oldlang = ctx.i18n.locale()
+      // reason should always be in default locale
+      ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+      const reason = ctx.i18n.t('join_raid_list_reason', {
         user: user,
         gymname: joinedraid.gymname
-      })}\n\n`, ctx)
+      })
+      let out = await listRaids(`${reason}\n\n`, ctx)
+      // restore user locale
+      ctx.i18n.locale(ctx.session.oldlang)
+
       if (out === null) {
         return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
