@@ -51,10 +51,10 @@ var UserDelayedGymWizard = function (bot) {
         ctx.session.raidbtns.push(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`)
       }
       candidates.push({
-        gymname: ctx.i18.t('user_delayed_dont_change_status'),
+        gymname: ctx.i18n.t('user_delayed_dont_change_status'),
         raidid: 0
       })
-      ctx.session.raidbtns.push(ctx.i18.t('user_delayed_dont_change_status'))
+      ctx.session.raidbtns.push(ctx.i18n.t('user_delayed_dont_change_status'))
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
       return ctx.replyWithMarkdown(ctx.i18n.t('user_delayed_select_raid'), Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
@@ -94,6 +94,10 @@ var UserDelayedGymWizard = function (bot) {
       if (raiduser) {
         let reason = ''
         let val = null
+        // save users langugage
+        ctx.session.oldlang = ctx.i18n.locale()
+         // reason should always be in default locale
+        ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         switch (delay) {
           case '2':
             reason = `${ctx.i18n.t('user_delayed_by_2min', {
@@ -120,6 +124,8 @@ var UserDelayedGymWizard = function (bot) {
             val = null
             break
         }
+        // restore user locale
+        ctx.i18n.locale(ctx.session.oldlang)
         try {
           await models.Raiduser.update(
             { delayed: val },
@@ -129,6 +135,7 @@ var UserDelayedGymWizard = function (bot) {
           return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_selection_wrong')})`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
+
         let out = await listRaids(`${reason}\n\n`, ctx)
         return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_status_changed', {
           gymname: delayedraid.gymname

@@ -10,8 +10,8 @@ const Stage = require('telegraf/stage')
 const TelegrafI18n = require('telegraf-i18n')
 const path = require('path')
 // const { match } = require('telegraf-i18n')
-var models = require('./models')
-
+const models = require('./models')
+const setLocale = require('./util/setLocale')
 // var env = process.env.NODE_ENV || 'development'
 // var sessconfig = require(`${__dirname}/config/config.json`)[env]
 // const session = new MySQLSession({
@@ -42,9 +42,11 @@ moment.tz.setDefault('Europe/Amsterdam')
 * This will stop the conversation immeditaly
 * @param context
 */
-function cancelConversation (ctx) {
+async function cancelConversation (ctx) {
   // Since something might be failing… reset session
   ctx.session = {}
+  // session cleared; resetting locale
+  await setLocale(ctx)
   return ctx.scene.leave()
     .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra()))
 }
@@ -133,6 +135,7 @@ const stage = new Stage([
 * @param context
 */
 function showHelp (ctx) {
+  setLocale(ctx)
   ctx.reply(ctx.i18n.t('helpmessage'))
 }
 bot.use(stage.middleware())
@@ -280,8 +283,9 @@ bot.on('inline_query', async ctx => {
 bot.hears(/\/hi/i, async (ctx) => {
   let chattitle = ''
   const me = await ctx.telegram.getMe()
+  setLocale(ctx)
   if (ctx.update.message.chat === undefined) {
-    return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_grou_warning'))
+    return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_group_warning'))
   }
   console.log('Somebody said hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
   let olduser = await models.User.find({
@@ -403,6 +407,7 @@ bot.on('left_chat_member', async (ctx) => {
 * Convenience method, just for checking
 */
 bot.hears(/\/raids/i, async (ctx) => {
+  setLocale(ctx)
   let raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
       include: [

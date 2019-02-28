@@ -3,7 +3,7 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const { Markup } = require('telegraf')
-var models = require('../models')
+const models = require('../models')
 const metaphone = require('metaphone')
 const adminCheck = require('../util/adminCheck')
 const setLocale = require('../util/setLocale')
