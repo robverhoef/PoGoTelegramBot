@@ -35,10 +35,10 @@ module.exports = async (reason, ctx) => {
     }))
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment.unix(raids[a].endtime)
-    out += `${ctx.i18n.t('until', lang)}: ${endtime.format('H:mm')} `
+    out += `${ctx.i18n.t('until')}: ${endtime.format('H:mm')} `
     out += `*${raids[a].target}*\n`
     if (raids[a].Raidboss) {
-      out += `${ctx.i18n.t('recommended', lang)}: ${raids[a].Raidboss.accounts} accounts\n`
+      out += `${ctx.i18n.t('recommended')}: ${raids[a].Raidboss.accounts} accounts\n`
     }
     if (raids[a].Gym.googleMapsLink) {
       out += `[${raids[a].Gym.gymname}](${raids[a].Gym.googleMapsLink})\n`
@@ -49,7 +49,7 @@ module.exports = async (reason, ctx) => {
       out += `💳 ExRaid Trigger\n`
     }
     const strtime = moment.unix(raids[a].start1)
-    out += `${ctx.i18n.t('start', lang)}: ${strtime.format('H:mm')} `
+    out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
     let userlist = ''
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
@@ -60,8 +60,8 @@ module.exports = async (reason, ctx) => {
         userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
       }
     }
-    out += `${ctx.i18n.t('number', lang)}: ${accounter}\n`
-    out += `${ctx.i18n.t('participants', lang)}: ${userlist}`
+    out += `${ctx.i18n.t('number')}: ${accounter}\n`
+    out += `${ctx.i18n.t('participants')}: ${userlist}`
     out += '\n\n'
   }
   let today = moment()

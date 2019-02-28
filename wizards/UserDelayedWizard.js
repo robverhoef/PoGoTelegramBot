@@ -129,7 +129,7 @@ var UserDelayedGymWizard = function (bot) {
           return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_selection_wrong')})`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-        let out = await listRaids(`${reason}\n\n`)
+        let out = await listRaids(`${reason}\n\n`, ctx)
         return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_status_changed', {
           gymname: delayedraid.gymname
         })}`, Markup.removeKeyboard().extra())

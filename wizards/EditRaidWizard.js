@@ -242,7 +242,7 @@ function EditRaidWizard (bot) {
             let out = await listRaids(ctx.i18n.t('edit_raid_list_message', {
               gymname: ctx.session.editraid.gymname,
               user: user
-            }))
+            }), ctx)
             bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
             await sendRaidbosses(ctx, bot)
             return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())

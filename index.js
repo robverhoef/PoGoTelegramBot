@@ -9,13 +9,6 @@ const { Markup } = require('telegraf')
 const Stage = require('telegraf/stage')
 const TelegrafI18n = require('telegraf-i18n')
 const path = require('path')
-const i18n = new TelegrafI18n({
-  defaultLanguage: 'nl',
-  useSession: true,
-  sessionName: 'session',
-  allowMissing: true,
-  directory: path.resolve(__dirname, 'locales')
-})
 // const { match } = require('telegraf-i18n')
 var models = require('./models')
 
@@ -32,6 +25,15 @@ var models = require('./models')
 // Let's go!
 // =====================
 const bot = new Telegraf(process.env.BOT_TOKEN)
+
+bot.use(Telegraf.session())
+const i18n = new TelegrafI18n({
+  defaultLanguage: 'nl',
+  useSession: true,
+  sessionName: 'session',
+  allowMissing: true,
+  directory: path.resolve(__dirname, 'locales')
+})
 bot.use(i18n.middleware())
 // Set the default timezone.
 // ToDo: this should could come from env
@@ -133,9 +135,6 @@ const stage = new Stage([
 function showHelp (ctx) {
   ctx.reply(ctx.i18n.t('helpmessage'))
 }
-
-// bot.use(session.middleware())
-bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {

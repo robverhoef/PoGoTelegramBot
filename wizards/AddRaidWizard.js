@@ -21,7 +21,7 @@ function AddRaidWizard (bot) {
     // step 0
     async (ctx) => {
       await setLocale(ctx)
-      console.log('I18N', ctx.i18n)
+      console.log('session: ', ctx.session)
       console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []

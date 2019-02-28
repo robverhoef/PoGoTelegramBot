@@ -266,11 +266,11 @@ function FielresearchWizard (bot) {
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(async () => {
             ctx.session = {}
-            let raidlist = await listRaids(``)
-            ctx.i18n.t('fres_list_reason', {
+            let raidlist = await listRaids(`
+            ${ctx.i18n.t('fres_list_reason', {
               firstname: ctx.from.first_name,
               uid: ctx.from.id
-            })
+            })}`, ctx)
             bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })
           .then(() => ctx.scene.leave())
@@ -369,7 +369,7 @@ function FielresearchWizard (bot) {
               let raidlist = await listRaids(`${ctx.i18n.t('fres_list_reason_modified', {
                 firstname: ctx.from.first_name,
                 uid: ctx.from.id
-              })}\n\n`)
+              })}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
             })
             .then(() => ctx.scene.leave())
@@ -466,7 +466,7 @@ function FielresearchWizard (bot) {
               let raidlist = await listRaids(`${ctx.i18n.t('fres_list_reason_delete', {
                 firstname: ctx.from.first_name,
                 uid: ctx.from.id
-              })}\n\n`)
+              })}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
               console.log(`Research deleted ${JSON.stringify(ctx.session.destroyresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
             }
