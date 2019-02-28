@@ -1,3 +1,12 @@
+# Be careful when adding or modifying language files!
+# This is a yaml file. Using a code editor with syntax colouring for yaml is recommended
+# Errors in this file will have an effect on the bot (text not showing up or worse…)
+# Every line has this format: key: "value" (yes, always double quotes on values)
+# *this wil be bold*
+# ${variable_name} is a variable and should NEVER be translated
+# \r\n or simply \n will add a linebreak
+# hyperlinks look like this [clickable text](url)
+
 # general
 btn_gym_not_found: "Mijn gym staat er niet bij…"
 cancel: "Annuleren"

@@ -1,3 +1,12 @@
+# Be careful when adding or modifying language files!
+# This is a yaml file. Using a code editor with syntax colouring for yaml is recommended
+# Errors in this file will have an effect on the bot (text not showing up or worse…)
+# Every line has this format: key: "value" (yes, always double quotes on values)
+# *this wil be bold*
+# ${variable_name} is a variable and should NEVER be translated
+# \r\n or simply \n will add a linebreak
+# hyperlinks look like this [clickable text](url)
+
 # general
 btn_gym_not_found: "My gym is not listed…"
 cancel: "Cancel"
@@ -148,7 +157,7 @@ edit_raidboss_accounts_question: "*How many accounts do you recommend?*"
 edit_raidboss_cancel_edit: "OK\n\n*Do you want to take another action? Click on */start"
 edit_raidboss_no_clue: "I have no clue of what you want me to do…\n\n*Do you want to take another action? Click on */start"
 edit_raidboss_overview_name: "Name"
-edit_raidboss_overview_accounts: "Recommended number"
+edit_raidboss_overview_accounts: "Recommended number of accounts"
 edit_raidboss_overview_level: "Level"
 edit_raidboss_overview: "These are now the raidboss data:\n\n${out}\n\n*What do you want to do next?*"
 edit_raidboss_btn_edit_more: "Modify something else about this raidboss"
@@ -249,13 +258,13 @@ fres_done: "*Do you want to take another action? Click on */start"
 fres_intro: "You want to add a new Field Research. Here you'll find a [list of Field Researches and rewards ↗️](https://thesilphroad.com/research-tasks). \r\n\r\nFirst we will look for the Stop.\n\n*Use the button 'Look for stops in my neighborhood…'*\r\nOr enter a part of the name, at least 2 characters…"
 fres_minimum_2_chars: "Enter at least two characters of the stop name…\n*Try again.* 🧐"
 fres_stop_not_found: "I couldn't find a stop…\nUse /cancel to quit.\n*Or try again by entering a part of the name*"
-fres_stop_not_listed: "My stop isn;t listed…"
+fres_stop_not_listed: "My stop isn't listed…"
 fres_select_stop: "Select a stop."
 fres_select_something_wrong: "Something went wrong during selection of the stop.\n*Use */start* to try again…*"
 fres_exists: "There is already a Field Research for this stop!\r\n\r\n*Do you want to take another action? Click on */start"
 fres_what_to_do: "*What do you have to do for this research?*\r\nClick a button or type the research if it is not on the list of buttons."
 fres_save_failed: "Sorry, something went *wrong*… Would you like to try again with /start?\n*Or you can also return to the group…**"
-fres_save_success: "*Excellent!*\r\nThe new Field Research for ${ctx.session.newresearch.stopName} has been saved"
+fres_save_success: "*Excellent!*\r\nThe new Field Research for ${stopname} has been saved"
 fres_added_fres: "[${stopname}](${stoplink}) added by: [${reportername}](tg://user?id=${reporterid})"
 fres_list_reason: "[${firstname}](tg://user?id=${uid}) has added a Field Research\n\n"
 frest_list_reason_modified: "[${firstname}](tg://user?id=${uid}) has modified a Field Research"
