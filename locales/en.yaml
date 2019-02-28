@@ -250,7 +250,7 @@ noti_finished_raidboss_removal: "You have been unsubscribed for notifications on
 fres_btn_mainmenu_showlist: "Show list"
 fres_btn_mainmenu_add_research: "Add Research"
 fres_btn_mainmenu_edit_research: "Edit Research"
-fres_btn_mainmenu_remove_research: "Remove Research"
+fres_btn_mainmenu_remove_research: "Delete Research"
 fres_no_fres_yet: "There are no reported Field Researches for today yet…\r\n\r\n*Do you want to take another action? Click on */start"
 fres_fres_today: "*Field Researches for today:*"
 fres_reportedstop: "[${stopname}](${stoplink}) added by: [${reportername}](tg://user?id=${reporterid})"

@@ -118,7 +118,7 @@ function FielresearchWizard (bot) {
             return ctx.scene.leave()
           })
       }
-      out = `${ctx.i18n.t('fres_today')}`
+      out = `${ctx.i18n.t('fres_fres_today')}\n`
       for (let res of researches) {
         out += `\r\n*${res.name}*\r\n`
         out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n\r\n`
@@ -248,7 +248,7 @@ function FielresearchWizard (bot) {
               return ctx.scene.leave()
             })
         }
-        console.log(`Research added ${JSON.stringify(ctx.session.newresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
+        console.log(`Research added ${ctx.session.newresearch} by ${ctx.from.first_name}, ${ctx.from.id}`)
         // success...
         out += `${ctx.i18n.t('fres_save_success', {
           stopname: ctx.session.newresearch.stopName
@@ -256,16 +256,15 @@ function FielresearchWizard (bot) {
         let researches = await listResearches()
         out += `${ctx.i18n.t('fres_fres_today')}\r\n`
         for (let res of researches) {
-          out += `\r\n*${res.name}*\r\n`
-          ctx.i18n.t('fres_added_fres', {
+          out += `\n*${res.name}*\n`
+          out += ctx.i18n.t('fres_added_fres', {
             stopname: res.Stop.name,
             stoplink: res.Stop.googleMapsLink,
             reportername: res.reporterName,
             reporterid: res.reporterId
           })
-          out += `\r\n`
         }
-        out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
+        out += `\n\n${ctx.i18n.t('fres_done')}`
         console.log('OUT', out)
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           .then(async () => {
@@ -366,8 +365,7 @@ function FielresearchWizard (bot) {
           let out = `${ctx.i18n.t('fres_saved_edit')}\r\n`
           for (let res of researches) {
             out += `\r\n*${res.name}*\r\n`
-            out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n\r\n`
-            out += `\r\n`
+            out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\n`
           }
           out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
 
@@ -465,7 +463,7 @@ function FielresearchWizard (bot) {
             return ctx.scene.leave()
           })
       }
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_delete_confirm')}`, Markup.keyboard([[ctx, ctx.i18n.t('yes'), ctx.i18n.t('no')]]).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_delete_confirm')}`, Markup.keyboard([[ctx.i18n.t('yes')], [ctx.i18n.t('no')]]).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -479,7 +477,7 @@ function FielresearchWizard (bot) {
               }
             })
             if (deleted) {
-              // save users langugage
+              // save users language
               ctx.session.oldlang = ctx.i18n.locale()
               // reason should always be in default locale
               ctx.i18n.locale(process.env.DEFAULT_LOCALE)
@@ -491,10 +489,10 @@ function FielresearchWizard (bot) {
               ctx.i18n.locale(ctx.session.oldlang)
               let raidlist = await listRaids(`${reason}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
-              console.log(`Research deleted ${JSON.stringify(ctx.session.destroyresearch)} by ${ctx.from.first_name}, ${ctx.from.id}`)
+              console.log(`Research deleted ${ctx.session.destroyresearch} by ${ctx.from.first_name}, ${ctx.from.id}`)
             }
           } catch (error) {
-            console.log(`Could not delete ${JSON.stringify(ctx.session.destroyresearch)}`, error)
+            console.log(`Could not delete ${ctx.session.destroyresearch}`, error)
             return ctx.replyWithMarkdown(`${ctx.i18n.t('fres_delete_failed')}`)
               .then(() => {
                 ctx.session = {}
@@ -523,8 +521,7 @@ function FielresearchWizard (bot) {
           stopname: res.Stop.name,
           stoplink: res.Stop.googleMapsLink,
           reportername: res.reporterName,
-          reporterid: res.reporterId })}\r\n\r\n`
-        out += `\r\n`
+          reporterid: res.reporterId })}\n`
       }
       out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
 

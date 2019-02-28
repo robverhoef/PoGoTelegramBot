@@ -1,8 +1,12 @@
 var models = require('../models')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 
 module.exports = async (ctx) => {
   const user = await models.User.findOne({
-    tId: ctx.from.id
+    [Op.where]:{
+      tId: ctx.from.id
+    }
   })
   if (user) {
     ctx.i18n.locale(user.locale)
