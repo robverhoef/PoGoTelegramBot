@@ -252,7 +252,7 @@ function FielresearchWizard (bot) {
         // success...
         out += `${ctx.i18n.t('fres_save_success', {
           stopname: ctx.session.newresearch.stopName
-        })}\r\n\r\n`
+        })}\n\n`
         let researches = await listResearches()
         out += `${ctx.i18n.t('fres_fres_today')}\r\n`
         for (let res of researches) {
@@ -263,6 +263,7 @@ function FielresearchWizard (bot) {
             reportername: res.reporterName,
             reporterid: res.reporterId
           })
+          out += `\n`
         }
         out += `\n\n${ctx.i18n.t('fres_done')}`
         console.log('OUT', out)
