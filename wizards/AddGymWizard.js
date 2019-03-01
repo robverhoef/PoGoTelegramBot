@@ -19,7 +19,7 @@ function AddGymWizard (bot) {
       }
 
       ctx.session.newgym = {}
-      return ctx.replyWithMarkdown(ctx.i18n.t('add_gym_welcome'), Markup.removeKeyboard())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_gym_welcome')}`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // Step 1
@@ -34,13 +34,13 @@ function AddGymWizard (bot) {
         }
       })
       if (oldgyms.length > 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('gym_exists_warning'), Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('gym_exists_warning')}`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       ctx.session.newgym.reporterName = user.first_name
       ctx.session.newgym.reporterId = user.id
       ctx.session.newgym.gymname = gymname
-      ctx.replyWithMarkdown(ctx.i18n.t('address_question'), Markup.removeKeyboard().extra())
+      ctx.replyWithMarkdown(`${ctx.i18n.t('address_question')}`, Markup.removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
     // Step 2
@@ -48,7 +48,7 @@ function AddGymWizard (bot) {
     async (ctx) => {
       let gymadres = ctx.update.message.text.trim()
       ctx.session.newgym.address = gymadres.toLowerCase() === 'x' ? null : gymadres
-      ctx.replyWithMarkdown(('gmlink_question'))
+      ctx.replyWithMarkdown(`${ctx.i18n.t('gmlink_question')}`)
         .then(() => ctx.wizard.next())
     },
     // Step 3
@@ -58,13 +58,13 @@ function AddGymWizard (bot) {
       gmlink = gmlink.toLowerCase() === 'x' ? null : gmlink
       ctx.session.newgym.googleMapsLink = gmlink
       if (gmlink !== null && gmlink.substr(0, 4) !== 'http') {
-        ctx.replyWithMarkdown(ctx.i18n.t('invalid_link'))
+        ctx.replyWithMarkdown(`${ctx.i18n.t('invalid_link')}`)
           .then(() => {
 
           })
       }
       ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
-      ctx.replyWithMarkdown(ctx.i18n.t('exraid_question'), Markup.keyboard(ctx.session.exraidbtns)
+      ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },

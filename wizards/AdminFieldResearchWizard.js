@@ -71,7 +71,7 @@ function AdminFieldResearchWizard (bot) {
       if (input === ctx.i18n.t('admin_fres_edit')) {
         ctx.wizard.selectStep(wizsteps.editresearch)
         return ctx.wizard.steps[wizsteps.editresearch](ctx)
-      } else if (input === ctx.i18n.t('fres_admin_delete')) {
+      } else if (input === ctx.i18n.t('admin_fres_delete')) {
         ctx.wizard.selectStep(wizsteps.deleteresearch)
         return ctx.wizard.steps[wizsteps.deleteresearch](ctx)
       }
@@ -122,7 +122,7 @@ function AdminFieldResearchWizard (bot) {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
             })
-        case 'Nee':
+        case ctx.i18n.t('no'):
           return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_save_canceled')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
@@ -177,6 +177,7 @@ function AdminFieldResearchWizard (bot) {
     },
     // delete
     async (ctx) => {
+      console.log('DELETE', ctx.session.selectedbtn, ctx.i18n.t('admin_fres_confirm_delete', {label: ctx.session.selectedbtn.label}))
       return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_confirm_delete', {
         label: ctx.session.selectedbtn.label
       })}`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())

@@ -143,7 +143,7 @@ function EditGymWizard (bot) {
       let key = ctx.session.editattr
       let value = ctx.update.message.text.trim()
       if (key === 'exRaidTrigger') {
-        ctx.session.editgym.exRaidTrigger = value.toLowerCase() === ctx.i18n.t('yes') ? 1 : 0
+        ctx.session.editgym.exRaidTrigger = value.toLowerCase() === ctx.i18n.t('yes').toLowerCase() ? 1 : 0
       } else if (value.toLowerCase() === 'x') {
         ctx.session.editgym[key] = null
       } else {
@@ -158,7 +158,7 @@ function EditGymWizard (bot) {
       ]
       return ctx.replyWithMarkdown(ctx.i18n.t('edit_gym_overview', {
         out: out
-      }), Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
+      }), Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra({disable_web_page_preview: true}))
         .then(() => ctx.wizard.next())
     },
 

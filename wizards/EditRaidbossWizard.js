@@ -51,8 +51,8 @@ function EditRaidbossWizard (bot) {
           accounts: bosses[i].accounts
         })
       }
-      ctx.session.bosscandidates.push({ name: ctx.i18n.t('edit_raidboss_cancel'), id: 0 })
-      return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_select'), Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
+      ctx.session.bosscandidates.push({ name: ctx.i18n.t('edit_raidboss_btn_cancel'), id: 0 })
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_raidboss_select')}`, Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
@@ -93,6 +93,7 @@ function EditRaidbossWizard (bot) {
           break
         }
       }
+      console.log('ctx.session.key', ctx.session.key)
       let question = ''
       switch (ctx.session.key) {
         case 'name':
@@ -104,8 +105,10 @@ function EditRaidbossWizard (bot) {
         case 'accounts':
           question = ctx.i18n.t('edit_raidboss_accounts_question')
           break
+        case '0':
         case 0:
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_cancel_edit'))
+          console.log(ctx.i18n.t('edit_raidboss_cancel_edit'))
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_raidboss_cancel_edit')}`)
             .then(() => ctx.scene.leave())
         default:
           return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_no_clue'))

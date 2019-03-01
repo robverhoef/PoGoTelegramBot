@@ -17,9 +17,8 @@ function AddRaidbossWizard (bot) {
       if (invalidAdmin !== false) {
         return invalidAdmin
       }
-
       ctx.session.newboss = {}
-      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_intro'), Markup.removeKeyboard())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raidboss_intro')}`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
 
@@ -38,13 +37,13 @@ function AddRaidbossWizard (bot) {
           .then(() => ctx.scene.leave())
       }
       let btns = ['1', '2', '3', '4', '5']
-      return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_level_question', {
-        bossname: bossname
-      }, Markup.keyboard(btns)
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('raidboss_level_question', {
+              bossname: bossname
+            })}`, Markup.keyboard(btns)
         .resize()
         .oneTime()
         .extra()
-      ))
+      )
         .then(() => {
           return ctx.wizard.next()
         })

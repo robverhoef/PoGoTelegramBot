@@ -10,7 +10,7 @@
 # general
 btn_gym_not_found: "My gym is not listed…"
 cancel: "Cancel"
-done: "Klaar!"
+done: "Done!"
 edit_more: "OK, more modifications…"
 edit_what: "What do you want to change?"
 find_gym_failed_retry: "I could not find a gym containing '${term === '/start help_fromgroup' ? '' : term}'…\nUse /cancel to stop.\n*Or try again…*"
@@ -100,9 +100,9 @@ unexpected_raid_not_found: "Mmmm, weird. Sorry, no raid found.\n*You can now ret
 
 #  AddRaidbossWizard.js
 add_raidboss_finished: "Thanks!\n\n*You can now return to the group. Do you want to take another action? Click on */start"
-add_raidboss_intro: "You want to add a new raid boss.\n*Enter the name…*`"
+add_raidboss_intro: "You want to add a new raid boss.\n*Enter the name…*"
 raidboss_exists: "This raid boss already exists!\n\n*Do you want to take another action? Click on */start"
-raidboss_level_question: "`What level does ${bossname}? have`"
+raidboss_level_question: "What level does ${bossname}? have"
 raidboss_recommended_accounts: "What is the recommended number of accounts for ${bossname}?"
 raidboss_save_canceled: "OK, the new raidboss is not saved.\n\n*You can now return to the group. Do you want to take another action? Click on */start"
 raidboss_save_question: "Raidboss: ${bossname}\nLevel: ${bosslevel}\nrecommended number of accounts: ${numaccounts}\n\n*Save?*"
@@ -143,7 +143,7 @@ edit_raid_search_gym_again: "We gaan opnieuw zoeken. \nIf you want to stop use /
 #  EditRaidWizard_bak.js
 #  EditRaidbossWizard.js
 edit_raiddboss_intro: "You want to modify a raidboss.\n*Enter a part of the name…*"
-edit_raidboss_not_found: "`I couldn't find a raidboss with '${term}' in the name…\n\n*Use */start* to take another action. Or return to the group.*"
+edit_raidboss_not_found: "I couldn't find a raidboss with '${term}' in the name…\n\n*Use */start* to take another action. Or return to the group.*"
 edit_raidboss_not_listed: "My raidboss is not listed…"
 edit_raidboss_select: "Select a raidboss."
 edit_raidboss_not_listed_close: "OK\n\n*Do you want to take another action? Click on */start"
@@ -155,7 +155,7 @@ edit_raidboss_name_question: "*What is the new name?*"
 edit_raidboss_level_question: "*What is the level?*"
 edit_raidboss_accounts_question: "*How many accounts do you recommend?*"
 edit_raidboss_cancel_edit: "OK\n\n*Do you want to take another action? Click on */start"
-edit_raidboss_no_clue: "I have no clue of what you want me to do…\n\n*Do you want to take another action? Click on */start"
+edit_raidboss_no_clue: "I have no clue about what you want me to do…\n\n*Do you want to take another action? Click on */start"
 edit_raidboss_overview_name: "Name"
 edit_raidboss_overview_accounts: "Recommended number of accounts"
 edit_raidboss_overview_level: "Level"
