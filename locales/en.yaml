@@ -226,6 +226,21 @@ stats_since: "Statistics since  ${timestr}"
 stats_exraid_since: "EX Raid statistics from ${timestr} until ${endtimestr}"
 stats_finished: "*Do you want to take another action? Click on */start"
 
+# Shiny stats
+sh_stats_btn_report: "Admin: Report shiny raid Pokémon"
+sh_stats_btn_show: "Admin: Show shiny stats"
+sh_stats_no_raids: "There has not been a raid in the past hour. \n*Click */start *to take another action*"
+sh_stats_report_intro: "You want to report shiny raid Pokémons. \n\n*Important:* To get good results you should report very often; not just after a shiny Pokémon has been caught…\n\n*Select a raid or click */cancel* to stop:*"
+sh_stats_input_question: "Specify the number of accounts that have played the raid and the number of shinies, separated by a space… Like this: \n11 2"
+sh_stats_input: "Accounts: ${accounts} Shinies: ${shinies}\n\n"
+sh_stats_input_wrong: "I do'nt get it! *Enter again… or use */cancel* to quit.*"
+sh_stats_save_failed: "Woops… failed while saving\n*Click */start* to take another action*"
+sh_stats_save_success: "OK, saved…\n*Click */start* to take another action*"
+sh_stats_save_canceled: "OK, NOT saved…\n*Click */start* to take another action*"
+sh_stats_head: "*Shiny Stats*"
+sh_stats_done: "\n*Click */start* to take another action*"
+
+
 # Notifications
 noti_something_wrong_finding_user: "Something *went wrong* while retrieving your data…\nPerhaps you can try again with /start. Or return to the group."
 noti_gyms: "Gym notifications"

@@ -15,7 +15,17 @@ module.exports = (sequelize, DataTypes) => {
     start3: DataTypes.DATE,
     reporterName: DataTypes.STRING,
     reporterId: DataTypes.INTEGER,
-    raidbossId: DataTypes.INTEGER
+    raidbossId: DataTypes.INTEGER,
+    shiny: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+      allowNull: true
+    },
+    accountsplayed: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+      allowNull: true
+    }
   }, { tableName: 'raids' })
 
   Raid.associate = function (models) {
