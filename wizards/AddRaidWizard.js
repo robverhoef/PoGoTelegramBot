@@ -71,7 +71,7 @@ function AddRaidWizard (bot) {
       }
       // Catch gym not found errors…
       if (selectedIndex === -1) {
-        return ctx.replyWithMarkdown(`Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raid_wrong_while_selecting')}\n`, Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -144,7 +144,7 @@ function AddRaidWizard (bot) {
           return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_minutes_retry'))
         }
         if ((!minutes || minutes < 0 || minutes > 45) && ctx.session.timemode === 'endmodemin') {
-          return ctx.replyWithMarkdown(`Opgegeven minuten moeten tussen de 0 en 45 liggen. \n*Probeer het nog eens.*`)
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raid_0_45_min_error')}`)
         }
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
           return ctx.replyWithMarkdown(ctx.i18n.t('time_to_tight'))

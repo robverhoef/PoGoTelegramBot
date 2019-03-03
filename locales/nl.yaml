@@ -97,7 +97,8 @@ raid_added_list: "Raid bij ${gymname} toegevoegd door: [${user.first_name}](tg:/
 raid_exists_warning: "Deze raid bestaat al.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 raid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${gymname}\n\n"
 unexpected_raid_not_found: "Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
-
+add_raid_wrong_while_selecting: "Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*"
+add_raid_0_45_min_error: "Opgegeven minuten moeten tussen de 0 en 45 liggen. \n*Probeer het nog eens.*"
 #  AddRaidbossWizard.js
 add_raidboss_finished: "Dankjewel!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 add_raidboss_intro: "Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*"
