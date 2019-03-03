@@ -440,18 +440,6 @@ bot.hears(/\/raids/i, async (ctx) => {
   }
   return ctx.replyWithMarkdown(out, { disable_web_page_preview: true })
 })
-// bot.on('text', function (ctx) {
-//   console.log('ON MESSAGE', ctx.message)
-//   ctx.i18n.locale(ctx.session.__language_code || process.env.LOCALE)
-
-//   switch (ctx.message.text) {
-//     case 'Report a new raid':
-//     case 'Een nieuwe raid melden':
-//       console.log('yep...', ctx, Stage)
-//       return ctx.scene.enter('add-raid-wizard')
-//       break
-//   }
-// })
 // Let's fire up!
 bot.telegram.setWebhook(process.env.BOT_URL)
   .then((data) => {
