@@ -1,10 +1,8 @@
 var models = require('../models')
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
 
 module.exports = async (ctx) => {
   const user = await models.User.findOne({
-    [Op.where]: {
+    where: {
       tId: ctx.from.id
     }
   })

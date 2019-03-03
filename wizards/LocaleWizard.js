@@ -37,18 +37,20 @@ function LocaleWizard (bot) {
           break
         }
       }
-      const user = ctx.from
+      const user = ctx.update.message.from
       // Note; it is exceptional, but users might be registered more than once; update all
-      let fusers = await models.User.findAll({
-        where: {
-          tId: user.id
-        }
-      })
-
-      for (let fuser of fusers) {
-        await fuser.update({
-          locale: newloc
-        })
+      try {
+        await models.User.update(
+          {
+            locale: newloc
+          }, {
+            where: {
+              tId: user.id
+            }
+          }
+        )
+      } catch (error) {
+        console.log('ERROR while updating locale', error.message)
       }
       ctx.i18n.locale(newloc)
       return ctx.replyWithMarkdown(`${ctx.i18n.t('lang_set')}`)
