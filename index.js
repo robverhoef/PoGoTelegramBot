@@ -1,26 +1,15 @@
 require('dotenv').config()
-// const fs = require('fs')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const moment = require('moment-timezone')
 const Telegraf = require('telegraf')
 const { Markup } = require('telegraf')
-// const MySQLSession = require('telegraf-session-mysql')
 const Stage = require('telegraf/stage')
 const TelegrafI18n = require('telegraf-i18n')
 const path = require('path')
-// const { match } = require('telegraf-i18n')
 const models = require('./models')
 require('./locales.js')
 const setLocale = require('./util/setLocale')
-// var env = process.env.NODE_ENV || 'development'
-// var sessconfig = require(`${__dirname}/config/config.json`)[env]
-// const session = new MySQLSession({
-//   host: sessconfig.host,
-//   user: sessconfig.username,
-//   password: sessconfig.password,
-//   database: sessconfig.database
-// })
 
 // =====================
 // Let's go!
@@ -358,22 +347,22 @@ bot.on('new_chat_members', async (ctx) => {
     console.log('A bot tried to become a group member…')
     return
   }
-  let lang = newusr.language_code
-  let locales = []
-  let rawlocales = process.env.LOCALES.split(',')
+  // Find the user's language
+  const lang = newusr.language_code
+  let userlang = process.env.LOCALE
+  let rawlocales = process.env.LOCALES
   for (const rawlocale of rawlocales) {
-    var loc = rawlocale.trim().split(' ')
-    locales.push(loc[0])
-  }
-  if (locales.indexOf(lang) < 0) {
-    lang = process.env.LOCALE
+    if (lang === rawlocale[0]) {
+      userlang = lang
+      break
+    }
   }
   if (ctx.message.chat.id.toString() === process.env.GROUP_ID) {
     let newuser = models.User.build({
       tId: newusr.id,
       tUsername: newusr.first_name,
       tGroupID: process.env.GROUP_ID.toString(),
-      locale: lang
+      locale: userlang
     })
     try {
       await newuser.save()
