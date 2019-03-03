@@ -596,6 +596,8 @@ var StatsWizard = function (bot) {
           return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
+      return ctx.replyWithMarkdown('Mmm.. /start', Markup.removeKeyboard().extra())
+          .then(() => ctx.scene.leave())
     }
   )
 }
