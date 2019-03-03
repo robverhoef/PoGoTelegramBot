@@ -206,10 +206,8 @@ bot.command('/start', async (ctx) => {
   })
   // if (ctx.message.text === '/start help_fromgroup') {
   if (fuser !== null) {
-    console.log('setting user locale session', fuser.locale)
-    ctx.locale = fuser.locale // ?
+    ctx.locale = fuser.locale
     ctx.i18n.locale(fuser.locale)
-    console.log('LOCALE SET?', ctx.i18n.locale())
     return showMainMenu(ctx, user)
   } else {
     // ToDo: check if user language is available
