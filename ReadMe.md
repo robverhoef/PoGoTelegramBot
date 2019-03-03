@@ -110,6 +110,6 @@ After the bot knows about the user, a conversation can be initiated from the gro
 The bot will then show a button that will take the user to a private chat.
 The conversation stays private. The final output will be sent to the group.
 
-Send /lang to the bot to change your language preferrence.
+Send /lang to the bot to change your language preference.
 
 A user can stop any conversation with the bot by entering the **/cancel** command. This is the preferred method of stopping when something appears to go wrong.
