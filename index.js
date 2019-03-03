@@ -11,6 +11,7 @@ const TelegrafI18n = require('telegraf-i18n')
 const path = require('path')
 // const { match } = require('telegraf-i18n')
 const models = require('./models')
+require('./locales.js')
 const setLocale = require('./util/setLocale')
 // var env = process.env.NODE_ENV || 'development'
 // var sessconfig = require(`${__dirname}/config/config.json`)[env]

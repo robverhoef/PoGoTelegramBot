@@ -11,6 +11,7 @@ function LocaleWizard (bot) {
     async (ctx) => {
       await setLocale(ctx)
       let rawlocales = process.env.LOCALES
+      console.log('LOCALES', rawlocales)
       const locs = JSON.parse(rawlocales)
       let locales = []
       ctx.session.localebtns = []
