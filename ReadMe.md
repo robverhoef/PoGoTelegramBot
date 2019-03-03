@@ -64,7 +64,7 @@ Edit your .env file
 ### Note on languages
 If Dutch is not the standard language you should now modify migrations/20181222145311-useraddlanguage.js and set the locale (defaultLanguage: 'nl') to your language code **before running the migrations**.
 You can also add your own language file to the locales folder. 
-Don't forget to modify your environment variables (DEFAULT_LOCALE and LOCALES) when adding a language or changing your default language.
+Don't forget to modify your environment variables (DEFAULT_LOCALE and LOCALES) in locales.js when adding a language or changing your default language.
 
 You will need the Telegram group ID. To obtain this ID; 
 
