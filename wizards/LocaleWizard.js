@@ -9,9 +9,12 @@ const setLocale = require('../util/setLocale')
 function LocaleWizard (bot) {
   return new WizardScene('locale-wizard',
     async (ctx) => {
+      if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
+        return ctx.replyWithMarkdown(`Not here… set your language in the bot screen`)
+          .then(() => ctx.scene.leave())
+      }
       await setLocale(ctx)
       let rawlocales = process.env.LOCALES
-      console.log('LOCALES', rawlocales)
       const locs = JSON.parse(rawlocales)
       let locales = []
       ctx.session.localebtns = []
@@ -28,7 +31,6 @@ function LocaleWizard (bot) {
       let rawlocales = process.env.LOCALES
       let newloc = process.env.LOCALE
       const rawlocs = JSON.parse(rawlocales)
-      console.log('locales', rawlocs)
       for (const loc of rawlocs) {
         if (loc[1] === lang) {
           newloc = loc[0]
@@ -44,7 +46,6 @@ function LocaleWizard (bot) {
       })
 
       for (let fuser of fusers) {
-        console.log('UPDATE FUSER:', fuser, newloc)
         await fuser.update({
           locale: newloc
         })
