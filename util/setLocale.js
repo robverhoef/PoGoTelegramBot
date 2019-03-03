@@ -4,7 +4,7 @@ const Op = Sequelize.Op
 
 module.exports = async (ctx) => {
   const user = await models.User.findOne({
-    [Op.where]:{
+    [Op.where]: {
       tId: ctx.from.id
     }
   })

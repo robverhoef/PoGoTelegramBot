@@ -177,7 +177,7 @@ function AdminFieldResearchWizard (bot) {
     },
     // delete
     async (ctx) => {
-      console.log('DELETE', ctx.session.selectedbtn, ctx.i18n.t('admin_fres_confirm_delete', {label: ctx.session.selectedbtn.label}))
+      console.log('DELETE', ctx.session.selectedbtn, ctx.i18n.t('admin_fres_confirm_delete', { label: ctx.session.selectedbtn.label }))
       return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_confirm_delete', {
         label: ctx.session.selectedbtn.label
       })}`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())

@@ -158,7 +158,7 @@ function EditGymWizard (bot) {
       ]
       return ctx.replyWithMarkdown(ctx.i18n.t('edit_gym_overview', {
         out: out
-      }), Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra({disable_web_page_preview: true}))
+      }), Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
 

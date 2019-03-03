@@ -156,7 +156,7 @@ var NotificationWizard = function () {
       // User can't find the gym/raidboss
       if (ctx.session.candidates[selectedIndex][1] === 0) {
         return ctx.replyWithMarkdown(`${ctx.i18n.t('retry_or_cancel')}`, Markup.removeKeyboard().extra())
-        .then(() => ctx.wizard.back())
+          .then(() => ctx.wizard.back())
       } else {
         // retrieve selected candidate from session
         let selectedCandidate = ctx.session.candidates[selectedIndex]

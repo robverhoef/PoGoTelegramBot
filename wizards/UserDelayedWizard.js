@@ -98,7 +98,7 @@ var UserDelayedGymWizard = function (bot) {
           case '2':
             // save users langugage
             ctx.session.oldlang = ctx.i18n.locale()
-             // reason should always be in default locale
+            // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_2min', {
               first_name: user.first_name,
@@ -106,13 +106,13 @@ var UserDelayedGymWizard = function (bot) {
               gymname: delayedraid.gymname
             })}`
             val = '2 min.'
-             // restore user locale
+            // restore user locale
             ctx.i18n.locale(ctx.session.oldlang)
             break
           case '5':
             // save users langugage
             ctx.session.oldlang = ctx.i18n.locale()
-             // reason should always be in default locale
+            // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_5min', {
               first_name: user.first_name,
@@ -120,7 +120,7 @@ var UserDelayedGymWizard = function (bot) {
               gymname: delayedraid.gymname
             })}`
             val = '5 min.'
-             // restore user locale
+            // restore user locale
             ctx.i18n.locale(ctx.session.oldlang)
             break
           case ctx.i18n.t('user_delayed_is_on_time'):

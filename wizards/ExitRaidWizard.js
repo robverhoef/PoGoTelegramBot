@@ -90,9 +90,9 @@ function ExitRaidWizard (bot) {
       // reason should always be in default locale
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('exit_raid_list_message', {
-          user: user,
-          gymname: ctx.session.gymnames[selectedraid]
-        })
+        user: user,
+        gymname: ctx.session.gymnames[selectedraid]
+      })
       // restore user locale
       ctx.i18n.locale(ctx.session.oldlang)
       let out = await listRaids(reason, ctx)

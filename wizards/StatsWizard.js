@@ -409,8 +409,8 @@ var StatsWizard = function (bot) {
         ctx.i18n.t('stats_total_statistics')
       ]
       if (await isAdmin(ctx, bot)) {
-          ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_report'))
-          ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_show'))
+        ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_report'))
+        ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_show'))
       }
       return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_stats_question'), Markup.keyboard(ctx.session.statbtns)
         .oneTime()
@@ -423,14 +423,14 @@ var StatsWizard = function (bot) {
     async (ctx) => {
       ctx.session.chosenStat = ctx.session.statbtns.indexOf(ctx.update.message.text)
       if (ctx.session.chosenStat === 2) {
-          // 4rd function
-          ctx.wizard.selectStep(3)
-          return ctx.wizard.steps[3](ctx)
+        // 4rd function
+        ctx.wizard.selectStep(3)
+        return ctx.wizard.steps[3](ctx)
       }
       if (ctx.session.chosenStat === 3) {
-          // 10th function
-          ctx.wizard.selectStep(7)
-          return ctx.wizard.steps[7](ctx)
+        // 10th function
+        ctx.wizard.selectStep(7)
+        return ctx.wizard.steps[7](ctx)
       }
       if (ctx.session.chosenStat === -1) {
         return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong'), Markup.removeKeyboard().extra())
@@ -508,14 +508,14 @@ var StatsWizard = function (bot) {
         include: [models.Gym, models.Raiduser],
         where: {
           start1: {
-            [Op.between]:[startfrom, startuntil]
+            [Op.between]: [startfrom, startuntil]
           }
         }
       })
-      console.log(raids.length, `${ctx.i18n.t('sh_stats_no_raids')}`)
+      // console.log(raids.length, `${ctx.i18n.t('sh_stats_no_raids')}`)
       if (raids.length === 0) {
         return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_no_raids')}`, Markup.removeKeyboard().extra())
-        .then(() => ctx.scene.leave())
+          .then(() => ctx.scene.leave())
       }
       ctx.session.sraids = raids.map((el) => {
         return {
@@ -524,18 +524,18 @@ var StatsWizard = function (bot) {
         }
       })
       return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_report_intro')}`, Markup.keyboard(ctx.session.sraids.map(el => el.label)).resize().oneTime().extra())
-      .then(() => ctx.wizard.next())
+        .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       const input = ctx.update.message.text
       ctx.session.raidId = 0
       for (const raid of ctx.session.sraids) {
         if (raid.label === input) {
-            ctx.session.raidId = raid.id
+          ctx.session.raidId = raid.id
         }
       }
       return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input_question')}`, Markup.removeKeyboard().extra())
-      .then(() => ctx.wizard.next())
+        .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       const input = ctx.update.message.text.split(' ')
@@ -543,7 +543,7 @@ var StatsWizard = function (bot) {
       const shinies = parseInt(input[1])
       let validated = true
       if (accounts.toString() !== input[0] || shinies.toString() !== input[1] || accounts < shinies) {
-          validated = false
+        validated = false
       }
       if (validated) {
         ctx.session.accounts = accounts
@@ -552,19 +552,19 @@ var StatsWizard = function (bot) {
           shinies: shinies,
           accounts: accounts
         })}\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())
-        .then(() => ctx.wizard.next())
+          .then(() => ctx.wizard.next())
       }
       return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input_wrong')}`)
     },
     async (ctx) => {
       const confirm = ctx.update.message.text
-      if(confirm == ctx.i18n.t('yes')) {
+      if (confirm === ctx.i18n.t('yes')) {
         // save…
         try {
           models.Raid.update({
             shiny: ctx.session.shinies,
             accountsplayed: ctx.session.accounts
-          },{
+          }, {
             where: {
               id: ctx.session.raidId
             }
@@ -572,32 +572,30 @@ var StatsWizard = function (bot) {
         } catch (error) {
           console.log('ERROR WHILE SAVING SHINY STATS', error.message)
           return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_failed')}`)
-          .then(() => ctx.scene.leave())
+            .then(() => ctx.scene.leave())
         }
         return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_success')}`, Markup.removeKeyboard().extra())
-        .then(() => ctx.scene.leave())
-
+          .then(() => ctx.scene.leave())
       }
       // don't save
       return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_canceled')}`, Markup.removeKeyboard().extra())
-      .then(() => ctx.scene.leave())
+        .then(() => ctx.scene.leave())
     },
     // Show Shiny stats
     async (ctx) => {
-      const results = await models.sequelize.query('select target, sum(shiny) as shiny, sum(accountsplayed) as players from raids where shiny is not null and accountsplayed is not null group by target', { type: models.sequelize.QueryTypes.SELECT})
-      console.log(results)
+      const results = await models.sequelize.query('select target, sum(shiny) as shiny, sum(accountsplayed) as players from raids where shiny is not null and accountsplayed is not null group by target', { type: models.sequelize.QueryTypes.SELECT })
+      // console.log(results)
       if (results.length > 0) {
-          let out = `${ctx.i18n.t('sh_stats_head')}\n\n`
-          for (const result of results) {
-            console.log('result:', result)
-            out += `*${result.target}:* ${result.shiny} shiny, ${result.players} accounts; ${Math.round(result.shiny*100/result.players)}%\n`
-          }
-          out += `${ctx.i18n.t('sh_stats_done')}`
-          return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())
+        let out = `${ctx.i18n.t('sh_stats_head')}\n\n`
+        for (const result of results) {
+          out += `*${result.target}:* ${result.shiny} shiny, ${result.players} accounts; ${Math.round(result.shiny * 100 / result.players)}%\n`
+        }
+        out += `${ctx.i18n.t('sh_stats_done')}`
+        return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       return ctx.replyWithMarkdown('Mmm.. /start', Markup.removeKeyboard().extra())
-          .then(() => ctx.scene.leave())
+        .then(() => ctx.scene.leave())
     }
   )
 }

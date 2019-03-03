@@ -251,7 +251,7 @@ function EditRaidWizard (bot) {
             ctx.i18n.locale(ctx.session.oldlang)
 
             let out = await listRaids(reason, ctx)
-            console.log('ctx.session.oldlang',ctx.session.oldlang)
+            console.log('ctx.session.oldlang', ctx.session.oldlang)
             bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
             await sendRaidbosses(ctx, bot)
             return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())

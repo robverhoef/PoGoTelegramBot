@@ -38,8 +38,8 @@ function AddRaidbossWizard (bot) {
       }
       let btns = ['1', '2', '3', '4', '5']
       return ctx.replyWithMarkdown(`${ctx.i18n.t('raidboss_level_question', {
-              bossname: bossname
-            })}`, Markup.keyboard(btns)
+        bossname: bossname
+      })}`, Markup.keyboard(btns)
         .resize()
         .oneTime()
         .extra()
