@@ -81,7 +81,7 @@ exraid_question: "Okidoki…\nIs this an Ex Raid contender?"
 new_gym_almost_done_confirm: "Almost done!\nYou have entered this information:\nNew gym"
 
 #  AddRaidWizard.js
-add_raid_welcome: "You want to add a new raid. We will first search for the gym.\n*Enter part of the name, at least 2 characters…*"
+add_raid_welcome: "You want to add a new raid. We will first search for the gym.\n\n*Use the button 'Look for gyms in my neighborhood…'*\nOr enter a part of the name, at least 2 characters…"
 btn_start_mode_time: "Hatching of the egg: start time"
 btn_start_mode_min: "Hatching of the egg: in minutes"
 btn_end_mode_time: "End of the raid: end time"
@@ -97,6 +97,7 @@ raid_added_list: "Raid at ${gymname} added by: [${user.first_name}](tg://user?id
 raid_exists_warning: "This raid already exists.\n*You can now return to the group. Do you want to take another action? Click on */start"
 raid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) was added to the raid at ${gymname}\n\n"
 unexpected_raid_not_found: "Mmmm, weird. Sorry, no raid found.\n*You can now return to the group. Do you want to take another action? Click on */start"
+btn_gym_find_location: "Look for gyms in my neighborhood…"
 
 #  AddRaidbossWizard.js
 add_raidboss_finished: "Thanks!\n\n*You can now return to the group. Do you want to take another action? Click on */start"
@@ -106,6 +107,7 @@ raidboss_level_question: "What level does ${bossname}? have"
 raidboss_recommended_accounts: "What is the recommended number of accounts for ${bossname}?"
 raidboss_save_canceled: "OK, the new raidboss is not saved.\n\n*You can now return to the group. Do you want to take another action? Click on */start"
 raidboss_save_question: "Raidboss: ${bossname}\nLevel: ${bosslevel}\nrecommended number of accounts: ${numaccounts}\n\n*Save?*"
+
 #  EditGymWizard.js
 btn_edit_gym_name: "Name"
 btn_edit_gym_gmlink: "Google Maps link"
@@ -122,6 +124,7 @@ edit_gym_overview: "These are now the gym data:\n\n${out}*What do you want to do
 edit_gym_btn_save_close: "Save and exit"
 edit_gym_btn_edit_more: "Edit something else for this gym"
 edit_gym_btn_cancel: "Cancel"
+
 #  EditRaidWizard.js
 edit_raid_no_raids_found: "Sorry, I can not find a raid now 🤨\n\n*You can now go back to the group. Do you want to take another action? Click on */start"
 edit_raid_until: "until"
@@ -140,7 +143,7 @@ edit_raid_overview_data: "These are now the raid data:\n\n${out}*What do you wan
 edit_raid_edit_more: "Edit something else for this raid"
 edit_raid_list_message: "*Raid at ${gymname} modified* by: [${user.first_name}](tg://user?id=${user.id})\n\n"
 edit_raid_search_gym_again: "We gaan opnieuw zoeken. \nIf you want to stop use /cancel\n*Enter a part of the name, at least 2 characters…*"
-#  EditRaidWizard_bak.js
+
 #  EditRaidbossWizard.js
 edit_raiddboss_intro: "You want to modify a raidboss.\n*Enter a part of the name…*"
 edit_raidboss_not_found: "I couldn't find a raidboss with '${term}' in the name…\n\n*Use */start* to take another action. Or return to the group.*"
@@ -168,9 +171,11 @@ exit_raid_not_participating: "You do not participate in raids yet…\n\n*You can
 exit_raid_not_listed: "My raid isn't listed…"
 exit_raid_select_raid: "Select araid…"
 exit_raid_list_message: "[${user.first_name}](tg://user?id=${user.id}) signed out of raid at ${gymname}\n\n"
+
 #  FindGymWizard.js
 find_gym_location_intro: "Enter at least 2 characters of the gym name…"
 find_gym_location_overview: "I have found ${l} gym${l === 1 ? '' : 's'} for '${term}' 🤓\n\n${out}*Use */start* to take another action.  Or return to the group.*"
+
 #  JoinRaidWizard.js
 join_raid_no_raids_found: "Sorry, there is no raid… 😉\n\n*You can now go back to the group. Do you want to take another action? Click on */start"
 join_raid_dont_participate: "…do not join"

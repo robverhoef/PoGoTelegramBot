@@ -21,44 +21,58 @@ function AddRaidWizard (bot) {
     // step 0
     async (ctx) => {
       await setLocale(ctx)
-      console.log('session: ', ctx.session)
       console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
-      return ctx.replyWithMarkdown(ctx.i18n.t('add_raid_welcome'), Markup.removeKeyboard())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raid_welcome')}\r\n`, Markup.keyboard([{ text: ctx.i18n.t('btn_gym_find_location'), request_location: true }]).resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
       // console.log('step 1', ctx.update.message.text)
-      const term = ctx.update.message.text.trim()
-      if (term.length < 2) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
-        // .then(() => ctx.wizard.back())
-      } else {
-        const candidates = await models.Gym.findAll({
-          where: {
-            gymname: { [Op.like]: '%' + term + '%' }
-          }
+      let candidates = []
+      if (ctx.update.message.location) {
+        const lat = ctx.update.message.location.latitude
+        const lon = ctx.update.message.location.longitude
+        const sf = 3.14159 / 180 // scaling factor
+        const er = 6371 // earth radius in km, approximate
+        const mr = 1.0 // max radius in Km
+        let $sql = `SELECT id, gymname, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM gyms WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
+        candidates = await models.sequelize.query($sql, {
+          model: models.Gym,
+          mapToModel: true // pass true here if you have any mapped fields
         })
-        if (candidates.length === 0) {
-          ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: term }))
-          return
+      } else {
+        // User was typing
+        const term = ctx.update.message.text.trim()
+        if (term.length < 2) {
+          return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
+          // .then(() => ctx.wizard.back())
+        } else {
+          candidates = await models.Gym.findAll({
+            where: {
+              gymname: { [Op.like]: '%' + term + '%' }
+            }
+          })
+          if (candidates.length === 0) {
+            ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: term }))
+            return
+          }
         }
-        ctx.session.gymcandidates = []
-        for (let i = 0; i < candidates.length; i++) {
-          ctx.session.gymcandidates.push([
-            candidates[i].gymname.trim(),
-            candidates[i].id
-          ])
-        }
-
-        ctx.session.gymcandidates.push([
-          ctx.i18n.t('btn_gym_not_found'), 0
-        ])
-        return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymcandidates.map(el => el[0])).oneTime().resize().extra())
-          .then(() => ctx.wizard.next())
       }
+      ctx.session.gymcandidates = []
+      for (let i = 0; i < candidates.length; i++) {
+        ctx.session.gymcandidates.push([
+          candidates[i].gymname.trim(),
+          candidates[i].id
+        ])
+      }
+
+      ctx.session.gymcandidates.push([
+        ctx.i18n.t('btn_gym_not_found'), 0
+      ])
+      return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymcandidates.map(el => el[0])).oneTime().resize().extra())
+        .then(() => ctx.wizard.next())
     },
     // step 2
     async (ctx) => {

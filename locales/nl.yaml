@@ -81,7 +81,7 @@ exraid_question: "Okidoki…\nIs dit een kanshebber voor een ExRaid?"
 new_gym_almost_done_confirm: "Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNieuwe gym"
 
 #  AddRaidWizard.js
-add_raid_welcome: "Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n*Voer een deel van de naam in, minimaal 2 tekens…*"
+add_raid_welcome: "Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n\n*Gebruik de knop 'Zoek gyms in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens…"
 btn_start_mode_time: "Uitkomen van het ei: start tijd"
 btn_start_mode_min: "Uitkomen van het ei: in minuten"
 btn_end_mode_time: "Einde van de raid: eind tijd"
@@ -99,6 +99,8 @@ raid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd 
 unexpected_raid_not_found: "Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 add_raid_wrong_while_selecting: "Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*"
 add_raid_0_45_min_error: "Opgegeven minuten moeten tussen de 0 en 45 liggen. \n*Probeer het nog eens.*"
+btn_gym_find_location: "Zoek gyms in mijn omgeving…"
+
 #  AddRaidbossWizard.js
 add_raidboss_finished: "Dankjewel!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 add_raidboss_intro: "Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*"
@@ -107,6 +109,7 @@ raidboss_level_question: "Welk level heeft ${bossname}?"
 raidboss_recommended_accounts: "Wat is het aanbevolen aantal accounts voor ${bossname}?"
 raidboss_save_canceled: "OK, de nieuwe raidboss wordt niet bewaard.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 raidboss_save_question: "Raidboss: ${bossname}\nLevel: ${bosslevel}\nAanbevolen aantal accounts: ${numaccounts}\n\n*Opslaan?*"
+
 #  EditGymWizard.js
 btn_edit_gym_name: "Naam"
 btn_edit_gym_gmlink: "Google Maps link"
@@ -123,6 +126,7 @@ edit_gym_overview: "Dit zijn nu de gym gegevens:\n\n${out}*Wat wil je nu doen?*"
 edit_gym_btn_save_close: "Opslaan en afsluiten"
 edit_gym_btn_edit_more: "Nog iets wijzigen aan deze gym"
 edit_gym_btn_cancel: "Annuleren"
+
 #  EditRaidWizard.js
 edit_raid_no_raids_found: "Sorry, ik kan nu geen raid vinden 🤨\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 edit_raid_until: "tot"
@@ -141,7 +145,7 @@ edit_raid_overview_data: "Dit zijn nu de raid gegevens:\n\n${out}*Wat wil je nu 
 edit_raid_edit_more: "Nog iets wijzigen aan deze raid"
 edit_raid_list_message: "*Raid bij ${gymname} gewijzigd* door: [${user.first_name}](tg://user?id=${user.id})\n\n"
 edit_raid_search_gym_again: "We gaan opnieuw zoeken. \nGebruik /cancel als je wilt stoppen\n*Voer een deel van de naam in, minimaal 2 tekens…*"
-#  EditRaidWizard_bak.js
+
 #  EditRaidbossWizard.js
 edit_raidboss_cancel: "Ik wil niets wijzigen en niets bewaren…"
 edit_raiddboss_intro: "Je wilt een raidboss wijzigen.\n*Voer een deel van de naam in…*"
@@ -165,14 +169,17 @@ edit_raidboss_overview: "Dit zijn nu de raidboss gegevens:\n\n${out}\n\n*Wat wil
 edit_raidboss_btn_edit_more: "Nog iets wijzigen aan deze raidboss"
 edit_raidboss_btn_save_close: "Opslaan en afsluiten"
 edit_raidboss_btn_cancel: "Annuleren"
+
 #  ExitRaidWizard.js
 exit_raid_not_participating: "Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 exit_raid_not_listed: "Mijn raid staat er niet bij…"
 exit_raid_select_raid: "Kies een raid…"
 exit_raid_list_message: "[${user.first_name}](tg://user?id=${user.id}) meldde zich af voor raid bij ${gymname}\n\n"
+
 #  FindGymWizard.js
 find_gym_location_intro: "Geef minstens 2 tekens van de gymnaam…"
 find_gym_location_overview: "Ik heb ${l} gym${l === 1 ? '' : 's'} gevonden voor '${term}' 🤓\n\n${out}*Gebruik */start* als je nog een actie wilt uitvoeren. Of ga terug naar de groep.*"
+
 #  JoinRaidWizard.js
 join_raid_no_raids_found: "Sorry, er is nu geen raid te doen… 😉\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 join_raid_dont_participate: "…toch niet meedoen"
@@ -194,6 +201,7 @@ user_delayed_by_5min: "[${first_name}](tg://user?id=${uid}) komt 5 minuten later
 user_delayed_on_time: "[${first_name}](tg://user?id=${uid}) komt toch op tijd bij ${gymname}"
 user_delayed_selection_wrong: "Hier ging iets niet goed tijdens het updaten… \n*Misschien opnieuw proberen?*"
 user_delayed_status_changed: "Je status voor ${gymname} is gewijzigd 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
+
 #  StatsWizard
 stats_your_total_raids_reported: "Totaal aantal raids door jou gemeld: *${ownraids.length}*"
 stats_your_most_reported_gyms: "Jouw meest gemelde gyms"
