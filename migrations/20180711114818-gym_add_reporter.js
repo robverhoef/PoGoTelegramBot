@@ -1,28 +1,27 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     queryInterface.addColumn(
       'gyms',
       'reporterName',
-     Sequelize.STRING
-     )
+      Sequelize.STRING
+    )
     queryInterface.addColumn(
       'gyms',
       'reporterId',
-     Sequelize.INTEGER
-     )
+      Sequelize.INTEGER
+    )
   },
 
   down: (queryInterface, Sequelize) => {
     queryInterface.removeColumn(
       'gyms',
       'reporterId'
-     )
+    )
     queryInterface.removeColumn(
       'gyms',
       'reporterName'
-     )
-    
+    )
   }
-};
+}

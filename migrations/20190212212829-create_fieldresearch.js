@@ -1,11 +1,12 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('fieldresearches', {
-      id: {type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey:true},
+      id: { type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
       stopId: {
-        type: Sequelize.INTEGER.UNSIGNED, references: {
+        type: Sequelize.INTEGER.UNSIGNED,
+        references: {
           model: 'stops',
           key: 'id',
           onDelete: 'CASCADE'
@@ -20,10 +21,10 @@ module.exports = {
       reporterId: Sequelize.INTEGER,
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE
-    });
+    })
   },
 
   down: (queryInterface, Sequelize) => {
-      return queryInterface.dropTable('fieldresearches');
+    return queryInterface.dropTable('fieldresearches')
   }
-};
+}

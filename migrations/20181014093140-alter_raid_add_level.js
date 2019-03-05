@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -10,7 +10,7 @@ module.exports = {
         defaultValue: 0,
         allowNull: false
       }
-    );
+    )
   },
 
   down: (queryInterface, Sequelize) => {
@@ -19,4 +19,4 @@ module.exports = {
       'level'
     )
   }
-};
+}

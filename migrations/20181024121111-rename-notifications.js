@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -24,41 +24,41 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    .then(() => {
-      queryInterface.addConstraint(
-        'raidboss-notifications',
-        ['userId'],
-        {
-          type: 'foreign key',
-          name: 'FBK_raidbossUserId',
-          references: { //Required field
-            table: 'users',
-            field: 'id'
-          },
-          onDelete: 'NO ACTION',
-          onUpdate: 'NO ACTION',
-          logging: console.log
-        }
-      )
-    }).then(() => {
-      queryInterface.addConstraint(
-        'raidboss-notifications',
-        ['raidbossId'],
-        {
-          type: 'foreign key',
-          name: 'FBK_raidboss-notificationsRaidbossId',
-          references: { //Required field
-            table: 'raidbosses',
-            field: 'id'
-          },
-          onDelete: 'NO ACTION',
-          onUpdate: 'NO ACTION',
-          logging: console.log
-        }
-      )
-    })
+      .then(() => {
+        queryInterface.addConstraint(
+          'raidboss-notifications',
+          ['userId'],
+          {
+            type: 'foreign key',
+            name: 'FBK_raidbossUserId',
+            references: { // Required field
+              table: 'users',
+              field: 'id'
+            },
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION',
+            logging: console.log
+          }
+        )
+      }).then(() => {
+        queryInterface.addConstraint(
+          'raidboss-notifications',
+          ['raidbossId'],
+          {
+            type: 'foreign key',
+            name: 'FBK_raidboss-notificationsRaidbossId',
+            references: { // Required field
+              table: 'raidbosses',
+              field: 'id'
+            },
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION',
+            logging: console.log
+          }
+        )
+      })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('raidboss-notifications');
+    return queryInterface.dropTable('raidboss-notifications')
   }
-};
+}

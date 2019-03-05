@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -10,23 +10,23 @@ module.exports = {
         allowNull: true
       }
     )
-    .then(() => {
-      queryInterface.addConstraint(
-        'raids',
-        ['raidbossId'],
-        {
-          type: 'foreign key',
-          name: 'FBK_raidbossId',
-          references: { //Required field
-            table: 'raidbosses',
-            field: 'id'
-          },
-          onDelete: 'cascade',
-          onUpdate: 'cascade',
-          logging: console.log
-        }
-      )
-    })
+      .then(() => {
+        queryInterface.addConstraint(
+          'raids',
+          ['raidbossId'],
+          {
+            type: 'foreign key',
+            name: 'FBK_raidbossId',
+            references: { // Required field
+              table: 'raidbosses',
+              field: 'id'
+            },
+            onDelete: 'cascade',
+            onUpdate: 'cascade',
+            logging: console.log
+          }
+        )
+      })
   },
 
   down: (queryInterface, Sequelize) => {
@@ -35,4 +35,4 @@ module.exports = {
       'raidbossId'
     )
   }
-};
+}

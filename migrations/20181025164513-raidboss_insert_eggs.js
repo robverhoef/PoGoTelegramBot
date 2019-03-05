@@ -1,9 +1,8 @@
 'use strict'
 var metaphone = require('metaphone')
-const models = require('../models')
 
 module.exports = {
-  up: function(queryInterface, Sequelize) {
+  up: function (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('raidbosses', [
       {
         name: 'Level 1 egg',
@@ -49,16 +48,16 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    const Op = Sequelize.Op;
+    const Op = Sequelize.Op
     return queryInterface.bulkDelete('raidbosses',
       {
         [Op.or]: [
-          {name: 'Level 1 egg'},
-          {name: 'Level 2 egg'},
-          {name: 'Level 3 egg'},
-          {name: 'Level 4 egg'},
-          {name: 'Level 5 egg'}
-        ]}
+          { name: 'Level 1 egg' },
+          { name: 'Level 2 egg' },
+          { name: 'Level 3 egg' },
+          { name: 'Level 4 egg' },
+          { name: 'Level 5 egg' }
+        ] }
     )
   }
 }
