@@ -64,11 +64,11 @@ function AddGymWizard (bot) {
 
         ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
         return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
-        .resize().oneTime().extra())
-        .then(() => {
-          ctx.wizard.selectStep(4)
-          return ctx.wizard.steps[4](ctx)
-        })
+          .resize().oneTime().extra())
+          .then(() => {
+            ctx.wizard.selectStep(4)
+            return ctx.wizard.steps[4](ctx)
+          })
       } else {
         const input = ctx.update.message.text
         if (input.toLowerCase() !== 'x') {
@@ -80,24 +80,21 @@ function AddGymWizard (bot) {
           // return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
           //   .resize().oneTime().extra())
           //   .then(() => {
-              ctx.wizard.selectStep(4)
-              return ctx.wizard.steps[4](ctx)
+          ctx.wizard.selectStep(4)
+          return ctx.wizard.steps[4](ctx)
           //  })
-
         } else {
-          ctx.session.newgym.lat  = null
+          ctx.session.newgym.lat = null
           ctx.session.newgym.lon = null
         }
       }
       return ctx.replyWithMarkdown(`${ctx.i18n.t('gmlink_question')}`, Markup.removeKeyboard().extra())
         .then(() => ctx.wizard.next())
-
     },
     // Step 4
     // Handle gm link
     // Exraid question
     async (ctx) => {
-
       if (ctx.session.newgym.lat === null) {
         let gmlink = ctx.update.message.text.trim()
         gmlink = gmlink.toLowerCase() === 'x' ? null : gmlink
@@ -124,7 +121,7 @@ function AddGymWizard (bot) {
         ctx.i18n.t('yes'),
         ctx.i18n.t('no')
       ]
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('new_gym_almost_done_confirm')}: *${ctx.session.newgym.gymname}*\n${ctx.i18n.t('address')}: ${ctx.session.newgym.address === null ? ctx.i18n.t('no_input') : ctx.session.newgym.address}\n${ctx.i18n.t('map')}: ${ctx.session.newgym.googleMapsLink === null ? ctx.i18n.t('no_input') : ctx.session.newgym.googleMapsLink}\n${ctx.i18n.t('coordinates')}: ${(ctx.session.newgym.lat !== null && ctx.session.newgym.lon !== null ? ctx.session.newgym.lat + ' ' + ctx.session.newgym.lon:ctx.i18n.t('no_input'))}\n${ctx.i18n.t('exraid_candidate')}: ${ctx.session.newgym.exRaidTrigger === true ? ctx.i18n.t('yes') : ctx.i18n.t('no_dont_know')}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('new_gym_almost_done_confirm')}: *${ctx.session.newgym.gymname}*\n${ctx.i18n.t('address')}: ${ctx.session.newgym.address === null ? ctx.i18n.t('no_input') : ctx.session.newgym.address}\n${ctx.i18n.t('map')}: ${ctx.session.newgym.googleMapsLink === null ? ctx.i18n.t('no_input') : ctx.session.newgym.googleMapsLink}\n${ctx.i18n.t('coordinates')}: ${(ctx.session.newgym.lat !== null && ctx.session.newgym.lon !== null ? ctx.session.newgym.lat + ' ' + ctx.session.newgym.lon : ctx.i18n.t('no_input'))}\n${ctx.i18n.t('exraid_candidate')}: ${ctx.session.newgym.exRaidTrigger === true ? ctx.i18n.t('yes') : ctx.i18n.t('no_dont_know')}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
     // Step 6
