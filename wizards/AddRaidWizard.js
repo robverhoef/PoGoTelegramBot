@@ -37,7 +37,7 @@ function AddRaidWizard (bot) {
         const sf = 3.14159 / 180 // scaling factor
         const er = 6371 // earth radius in km, approximate
         const mr = 1.0 // max radius in Km
-        let $sql = `SELECT id, gymname, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM gyms WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
+        let $sql = `SELECT id, gymname, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM gyms WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) AND removed = 0 ORDER BY d`
         candidates = await models.sequelize.query($sql, {
           model: models.Gym,
           mapToModel: true // pass true here if you have any mapped fields
@@ -51,7 +51,16 @@ function AddRaidWizard (bot) {
         } else {
           candidates = await models.Gym.findAll({
             where: {
-              gymname: { [Op.like]: '%' + term + '%' }
+              [Op.and]: [
+                {
+                  gymname: {
+                    [Op.like]: '%' + term + '%'
+                  }
+                },
+                {
+                  removed: false
+                }
+              ]
             }
           })
           if (candidates.length === 0) {
