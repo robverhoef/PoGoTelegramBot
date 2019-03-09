@@ -16,6 +16,10 @@ const setLocale = require('./util/setLocale')
 // =====================
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
+bot.catch((err) => {
+  console.log('Ooops', err)
+})
+
 bot.use(Telegraf.session())
 const i18n = new TelegrafI18n({
   defaultLanguage: 'nl',
