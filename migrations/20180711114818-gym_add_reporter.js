@@ -7,11 +7,13 @@ module.exports = {
       'reporterName',
       Sequelize.STRING
     )
-    queryInterface.addColumn(
-      'gyms',
-      'reporterId',
-      Sequelize.INTEGER
-    )
+    .then(() => {
+      queryInterface.addColumn(
+        'gyms',
+        'reporterId',
+        Sequelize.INTEGER
+      )
+    }
   },
 
   down: (queryInterface, Sequelize) => {
