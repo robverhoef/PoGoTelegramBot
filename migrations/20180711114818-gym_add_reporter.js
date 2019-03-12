@@ -13,7 +13,7 @@ module.exports = {
         'reporterId',
         Sequelize.INTEGER
       )
-    }
+    })
   },
 
   down: (queryInterface, Sequelize) => {
