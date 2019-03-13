@@ -2,16 +2,18 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    queryInterface.addColumn(
+    return queryInterface.addColumn(
       'gyms',
       'reporterName',
       Sequelize.STRING
     )
-    queryInterface.addColumn(
-      'gyms',
-      'reporterId',
-      Sequelize.INTEGER
-    )
+    .then(() => {
+      queryInterface.addColumn(
+        'gyms',
+        'reporterId',
+        Sequelize.INTEGER
+      )
+    })
   },
 
   down: (queryInterface, Sequelize) => {

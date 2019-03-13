@@ -36,6 +36,10 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * Only group admins can add or modify gyms and raidbosses
 * Personal and group statistics (who is the most active player, the most reported gym, etc)
 
+## A few screenshots
+![Report a raid](https://raw.githubusercontent.com/RobVerhoef/PoGoTelegramBot/master/bot_reportraid.png)
+![A raid report](https://raw.githubusercontent.com/RobVerhoef/PoGoTelegramBot/master/bot_raid_report.png)
+
 ## Requirements
 
 * Node v8 or 9
