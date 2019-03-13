@@ -94,10 +94,10 @@ var UserDelayedGymWizard = function (bot) {
       if (raiduser) {
         let reason = ''
         let val = null
+        // save users langugage
+        const oldlocale = ctx.i18n.locale()
         switch (delay) {
           case '2':
-            // save users langugage
-            ctx.session.oldlang = ctx.i18n.locale()
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_2min', {
@@ -107,11 +107,9 @@ var UserDelayedGymWizard = function (bot) {
             })}`
             val = '2 min.'
             // restore user locale
-            ctx.i18n.locale(ctx.session.oldlang)
+            ctx.i18n.locale(oldlocale)
             break
           case '5':
-            // save users langugage
-            ctx.session.oldlang = ctx.i18n.locale()
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_5min', {
@@ -121,11 +119,9 @@ var UserDelayedGymWizard = function (bot) {
             })}`
             val = '5 min.'
             // restore user locale
-            ctx.i18n.locale(ctx.session.oldlang)
+            ctx.i18n.locale(oldlocale)
             break
           case ctx.i18n.t('user_delayed_is_on_time'):
-            // save users langugage
-            ctx.session.oldlang = ctx.i18n.locale()
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_on_time', {
@@ -135,7 +131,7 @@ var UserDelayedGymWizard = function (bot) {
             })}`
             val = null
             // restore user locale
-            ctx.i18n.locale(ctx.session.oldlang)
+            ctx.i18n.locale(oldlocale)
             break
         }
         try {
@@ -147,7 +143,6 @@ var UserDelayedGymWizard = function (bot) {
           return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_selection_wrong')})`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-
         let out = await listRaids(`${reason}\n\n`, ctx)
         return ctx.replyWithMarkdown(`${ctx.i18n.t('user_delayed_status_changed', {
           gymname: delayedraid.gymname

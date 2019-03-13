@@ -271,7 +271,7 @@ function FielresearchWizard (bot) {
           .then(async () => {
             ctx.session = {}
             // save users langugage
-            ctx.session.oldlang = ctx.i18n.locale()
+            const oldlocale = ctx.i18n.locale()
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             const reason = ctx.i18n.t('fres_list_reason', {
@@ -279,7 +279,7 @@ function FielresearchWizard (bot) {
               uid: ctx.from.id
             })
             // restore user locale
-            ctx.i18n.locale(ctx.session.oldlang)
+            ctx.i18n.locale(oldlocale)
             let raidlist = await listRaids(`${reason}`, ctx)
             bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })
@@ -373,7 +373,7 @@ function FielresearchWizard (bot) {
           return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
             .then(async () => {
               // save users langugage
-              ctx.session.oldlang = ctx.i18n.locale()
+              const oldlocale = ctx.i18n.locale()
               // reason should always be in default locale
               ctx.i18n.locale(process.env.DEFAULT_LOCALE)
               const reason = ctx.i18n.t('fres_list_reason_modified', {
@@ -381,7 +381,7 @@ function FielresearchWizard (bot) {
                 uid: ctx.from.id
               })
               // restore user locale
-              ctx.i18n.locale(ctx.session.oldlang)
+              ctx.i18n.locale(oldlocale)
               let raidlist = await listRaids(`${reason}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
             })
@@ -479,7 +479,7 @@ function FielresearchWizard (bot) {
             })
             if (deleted) {
               // save users language
-              ctx.session.oldlang = ctx.i18n.locale()
+              const oldlocale = ctx.i18n.locale()
               // reason should always be in default locale
               ctx.i18n.locale(process.env.DEFAULT_LOCALE)
               const reason = ctx.i18n.t('fres_list_reason_delete', {
@@ -487,7 +487,7 @@ function FielresearchWizard (bot) {
                 uid: ctx.from.id
               })
               // restore user locale
-              ctx.i18n.locale(ctx.session.oldlang)
+              ctx.i18n.locale(oldlocale)
               let raidlist = await listRaids(`${reason}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
               console.log(`Research deleted ${ctx.session.destroyresearch} by ${ctx.from.first_name}, ${ctx.from.id}`)

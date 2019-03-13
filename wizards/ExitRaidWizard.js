@@ -86,7 +86,7 @@ function ExitRaidWizard (bot) {
         console.log('Error removing user from raid', error)
       }
       // save users langugage
-      ctx.session.oldlang = ctx.i18n.locale()
+      const oldlocale = ctx.i18n.locale()
       // reason should always be in default locale
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('exit_raid_list_message', {
@@ -94,7 +94,7 @@ function ExitRaidWizard (bot) {
         gymname: ctx.session.gymnames[selectedraid]
       })
       // restore user locale
-      ctx.i18n.locale(ctx.session.oldlang)
+      ctx.i18n.locale(oldlocale)
       let out = await listRaids(reason, ctx)
       if (out === null) {
         ctx.replyWithMarkdown(ctx.i18n.t('no_raids_found'), Markup.removeKeyboard().extra())

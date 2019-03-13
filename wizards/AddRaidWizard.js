@@ -299,11 +299,15 @@ function AddRaidWizard (bot) {
               return ctx.scene.leave()
             })
         }
-        // send updated list to group
-        let out = await listRaids(ctx.i18n.t('raid_added_list', {
+        const oldlang = ctx.i18n.locale()
+        ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+        let reason = ctx.i18n.t('raid_added_list', {
           gymname: ctx.session.newraid.gymname,
           user: user
-        }), ctx)
+        })
+        ctx.i18n.locale(oldlang)
+        // send updated list to group
+        let out = await listRaids(reason, ctx)
         if (out === null) {
           return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
@@ -376,10 +380,14 @@ function AddRaidWizard (bot) {
             .then(() => ctx.scene.leave())
         }
       }
-      let out = await listRaids(ctx.i18n.t('raid_user_added_list', {
+      const oldlang = ctx.i18n.locale()
+      ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+      const reason = ctx.i18n.t('raid_user_added_list', {
         user: user,
         gymname: ctx.session.newraid.gymname
-      }), ctx)
+      })
+      ctx.i18n.locale(oldlang)
+      let out = await listRaids(reason, ctx)
       if (out === null) {
         ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
