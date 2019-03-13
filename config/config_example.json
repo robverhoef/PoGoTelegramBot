@@ -1,0 +1,35 @@
+{
+  "development": {
+    "username": "root",
+    "password": null,
+    "database": "",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "dialectOptions": {
+      "charset": "utf8mb4"
+    },
+    "logging": "console.log"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "dialectOptions": {
+      "charset": "utf8mb4"
+    },
+    "logging": false
+  },
+  "production": {
+    "username": "root",
+    "password": "",
+    "database": "",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "dialectOptions": {
+      "charset": "utf8mb4"
+    },
+    "logging": false
+  }
+}
