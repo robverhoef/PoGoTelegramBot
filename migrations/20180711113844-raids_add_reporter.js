@@ -2,15 +2,17 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    queryInterface.addColumn(
+    return queryInterface.addColumn(
       'raids',
       'reporterName',
       Sequelize.STRING
     )
-    queryInterface.addColumn(
-      'raids',
-      'reporterId',
-      Sequelize.INTEGER
+    .then(() => {
+      queryInterface.addColumn(
+        'raids',
+        'reporterId',
+        Sequelize.INTEGER
+      )}
     )
   },
 
