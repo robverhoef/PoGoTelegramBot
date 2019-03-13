@@ -325,6 +325,23 @@ admin_fres_delete_success: "OK, deleted…"
 admin_fres_delete_canceled: "OK, *not* deleted."
 admin_fres_finished: "OK, use /start if you want to take another action."
 
+# Admin stops
+btn_admin_stops: "Admin: Stops beheren"
+admin_stops_btn_add: "Stop toevoegen"
+admin_stops_btn_edit: "Stop wijzigen"
+admin_stops_btn_delete: "Stop verwijderen"
+admin_stops_intro: "Stop intro"
+admin_stops_add: "*Hoe heet de nieuwe stop?*"
+admin_stops_location_question: "*Wat is de GPS locatie?*\nGeef de coordinaten zo op: Breedtegraad,Lengtegraad format. Bijvoorbeeld: 52.098115,5.015154"
+admin_stops_name: "Naam"
+admin_stops_save_canceled: "OK\n\n*Klik op */start* om nog een actie uit te voeren*"
+admin_stops_save_success: "OK! De stop is opgeslagen.\n\n*Klik op */start* om nog een actie uit te voeren*"
+admin_stops_edit: "Je wilt een stop aanpassen.\n\n*Klik op 'Toon stops in de omgeving'*\nOf geef een deel van de naam, minimaal 2 tekens."
+admin_stops_list_nearby: "Toon stops in de omgeving"
+admin_stops_two_chars_minimum: "*Geef minimaal 2 tekens uit de naam*.\nProbeer het nog eens.\nOf gebruik /cancel om te stoppen."
+admin_stops_select: "*Kies de stop*"
+admin_stops_delete: "Je wilt een stop verwijderen.\n\n*Klik op 'Toon stops in de omgeving'*\nOf geef een deel van de naam, minimaal 2 tekens."
+
 # Language wizard
 lang_set: "Your language was set to English\r\n*Click */start* to take another action.*"
 
