@@ -189,7 +189,7 @@ function AdminFieldResearchWizard (bot) {
         case ctx.i18n.t('yes'):
           console.log(`Research Key ${ctx.session.selectedbtn.label} deleted by ${ctx.from.id} ${ctx.from.first_name}`)
           try {
-            models.Fieldresearchkey.destroy({
+            await models.Fieldresearchkey.destroy({
               where: {
                 id: ctx.session.selectedbtn.id
               }
