@@ -351,6 +351,8 @@ admin_stops_edit_name: "*Geef de nieuwe naam voor ${stopname}*"
 admin_stops_edit_location: "*Geef de nieuwe GPS locatie voor ${stopname}*"
 admin_stops_confirm_delete: "Weet je zeker dat je '${label}' wilt verwijderen?"
 admin_stops_not_found: "Ik kon geen stops vinden.\nProbeer het nog eens.\nOf gebruik /cancel om te stoppen."
+admin_stops_not_listed: "OK\n*Probeer het nog eens.*\nOf gebruik /cancel om te stoppen."
+admin_stops_my_stop_not_listed: "Mijn stop staat er niet bij"
 
 # Language wizard
 lang_set: "Je taal is nu ingesteld op Nederlands.\n\n*Klik op */start* om nog een actie uit te voeren*"

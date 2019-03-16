@@ -40,11 +40,10 @@ function AdminStopsWizard (bot) {
           ctx.wizard.selectStep(wizsteps.add_stop)
           return ctx.wizard.steps[wizsteps.add_stop](ctx)
         case ctx.i18n.t('admin_stops_btn_edit'):
-          console.log('wizsteps[wizsteps.edit_stop]', wizsteps[wizsteps.edit_stop])
           ctx.wizard.selectStep(wizsteps.edit_stop)
           return ctx.wizard.steps[wizsteps.edit_stop](ctx)
         case ctx.i18n.t('admin_stops_btn_delete'):
-          ctx.wizard.selectStep([wizsteps.delete_stop])
+          ctx.wizard.selectStep(wizsteps.delete_stop)
           return ctx.wizard.steps[wizsteps.delete_stop](ctx)
       }
     },
@@ -136,6 +135,9 @@ function AdminStopsWizard (bot) {
           })
         }
       }
+
+      candidates.push({ name: ctx.i18n.t('admin_stops_my_stop_not_listed'), id: 0 })
+
       ctx.session.candidates = candidates
       return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_select')}`, Markup.keyboard(ctx.session.candidates.map((el) => {
         return el.name
@@ -156,6 +158,14 @@ function AdminStopsWizard (bot) {
           break
         }
       }
+      if (ctx.session.editstop.id === 0) {
+        // wanted stop is not listed
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_not_listed')}`)
+          .then(() => {
+            ctx.wizard.selectStep(wizsteps.edit_stop)
+            return ctx.wizard.steps[wizsteps.edit_stop](ctx)
+          })
+      }
       return ctx.replyWithMarkdown(`*${ctx.i18n.t('edit_what')}*`, Markup.keyboard(ctx.session.editbtns).resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
@@ -163,7 +173,6 @@ function AdminStopsWizard (bot) {
     async (ctx) => {
       ctx.session.editattribute = ctx.update.message.text.toLowerCase()
       let question = ''
-      console.log('EDITSTOP', ctx.session.editstop, ctx.session.editattribute)
       switch (ctx.session.editattribute) {
         case ctx.i18n.t('admin_stops_name').toLowerCase():
           question = ctx.i18n.t('admin_stops_edit_name', { stopname: ctx.session.editstop.name })
@@ -236,11 +245,12 @@ function AdminStopsWizard (bot) {
           request_location: true
         }
       ]).oneTime().resize().extra())
-        .then(() => ctx.wizard.next())
+        .then(() => {
+          return ctx.wizard.next()
+        })
     },
 
     async (ctx) => {
-      console.log('LOCATION: ', ctx.update.message.location)
       let candidates = []
       if (ctx.update.message.location !== undefined) {
         const lat = ctx.update.message.location.latitude
@@ -269,23 +279,34 @@ function AdminStopsWizard (bot) {
       if (candidates.length === 0) {
         return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_not_found')}`)
       }
+      candidates.push({ name: ctx.i18n.t('admin_stops_my_stop_not_listed'), id: 0 })
+
       ctx.session.candidates = candidates
       return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_select')}`, Markup.keyboard(ctx.session.candidates.map((el) => {
         return el.name
       })).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
+
     async (ctx) => {
       ctx.session.delselected = null
-      for (const cand of ctx.sessions.candidates) {
+      for (const cand of ctx.session.candidates) {
         if (cand.name === ctx.update.message.text) {
           ctx.session.delselected = cand
           break
         }
       }
-      if (ctx.session.delselected !== null) {
+      if (ctx.session.delselected.id === 0) {
+        // wanted stop is not listed
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_not_listed')}`)
+          .then(() => {
+            ctx.wizard.selectStep(wizsteps.delete_stop)
+            return ctx.wizard.steps[wizsteps.delete_stop](ctx)
+          })
+      } else if (ctx.session.delselected !== null) {
         const delbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
         return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_confirm_delete', { label: ctx.session.delselected.name })}`, Markup.keyboard(delbtns).oneTime().resize().extra())
+          .then(() => ctx.wizard.next())
       }
     },
 
@@ -299,18 +320,19 @@ function AdminStopsWizard (bot) {
                 id: ctx.session.delselected.id
               }
             })
-            return ctx.replyWithMarkdown('edit_gym_delete_success')
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_gym_delete_success')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           } catch (error) {
             console.log('something went wrong while deleting', ctx.session.delselected)
-            return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_delete_failed', { message: error.message })}`)
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_delete_failed')}`)
               .then(() => {
                 ctx.wizard.selectStep(wizsteps.mainmenu)
                 return ctx.wizard.steps[wizsteps.mainmenu](ctx)
               })
           }
+
         case ctx.i18n.t('no').toLowerCase():
-          return ctx.replyWithMarkdown('edit_gym_delete_cancelled')
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_gym_delete_canceled')}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
       }
     }
