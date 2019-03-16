@@ -97,7 +97,7 @@ To seed the list of raid bosses:
  losing the reference to the process (showing a blank list after 'forever list' while the process was still running).
 * **npm run eslint**  - reports eslint errors
 * **npm run eslintfix** - reports eslint errors and automagically fixes them wherever possible
-
+* **npm run checklocales** - checks if all required keys exist in the YAML translation files
 ## Usage
 
 Make sure that there is a group admin. Group admins are allowed to add / modify gyms. 
