@@ -240,7 +240,7 @@ function EditRaidWizard (bot) {
               }
             )
             // save users langugage
-            ctx.session.oldlang = ctx.i18n.locale()
+            const oldlocale = ctx.i18n.locale()
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             const reason = ctx.i18n.t('edit_raid_list_message', {
@@ -248,8 +248,7 @@ function EditRaidWizard (bot) {
               user: user
             })
             // restore user locale
-            ctx.i18n.locale(ctx.session.oldlang)
-
+            ctx.i18n.locale(oldlocale)
             let out = await listRaids(reason, ctx)
             console.log('ctx.session.oldlang', ctx.session.oldlang)
             bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })

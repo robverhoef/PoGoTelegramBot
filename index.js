@@ -106,6 +106,10 @@ const AdminFieldResearchWizard = require('./wizards/AdminFieldResearchWizard')
 const adminFieldResearchWizard = AdminFieldResearchWizard(bot)
 adminFieldResearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const AdminStopsWizard = require('./wizards/AdminStopsWizard')
+const adminStopsWizard = AdminStopsWizard(bot)
+adminStopsWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -121,7 +125,8 @@ const stage = new Stage([
   localeWizard,
   userDelayedWizard,
   fieldresearchWizard,
-  adminFieldResearchWizard
+  adminFieldResearchWizard,
+  adminStopsWizard
 ])
 
 /**
@@ -183,6 +188,7 @@ async function showMainMenu (ctx, user) {
       btns.push(ctx.i18n.t('btn_manage_fieldresearches'))
       btns.push(ctx.i18n.t('btn_add_gym'))
       btns.push(ctx.i18n.t('btn_edit_gym'))
+      btns.push(ctx.i18n.t('btn_admin_stops'))
       btns.push(ctx.i18n.t('btn_add_boss'))
       btns.push(ctx.i18n.t('btn_edit_boss'))
       break
@@ -238,6 +244,7 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key]['btn_edit_gym'].call(), Stage.enter('edit-gym-wizard'))
   bot.hears(i18n.repository[key]['btn_add_boss'].call(), Stage.enter('add-raidboss-wizard'))
   bot.hears(i18n.repository[key]['btn_edit_boss'].call(), Stage.enter('edit-raidboss-wizard'))
+  bot.hears(i18n.repository[key]['btn_admin_stops'].call(), Stage.enter('admin-stops-wizard'))
 }
 
 /**

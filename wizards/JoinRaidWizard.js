@@ -114,18 +114,14 @@ function JoinRaidWizard (bot) {
             .then(() => ctx.scene.leave())
         }
       }
-      // save users langugage
-      ctx.session.oldlang = ctx.i18n.locale()
-      // reason should always be in default locale
+      const oldlocale = ctx.i18n.locale()
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('join_raid_list_reason', {
         user: user,
         gymname: joinedraid.gymname
       })
+      ctx.i18n.locale(oldlocale)
       let out = await listRaids(`${reason}\n\n`, ctx)
-      // restore user locale
-      ctx.i18n.locale(ctx.session.oldlang)
-
       if (out === null) {
         return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())

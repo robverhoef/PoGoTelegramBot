@@ -19,13 +19,14 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * report Field Researches on stops, most of the time without typing
 * add gyms or change gym properties (admins only)
 * add or modify raidbosses (admins only)
+* add, remove or modify Pokéstops (admins only)
 * add, remove or modify predefined Field Research keys (admins only)
 * set your preferred language by sending /lang to the bot
 
 ## Features
 
 * Easy to use for end users; no more copying/pasting lists of raid users.
-* Multilingual; comes with Dutch and English out of the box
+* Multilingual; comes with Dutch, Spanish and English out of the box
 * Predefined gym locations with optional Google Maps link
 * Predefined stop locations with Google Maps link
 * Restricted to a specific Telegram supergroup (…might not be watertight yet)
@@ -96,7 +97,7 @@ To seed the list of raid bosses:
  losing the reference to the process (showing a blank list after 'forever list' while the process was still running).
 * **npm run eslint**  - reports eslint errors
 * **npm run eslintfix** - reports eslint errors and automagically fixes them wherever possible
-
+* **npm run checklocales** - checks if all required keys exist in the YAML translation files
 ## Usage
 
 Make sure that there is a group admin. Group admins are allowed to add / modify gyms. 
