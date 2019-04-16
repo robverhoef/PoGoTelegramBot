@@ -15,6 +15,32 @@ const setLocale = require('../util/setLocale')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
+async function isAdmin (bot, user) {
+  let isAdmin = false
+  let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+  for (let a = 0; a < admins.length; a++) {
+    if (admins[a].user.id === user.id) {
+      isAdmin = true
+    }
+  }
+  // or marked admin from database?
+  if (!isAdmin) {
+    let dbAdmin = await models.User.findOne({
+      where: {
+        tId: {
+          [Op.eq]: user.id
+        },
+        [Op.and]: {
+          isAdmin: true
+        }
+      }
+    })
+    if (dbAdmin !== null) {
+      isAdmin = true
+    }
+  }
+  return isAdmin
+}
 function EditRaidWizard (bot) {
   return new WizardScene('edit-raid-wizard',
 
@@ -25,11 +51,16 @@ function EditRaidWizard (bot) {
       ctx.session.newgymid = null
       ctx.session.editattr = null
 
+
+      const until = moment()
+      if(await isAdmin(bot, ctx.from)) {
+        until.subtract(1, 'hour')
+      }
       let raids = await models.Raid.findAll({
         include: [models.Gym, models.Raiduser],
         where: {
           endtime: {
-            [Op.gt]: moment().unix()
+            [Op.gt]: until.unix()
           }
         }
       })
