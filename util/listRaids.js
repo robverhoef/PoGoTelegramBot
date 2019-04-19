@@ -13,7 +13,7 @@ moment.tz.setDefault('Europe/Amsterdam')
 module.exports = async (reason, ctx) => {
   // save old user language
   ctx.session.oldlang = ctx.i18n.locale()
-  console.log('listraids', ctx.session.oldlang)
+
   // list should always be in default locale
   ctx.i18n.locale(process.env.DEFAULT_LOCALE)
   let out = reason
@@ -80,7 +80,6 @@ module.exports = async (reason, ctx) => {
   })}`
   // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
   // restore user locale
-  console.log('list done restet locale', ctx.session.oldlang)
   ctx.i18n.locale(ctx.session.oldlang)
   return out
 }
