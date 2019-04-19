@@ -41,7 +41,9 @@ module.exports = async (bossname) => {
       // last resort; try metaphone
       const boss = await models.Raidboss.findOne({
         where: {
-          metaphone: metaphone(bossname)
+          metaphone: {
+            [Op.eq]: metaphone(bossname)
+          }
         }
       })
       if (boss) {

@@ -120,7 +120,9 @@ function AdminStopsWizard (bot) {
         let $sql = `SELECT id, name, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM stops WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
         candidates = await models.sequelize.query($sql, {
           model: models.Stop,
-          mapToModel: true
+          mapToModel: {
+            [Op.eq]: true
+          }
         })
       } else {
         const term = ctx.update.message.text
@@ -261,7 +263,9 @@ function AdminStopsWizard (bot) {
         let $sql = `SELECT id, name, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM stops WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
         candidates = await models.sequelize.query($sql, {
           model: models.Stop,
-          mapToModel: true
+          mapToModel: {
+            [Op.eq]: true
+          }
         })
       } else {
         const term = ctx.update.message.text

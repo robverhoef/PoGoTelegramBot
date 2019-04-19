@@ -40,7 +40,9 @@ function AddRaidWizard (bot) {
         let $sql = `SELECT id, gymname, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM gyms WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) AND removed = 0 ORDER BY d`
         candidates = await models.sequelize.query($sql, {
           model: models.Gym,
-          mapToModel: true // pass true here if you have any mapped fields
+          mapToModel: {
+            [Op.eq]: true // pass true here if you have any mapped fields
+          }
         })
       } else {
         // User was typing
@@ -58,7 +60,9 @@ function AddRaidWizard (bot) {
                   }
                 },
                 {
-                  removed: false
+                  removed: {
+                    [Op.eq]: false
+                  }
                 }
               ]
             }
@@ -260,10 +264,26 @@ function AddRaidWizard (bot) {
         var raidexists = await models.Raid.findOne({
           where: {
             [Op.and]: [
-              { gymId: ctx.session.newraid.gymId },
-              { target: ctx.session.newraid.target },
-              { start1: ctx.session.newraid.start1 },
-              { endtime: ctx.session.newraid.endtime }
+              {
+                gymId: {
+                  [Op.eq]: ctx.session.newraid.gymId
+                }
+              },
+              {
+                target: {
+                  [Op.eq]: ctx.session.newraid.target
+                }
+              },
+              {
+                start1: {
+                  [Op.eq]: ctx.session.newraid.start1
+                }
+              },
+              {
+                endtime: {
+                  [Op.eq]: ctx.session.newraid.endtime
+                }
+              }
             ]
           }
         })

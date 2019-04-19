@@ -6,6 +6,8 @@ const { Markup } = require('telegraf')
 var models = require('../models')
 const adminCheck = require('../util/adminCheck')
 const setLocale = require('../util/setLocale')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 
 function AddGymWizard (bot) {
   return new WizardScene('add-gym-wizard',

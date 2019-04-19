@@ -24,7 +24,9 @@ module.exports = async (ctx, bot) => {
           [Op.eq]: user.id
         },
         [Op.and]: {
-          isAdmin: true
+          isAdmin: {
+            [Op.eq]: true
+          }
         }
       }
     })

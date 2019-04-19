@@ -4,6 +4,8 @@
 const WizardScene = require('telegraf/scenes/wizard')
 const { Markup } = require('telegraf')
 const models = require('../models')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 const metaphone = require('metaphone')
 const adminCheck = require('../util/adminCheck')
 const setLocale = require('../util/setLocale')
@@ -29,7 +31,9 @@ function AddRaidbossWizard (bot) {
       // lookup raidboss, prevent double bosses
       let oldboss = await models.Raidboss.findOne({
         where: {
-          name: bossname
+          name: {
+            [Op.eq]: bossname
+          }
         }
       })
       if (oldboss !== null) {

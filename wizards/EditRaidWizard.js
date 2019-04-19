@@ -31,7 +31,9 @@ async function isAdmin (bot, user) {
           [Op.eq]: user.id
         },
         [Op.and]: {
-          isAdmin: true
+          isAdmin: {
+            [Op.eq]: true
+          }
         }
       }
     })

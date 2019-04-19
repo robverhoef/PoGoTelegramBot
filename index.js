@@ -175,12 +175,18 @@ async function showMainMenu (ctx, user) {
   // or marked admin from database
   let dbAdmin = await models.User.findOne({
     where: {
-      tId: {
-        [Op.eq]: user.id
-      },
-      [Op.and]: {
-        isAdmin: true
-      }
+      [Op.and]: [
+        {
+          tId: {
+            [Op.eq]: user.id
+          }
+        },
+        {
+          isAdmin: {
+            [Op.eq]: true
+          }
+        }
+      ]
     }
   })
   for (let a = 0; a < admins.length; a++) {

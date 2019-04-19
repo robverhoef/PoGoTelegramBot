@@ -126,7 +126,9 @@ async function processPersonalExRaidGyms (user, start, end, ctx) {
       {
         model: models.Gym,
         where: {
-          'exRaidTrigger': true
+          'exRaidTrigger': {
+            [Op.eq]: true
+          }
         }
       },
       {
@@ -353,7 +355,9 @@ async function determineGlobalExRaids (start, end, ctx) {
       {
         model: models.Gym,
         where: {
-          'exRaidTrigger': true
+          'exRaidTrigger': {
+            [Op.eq]: true
+          }
         }
       }, models.Raiduser, models.Raidboss]
   })
@@ -387,7 +391,9 @@ async function isAdmin (ctx, bot) {
         [Op.eq]: user.id
       },
       [Op.and]: {
-        isAdmin: true
+        isAdmin: {
+          [Op.eq]: true
+        }
       }
     }
   })

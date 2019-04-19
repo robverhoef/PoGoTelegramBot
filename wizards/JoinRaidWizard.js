@@ -92,7 +92,14 @@ function JoinRaidWizard (bot) {
         try {
           await models.Raiduser.update(
             { accounts: accounts },
-            { where: { [Op.and]: [{ uid: user.id }, { raidId: joinedraid.raidid }] } }
+            {
+              where: {
+                [Op.and]: [
+                  { uid: user.id },
+                  { raidId: joinedraid.raidid }
+                ]
+              }
+            }
           )
         } catch (error) {
           return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
