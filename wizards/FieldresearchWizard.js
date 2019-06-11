@@ -121,16 +121,20 @@ function FielresearchWizard (bot) {
             return ctx.scene.leave()
           })
       }
+      let oldname = ''
       out = `${ctx.i18n.t('fres_fres_today')}\n`
       let c = 0
       for (let res of researches) {
-        if(c > 25) {
+        if(c > 35) {
           ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra({ disable_web_page_preview: true }))
           out = ''
           c=0
         }
-        out += `\r\n*${res.name}*\r\n`
-        out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n\r\n`
+        if(oldname !== res.name) {
+          out += `\r\n\r\n*${res.name}*\r\n`
+          oldname = res.name
+        }
+        out += `${ctx.i18n.t('fres_reportedstop', { stopname: res.Stop.name, stoplink: res.Stop.googleMapsLink, reportername: res.reporterName, reporterid: res.reporterId })}\r\n`
         c++
       }
       out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
