@@ -86,6 +86,10 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const ExraidWizard = require('./wizards/ExraidWizard')
+const exraidWizard = ExraidWizard(bot)
+exraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const AddNotificationWizard = require('./wizards/NotificationWizard')
 const addNotificationWizard = AddNotificationWizard(bot)
 addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
@@ -121,6 +125,7 @@ const stage = new Stage([
   addRaidbossWizard,
   editRaidbossWizard,
   statsWizard,
+  exraidWizard,
   addNotificationWizard,
   localeWizard,
   userDelayedWizard,
@@ -170,6 +175,8 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_find_gym'))
   btns.push(ctx.i18n.t('btn_notifications'))
   btns.push(ctx.i18n.t('btn_stats'))
+  btns.push(ctx.i18n.t('btn_exraids'))
+
   // group admins:
   let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database
@@ -242,6 +249,9 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key]['btn_find_gym'].call(), Stage.enter('find-gym-wizard'))
   bot.hears(i18n.repository[key]['btn_field_researches'].call(), Stage.enter('fieldresearch-wizard'))
   bot.hears(i18n.repository[key]['btn_stats'].call(), Stage.enter('stats-wizard'))
+
+  bot.hears(i18n.repository[key]['btn_exraids'].call(), Stage.enter('exraid-wizard'))
+
   bot.hears(i18n.repository[key]['btn_notifications'].call(), Stage.enter('notification-wizard'))
   bot.hears(i18n.repository[key]['btn_user_delayed'].call(), Stage.enter('user-delayed-wizard'))
   // Admin

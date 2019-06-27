@@ -1,6 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  var Raiduser = sequelize.define('Raiduser', {
+  var Exraiduser = sequelize.define('Exraiduser', {
     id: {
       type: DataTypes.INTEGER.UNSIGNED,
       autoIncrement: true,
@@ -12,20 +12,24 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 1
     },
-    raidId: DataTypes.INTEGER.UNSIGNED,
+    hasinvite: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: 1
+    },
+    exraidId: DataTypes.INTEGER.UNSIGNED,
     delayed: {
       type: DataTypes.STRING(32),
       allowNull: true
     }
-  }, { tableName: 'raidusers' })
+  }, { tableName: 'exraidusers' })
 
-  Raiduser.associate = function (models) {
-    models.Raiduser.belongsTo(models.Raid, {
+  Exraiduser.associate = function (models) {
+    models.Exraiduser.belongsTo(models.Exraid, {
       onDelete: 'CASCADE',
       foreignKey: {
         allowNull: false
       }
     })
   }
-  return Raiduser
+  return Exraiduser
 }

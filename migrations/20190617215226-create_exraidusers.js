@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('raidusers', {
+    return queryInterface.createTable('exraidusers', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         autoIncrement: true,
@@ -13,10 +13,10 @@ module.exports = {
       accounts: {
         type: Sequelize.INTEGER, defaultValue: 1
       },
-      raidId: {
+      exraidId: {
         type: Sequelize.INTEGER.UNSIGNED,
         references: {
-          model: 'raids',
+          model: 'exraids',
           key: 'id',
           onDelete: 'CASCADE'
         }
@@ -28,6 +28,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('raidusers')
+    return queryInterface.dropTable('exraidusers')
   }
 }
