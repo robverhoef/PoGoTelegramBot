@@ -360,8 +360,10 @@ lang_set: "Your language was set to English\r\n*Click */start* to take another a
 list_raids_fres_count: "The bot knows about ${researchcount} Field Researches\r\n"
 
 # Exraids
+exraid_greeting: "Hello ${user.first_name}.\n\nYou can register for an Ex Raid here -even without an invite-, modify your registration by registering again or add/modify an Ex Raid.\n\n*What do you want to do?*"
 add_exraid_welcome: "You want to add an Ex Raid. Let;s find the gym first.\n\n*Use the button  'Look for gyms in my neighborhood……'*\r\nOr enter a part of the name, 2 characters minimum…"
 do_you_participate_exraid: "Thank you!\n*Will you take part in this Ex Raid yourself?*"
+exraid_add_finish: "You are signed up for ${gymname} at ${starttm} 👍\n\n*You can now return to the group. Do you want to take another action? Click on */start"
 enter_end_time_mode_question_exraid: "*How do you want to enter the end time of this EX RAID?*\nClick a button…"
 enter_endtime_minutes_exraid: "*How many minutes are left on this Ex Raid?*"
 enter_endtime_time_exraid: "*At what time does this ex raid end?*\nEnter the time like this: *09:30* of *13:45*…\n(Note: end time is hatching of the egg + 45 minutes)"

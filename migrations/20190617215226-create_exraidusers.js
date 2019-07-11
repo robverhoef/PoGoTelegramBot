@@ -10,6 +10,16 @@ module.exports = {
       },
       username: Sequelize.STRING(191),
       uid: Sequelize.STRING(191),
+      hasinvite: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      },
+      delayed: {
+        type: Sequelize.STRING(32),
+        defaultValue: null,
+        allowNull: true
+      },
       accounts: {
         type: Sequelize.INTEGER, defaultValue: 1
       },

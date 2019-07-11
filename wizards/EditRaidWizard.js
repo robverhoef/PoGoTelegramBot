@@ -53,9 +53,8 @@ function EditRaidWizard (bot) {
       ctx.session.newgymid = null
       ctx.session.editattr = null
 
-
       const until = moment()
-      if(await isAdmin(bot, ctx.from)) {
+      if (await isAdmin(bot, ctx.from)) {
         until.subtract(1, 'hour')
       }
       let raids = await models.Raid.findAll({

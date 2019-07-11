@@ -361,8 +361,10 @@ lang_set: "Tu idioma ahora está configurado a Español.\r\n*Pulse en */start* p
 list_raids_fres_count: "El bot conoce ahora ${researchcount} Investigaciónes de Campo\r\n"
 
 # Exraids
+exraid_greeting: "Hello ${user.first_name}.\n\nYou can register for an Ex Raid here -even without an invite-, modify your registration by registering again or add/modify an Ex Raid.\n\n*What do you want to do?*"
 add_exraid_welcome: "Je wilt een nieuwe EX Raid toevoegen. We gaan eerst de gym zoeken.\n\n*Gebruik de knop 'Zoek gyms in mijn omgeving…'*\r\nOf voer een deel van de naam in, minimaal 2 tekens…"
 do_you_participate_exraid: "Dankjewel!\n*Doe je zelf mee met deze Ex Raid?*"
+exraid_add_finish: "Estas apuntado para ${gymname} a las ${starttm} 👍\n\n*Puedes volver al grupo. ¿Quieres volver hacer algo? Pulse aqui en */start"
 enter_end_time_mode_question_exraid: "*Hoe wil je de eindtijd van de EX Raid opgeven?*\nKlik op een knop…"
 enter_endtime_minutes_exraid: "*Hoeveel minuten staat er nog op de Ex Raid?*"
 enter_endtime_time_exraid: "*Hoe laat eindigt de EX Raid?*\nGeef de tijd zo op: *09:30* of *13:45*…\n(Noot: eindtijd is uitkomen van het ei + 45 minuten)"
