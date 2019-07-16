@@ -75,8 +75,16 @@ module.exports = async (reason, ctx) => {
       }
     }
   })
+  let exraidcount = await models.Exraid.count({
+    where: {
+      endtime: {
+        [Op.gt]: today.unix()
+      }
+    }
+  })
   out += `${ctx.i18n.t('list_raids_fres_count', {
-    researchcount: researchcount
+    researchcount: researchcount,
+    exraidcount: exraidcount
   })}`
   // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
   // restore user locale
