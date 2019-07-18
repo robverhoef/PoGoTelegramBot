@@ -398,7 +398,7 @@ exraid_joined_noinvite_message: "[${user.first_name}](tg://user?id=${user.id}) w
 exraid_raidboss: "Wat is de raidboss? \nBijvoorbeeld 'Deoxys'"
 exraid_registered_without_pass: "OK, je staat *voorlopig* geregistreerd. \nAndere spelers kunnen in deze lijst zien dat je nog een pas nodig hebt.\n* Wijzig direct deze inschrijving als je een pas krijgt.* \nDit kun je doen door je opnieuw aan te melden, maar dan met pas. Zo weten anderen dat je meedoet en geen pas meer nodig hebt.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
 exraid_selected_raid: "Selecteer een Ex R aid om verder te gaan. Of kies voor Toevoegen of Afsluiten"
-exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan EX Raid bij ${gymname}\n\n"
+exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan EX Raid bij ${gymname}"
 exraid_user_left: "OK, je doet niet meer mee met deze Ex Raid.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
 
 # Months

@@ -397,7 +397,7 @@ exraid_joined_noinvite_message: "[${user.first_name}](tg://user?id=${user.id}) w
 exraid_raidboss: "What is the raidboss? \nFor example 'Deoxys'"
 exraid_registered_without_pass: "OK, you are registered *provisionally*. \nOther players can see in this list that you need an invite pass.\n*Change this registration immediately if you get a pass. *\nYou can do this by registering again, but with a pass. This way others know that you are participating and do not need a pass anymore. \n\n*You can now go back to the group. Do you want to perform another action? Then click on* /start"
 exraid_selected_raid: "Select an Ex Raid to continue. Or select Add or Done"
-exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) added to Ex Raid at ${gymname}\n\n"
+exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) added to Ex Raid at ${gymname}"
 exraid_user_left: "OK, you have left this Ex Raid.\n\n*You can now return to the group. Do you want to take another action? Click */start"
 
 # months

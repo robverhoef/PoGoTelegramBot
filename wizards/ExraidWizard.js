@@ -348,11 +348,6 @@ function ExraidWizard (bot) {
                 }
               },
               {
-                target: {
-                  [Op.eq]: ctx.session.newexraid.target
-                }
-              },
-              {
                 start1: {
                   [Op.eq]: ctx.session.newexraid.start1
                 }
