@@ -431,7 +431,7 @@ async function sendGyms (ctx, bot) {
   let target = ctx.session.newraid.target
   let starttime = ctx.session.newraid.start1
 
-  await sendGymNotifications(bot, gymId, gymname, target, starttime)
+  await sendGymNotifications(ctx, bot, gymId, gymname, target, starttime)
 }
 
 async function sendRaidbosses (ctx, bot) {
@@ -443,7 +443,7 @@ async function sendRaidbosses (ctx, bot) {
   let target = ctx.session.newraid.target
   let starttime = ctx.session.newraid.start1
 
-  await sendRaidbossNotifications(bot, raidbossId, gymname, target, starttime)
+  await sendRaidbossNotifications(ctx, bot, raidbossId, gymname, target, starttime)
 }
 
 module.exports = AddRaidWizard

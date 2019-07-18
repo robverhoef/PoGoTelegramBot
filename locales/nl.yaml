@@ -276,7 +276,8 @@ noti_gym_finished: "Je bent aangemeld voor notificaties op de volgende gym: ${se
 noti_raidboss_finished: "Je bent aangemeld voor notifiaties op de volgende raidboss: ${selected}.\nZodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 noti_finished_gym_removal: "Je bent afgemeld voor notificaties op de volgende gym: ${selected}. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
 noti_finished_raidboss_removal: "Je bent afgemeld voor notificaties op de volgende raidboss: ${selected}. 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
-
+noti_gym_notification: "Psst… Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${starttime}*."
+noti_raidboss_notification: "Hey… Jij was toch geïnteresseerd in *${target}* raids? Er is er zojuist een toegevoegd bij *${gymname}* om *${starttime}*."
 # Field researches
 fres_btn_mainmenu_showlist: "Lijst tonen"
 fres_btn_mainmenu_add_research: "Research toevoegen"
@@ -401,6 +402,7 @@ exraid_registered_without_pass: "OK, je staat *voorlopig* geregistreerd. \nAnder
 exraid_selected_raid: "Selecteer een ex raid om verder te gaan. Of kies voor Toevoegen of Afsluiten"
 exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan EX Raid bij ${gymname}"
 exraid_user_left: "OK, je doet niet meer mee met deze Ex Raid.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
+
 
 # Months:
 jan: "Januari"

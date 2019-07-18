@@ -276,6 +276,8 @@ noti_gym_finished: "Te has registrado para notificaciones del siguiente gimnasio
 noti_raidboss_finished: "Te has registrado para notificaciones del siguiente jefe de incursión: ${selected}. Cuando se registra una nueva incursión, serás el primero en escucharlo.  👍\n\n*Puedes volver al grupo. ¿Quieres hacer algo más? Pulse aqui en */start"
 noti_finished_gym_removal: "Te has desregistrado para notificaciones del siguiente gimnasio: ${selected}. 👍\n\n*Puedes volver al grupo. ¿Quieres hacer algo más? pulse aqui en */start"
 noti_finished_raidboss_removal: "Te has desregistrado para notificaciones del siguiente jefe de incursión: ${selected}. 👍\n\n*Puedes volver al grupo. ¿Quieres hacer algo más? pulse aqui en */start"
+noti_gym_notification: "Psst… Er is zojuist een *${target}* raid toegevoegd bij *${gymname}* om *${starttime}*."
+noti_raidboss_notification: "Hey… Jij was toch geïnteresseerd in *${target}* raids? Er is er zojuist een toegevoegd bij *${gymname}* om *${starttime}*."
 
 # Field researches
 fres_btn_mainmenu_showlist: "Mostrar lista"

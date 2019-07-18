@@ -275,6 +275,8 @@ noti_gym_finished: "You are signed up for notifications at this gym: ${selected}
 noti_raidboss_finished: "You are signed up for notifications on the following raidboss: ${selected}. \nAs soon as a raid is reported, you will be the first person to hear about it. 👍 \n\n*You can now go back to the group. Do you want to take another action? Click here on * /start"
 noti_finished_gym_removal: "You have been unsubscribed for notifications at this next gym: ${selected}. 👍 \n\n *You can now go back to the group. Do you want to take another action? Then click* /start"
 noti_finished_raidboss_removal: "You have been unsubscribed for notifications on the following raidboss: ${selected}. 👍\n\n*You can now go back to the group. Do you want to take another action? Then click* /start"
+noti_gym_notification: "Psst… A *${target}* raid has just been added at *${gymname}* at *${starttime}*."
+noti_raidboss_notification: "Hey… You were interested in *${target}* raids, right? One has just been added at *${gymname}* at *${starttime}*."
 
 # Field researches
 fres_btn_mainmenu_showlist: "Show list"

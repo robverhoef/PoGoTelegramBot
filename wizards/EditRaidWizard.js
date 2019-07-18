@@ -395,7 +395,7 @@ async function sendRaidbosses (ctx, bot) {
   let target = ctx.session.editraid.target
   let starttime = ctx.session.editraid.start1
 
-  await sendRaidbossNotifications(bot, raidbossId, gymname, target, starttime)
+  await sendRaidbossNotifications(ctx, bot, raidbossId, gymname, target, starttime)
 }
 
 module.exports = EditRaidWizard
