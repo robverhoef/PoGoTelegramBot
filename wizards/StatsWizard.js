@@ -547,16 +547,22 @@ var StatsWizard = function (bot) {
       const input = ctx.update.message.text.split(' ')
       const accounts = parseInt(input[0])
       const shinies = parseInt(input[1])
+      const newAccounts = input.length > 2 ? parseInt(input[2]) : 0
+
       let validated = true
-      if (accounts.toString() !== input[0] || shinies.toString() !== input[1] || accounts < shinies) {
+      if (accounts.toString() !== input[0] ||
+          shinies.toString() !== input[1] ||
+          accounts < shinies || shinies < newAccounts) {
         validated = false
       }
       if (validated) {
         ctx.session.accounts = accounts
         ctx.session.shinies = shinies
+        ctx.session.newAccounts = newAccounts
         return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input', {
-          shinies: shinies,
-          accounts: accounts
+          shinies,
+          accounts,
+          newAccounts
         })}\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
@@ -569,7 +575,8 @@ var StatsWizard = function (bot) {
         try {
           models.Raid.update({
             shiny: ctx.session.shinies,
-            accountsplayed: ctx.session.accounts
+            accountsplayed: ctx.session.accounts,
+            newaccounts: ctx.session.newAccounts
           }, {
             where: {
               id: ctx.session.raidId
@@ -589,12 +596,12 @@ var StatsWizard = function (bot) {
     },
     // Show Shiny stats
     async (ctx) => {
-      const results = await models.sequelize.query('select target, sum(shiny) as shiny, sum(accountsplayed) as players from raids where shiny is not null and accountsplayed is not null group by target', { type: models.sequelize.QueryTypes.SELECT })
+      const results = await models.sequelize.query('select target, sum(shiny) as shiny, sum(accountsplayed) as players, sum(newaccounts) as newplayers from raids where shiny is not null and accountsplayed is not null group by target', { type: models.sequelize.QueryTypes.SELECT })
       // console.log(results)
       if (results.length > 0) {
         let out = `${ctx.i18n.t('sh_stats_head')}\n\n`
         for (const result of results) {
-          out += `*${result.target}:* ${result.shiny} shiny, ${result.players} accounts; ${Math.round(result.shiny * 100 / result.players)}%\n`
+          out += `*${result.target}:* ${result.shiny} shiny, ${result.players} accounts (${result.newplayers} new); Total ${Math.round(result.shiny * 100 / result.players)}% (${Math.round(result.newplayers * 100 / result.shiny)}% new) \n`
         }
         out += `${ctx.i18n.t('sh_stats_done')}`
         return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())

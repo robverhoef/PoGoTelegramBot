@@ -25,6 +25,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: null,
       allowNull: true
+    },
+    newaccounts: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+      allowNull: true
     }
   }, { tableName: 'raids' })
 
