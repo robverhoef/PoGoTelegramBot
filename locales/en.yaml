@@ -68,7 +68,7 @@ main_menu_greeting: "Hello ${user.first_name}.\nWhat do you want to do?"
 
 user_unknown_warning: "Uhm… I do not know you, sorry. Log in to me in your group with \n\n */ hi@${me.username}*\n\nThen I will send you instructions."
 no_raids_found: "No raids found…"
-raidboss_question: "*What is the raidboss?*\nFor example *Kyogre* or *Level 5 egg*"
+raidboss_question: "*What is the raidboss?*\nType for example *Kyogre* or *Level 5 egg* or use the buttons"
 recommended: "Recommended"
 starttime_proposal: "*What start time do you propose?*\nPlease enter the time between *${starttm}* and *${endtm}* or enter *x* to leave it blank"
 time_to_tight: "* It gets a little tight to report, better luck next time.\nWould you like to take another action? Click on */start"

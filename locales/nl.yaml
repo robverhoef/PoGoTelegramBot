@@ -367,7 +367,7 @@ edit_exraid_no_raids_found: "Sorry, ik kan nu geen EX Raid vinden 🤨\n\n*Je ku
 edit_exraid_not_found: "…de Ex Raid staat er niet bij"
 edit_exraid_which_raid: "Welke Ex Raid wil je wijzigen?"
 edit_exraid_starttime: "Starttijd"
-edit_exraid_question_pokemon: "*Hoe heet de nieuwe raidboss?*\nBijvoorbeeld 'Kyogre' of 'Groudon'"
+edit_exraid_question_pokemon: "*Hoe heet de nieuwe raidboss?*\nType bijvoorbeeld 'Kyogre' of 'Groudon' of gebruik de knoppen"
 edit_exraid_question_gym: "Je wilt de gym wijzigen\nWelke gym wordt het nu?\n*Voer een deel van de naam in, minimaal 2 tekens…*"
 edit_exraid_overview_data: "Dit zijn nu de EX Raid gegevens:\n\n${out}*Wat wil je nu doen?*"
 edit_exraid_edit_more: "Nog iets wijzigen aan deze EX Raid"
