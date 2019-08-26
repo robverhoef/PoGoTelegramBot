@@ -238,9 +238,15 @@ function AddRaidWizard (bot) {
         }
       })
 
-      var lastRaidBosses = [...new Set(lastRaidBossesQuery.map(({ target }) => target))].slice(0, 5)
+      var lastRaidBosses = [...new Set(lastRaidBossesQuery.map(({ target: text }) => text))].slice(0, 5).map(text => ({ text }))
+      var buttons = lastRaidBosses.reduce((result, value, index, array) => {
+        if (index % 2 === 0) {
+          result.push(array.slice(index, index + 2))
+        }
+        return result
+      }, [])
 
-      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'), Markup.keyboard([lastRaidBosses.map(text => ({ text }))]).resize().extra({ disable_web_page_preview: true }))
+      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'), Markup.keyboard(buttons).resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
     // step 5
