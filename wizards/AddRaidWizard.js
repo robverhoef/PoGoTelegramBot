@@ -230,7 +230,17 @@ function AddRaidWizard (bot) {
         }
       }
       ctx.session.newraid.start1 = start1
-      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'))
+
+      var lastRaidBossesQuery = await models.sequelize.query('SELECT target FROM raids ORDER BY createdAt DESC LIMIT 10;', {
+        model: models.Raid,
+        mapToModel: {
+          [Op.eq]: true // pass true here if you have any mapped fields
+        }
+      })
+
+      var lastRaidBosses = [...new Set(lastRaidBossesQuery.map(({ target }) => target))].slice(0, 5)
+
+      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'), Markup.keyboard([lastRaidBosses.map(text => ({ text }))]).resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
     // step 5
