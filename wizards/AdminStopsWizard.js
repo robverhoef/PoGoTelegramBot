@@ -318,6 +318,19 @@ function AdminStopsWizard (bot) {
       const input = ctx.update.message.text.toLowerCase()
       switch (input) {
         case ctx.i18n.t('yes').toLowerCase():
+          console.log(ctx.from.first_name, 'is about to delete stop', ctx.session.delselected.id)
+          console.log('deleting Fieldresearches first')
+          try {
+            await models.Fieldresearch.destroy({
+              where: {
+                stopId: ctx.session.delselected.id
+              }
+            })
+          } catch (error) {
+            console.log('Error while deleting Fieldresearches', error)
+            return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_delete_failed')}`)
+          }
+
           try {
             await models.Stop.destroy({
               where: {
@@ -327,7 +340,7 @@ function AdminStopsWizard (bot) {
             return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_gym_delete_success')}`, Markup.removeKeyboard().extra())
               .then(() => ctx.scene.leave())
           } catch (error) {
-            console.log('something went wrong while deleting', ctx.session.delselected)
+            console.log('something went wrong while deleting', ctx.session.delselected.id, 'ERROR: ', error)
             return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_delete_failed')}`)
               .then(() => {
                 ctx.wizard.selectStep(wizsteps.mainmenu)
