@@ -26,10 +26,10 @@ function AddRaidbossWizard (bot) {
 
     // Step 1: Handle raidboss name and ask for level
     async (ctx) => {
-      let bossname = ctx.update.message.text.trim()
+      const bossname = ctx.update.message.text.trim()
       ctx.session.newboss.name = bossname
       // lookup raidboss, prevent double bosses
-      let oldboss = await models.Raidboss.findOne({
+      const oldboss = await models.Raidboss.findOne({
         where: {
           name: {
             [Op.eq]: bossname
@@ -40,7 +40,7 @@ function AddRaidbossWizard (bot) {
         return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_exists'))
           .then(() => ctx.scene.leave())
       }
-      let btns = ['1', '2', '3', '4', '5']
+      const btns = ['1', '2', '3', '4', '5']
       return ctx.replyWithMarkdown(`${ctx.i18n.t('raidboss_level_question', {
         bossname: bossname
       })}`, Markup.keyboard(btns)
@@ -82,9 +82,9 @@ function AddRaidbossWizard (bot) {
 
     // Handle save
     async (ctx) => {
-      let dosave = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
+      const dosave = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
       if (dosave) {
-        let newboss = models.Raidboss.build({
+        const newboss = models.Raidboss.build({
           name: ctx.session.newboss.name,
           level: ctx.session.newboss.level,
           accounts: ctx.session.newboss.accounts,

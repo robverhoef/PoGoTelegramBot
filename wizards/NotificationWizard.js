@@ -14,7 +14,7 @@ var NotificationWizard = function () {
     async (ctx) => {
       await setLocale(ctx)
       const user = ctx.from
-      let dbuser = await models.User.findOne({
+      const dbuser = await models.User.findOne({
         where: {
           tId: {
             [Op.eq]: user.id
@@ -73,7 +73,7 @@ var NotificationWizard = function () {
       }
 
       let message = ''
-      for (let existingNotification of existingNotifications) {
+      for (const existingNotification of existingNotifications) {
         message += `\n- ${ctx.session.chosenGymNotification ? existingNotification.Gym.gymname : existingNotification.Raidboss.name}`
       }
 
@@ -159,7 +159,7 @@ var NotificationWizard = function () {
           .then(() => ctx.wizard.back())
       } else {
         // retrieve selected candidate from session
-        let selectedCandidate = ctx.session.candidates[selectedIndex]
+        const selectedCandidate = ctx.session.candidates[selectedIndex]
         ctx.session.selected = selectedCandidate
         let existingNotification
         if (ctx.session.chosenGymNotification) {
@@ -211,13 +211,13 @@ var NotificationWizard = function () {
           })
       }
 
-      let selected = ctx.session.selected
-      let userId = ctx.session.userId
+      const selected = ctx.session.selected
+      const userId = ctx.session.userId
 
       // save new
       if (!ctx.session.existingNotificationId) {
         if (ctx.session.chosenGymNotification) {
-          let gymNotification = models.GymNotification.build({
+          const gymNotification = models.GymNotification.build({
             gymId: selected[1],
             userId: userId
           })
@@ -233,7 +233,7 @@ var NotificationWizard = function () {
           })}`, Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         } else {
-          let raidbossNotification = models.RaidbossNotification.build({
+          const raidbossNotification = models.RaidbossNotification.build({
             raidbossId: selected[1],
             userId: userId
           })

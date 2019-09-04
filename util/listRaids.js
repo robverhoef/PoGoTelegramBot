@@ -17,7 +17,7 @@ module.exports = async (reason, ctx) => {
   // list should always be in default locale
   ctx.i18n.locale(process.env.DEFAULT_LOCALE)
   let out = reason
-  let raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
+  const raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
       include: [
         models.Gym,
@@ -46,7 +46,7 @@ module.exports = async (reason, ctx) => {
       out += `${raids[a].Gym.gymname}\n`
     }
     if (raids[a].Gym.exRaidTrigger) {
-      out += `💳 ExRaid Trigger\n`
+      out += '💳 ExRaid Trigger\n'
     }
     const strtime = moment.unix(raids[a].start1)
     out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
@@ -64,18 +64,18 @@ module.exports = async (reason, ctx) => {
     out += `${ctx.i18n.t('participants')}: ${userlist}`
     out += '\n\n'
   }
-  let today = moment()
+  const today = moment()
   today.hours(0)
   today.minutes(0)
   today.seconds(0)
-  let researchcount = await models.Fieldresearch.count({
+  const researchcount = await models.Fieldresearch.count({
     where: {
       createdAt: {
         [Op.gt]: today
       }
     }
   })
-  let exraidcount = await models.Exraid.count({
+  const exraidcount = await models.Exraid.count({
     where: {
       endtime: {
         [Op.gt]: today.unix()

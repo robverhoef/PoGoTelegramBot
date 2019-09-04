@@ -10,25 +10,25 @@ function LocaleWizard (bot) {
   return new WizardScene('locale-wizard',
     async (ctx) => {
       if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
-        return ctx.replyWithMarkdown(`Not here… set your language in the bot screen`)
+        return ctx.replyWithMarkdown('Not here… set your language in the bot screen')
           .then(() => ctx.scene.leave())
       }
       await setLocale(ctx)
-      let rawlocales = process.env.LOCALES
+      const rawlocales = process.env.LOCALES
       const locs = JSON.parse(rawlocales)
-      let locales = []
+      const locales = []
       ctx.session.localebtns = []
       for (const loc of locs) {
         locales.push({ code: loc[0].trim(), name: loc[1].trim() })
         ctx.session.localebtns.push(ctx.i18n.t(loc[1]))
       }
-      return ctx.replyWithMarkdown(`*Select a language…*`, Markup.keyboard(ctx.session.localebtns).resize().oneTime().extra())
+      return ctx.replyWithMarkdown('*Select a language…*', Markup.keyboard(ctx.session.localebtns).resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
       const lang = ctx.update.message.text
-      let rawlocales = process.env.LOCALES
+      const rawlocales = process.env.LOCALES
       let newloc = process.env.LOCALE
       const rawlocs = JSON.parse(rawlocales)
       for (const loc of rawlocs) {

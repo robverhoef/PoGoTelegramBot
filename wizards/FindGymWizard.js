@@ -28,7 +28,7 @@ var FindGymWizard = function () {
           }
         })
         let out = ''
-        let l = candidates.length
+        const l = candidates.length
         for (let i = 0; i < l; i++) {
           out += `*${candidates[i].gymname}\n*`
           if (candidates[i].exRaidTrigger) {

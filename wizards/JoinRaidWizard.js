@@ -18,7 +18,7 @@ function JoinRaidWizard (bot) {
       await setLocale(ctx)
       ctx.session.joinedraid = null
       // ToDo: check for endtime
-      let raids = await models.Raid.findAll({
+      const raids = await models.Raid.findAll({
         include: [models.Gym, models.Raiduser],
         where: {
           endtime: {
@@ -32,9 +32,9 @@ function JoinRaidWizard (bot) {
       }
       // buttons to show, with index from candidates as data (since maxlength of button data is 64 bytes…)
       ctx.session.raidbtns = []
-      let candidates = []
+      const candidates = []
       for (var a = 0; a < raids.length; a++) {
-        let strttm = moment.unix(raids[a].start1).format('H:mm')
+        const strttm = moment.unix(raids[a].start1).format('H:mm')
         candidates[a] = {
           gymname: raids[a].Gym.gymname,
           raidid: raids[a].id,
@@ -55,11 +55,11 @@ function JoinRaidWizard (bot) {
 
     async (ctx) => {
       // retrieve selected candidate  from session…
-      let ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
+      const ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
       if (ind === -1) {
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_not_found'), Markup.removeKeyboard().extra())
       }
-      let selectedraid = ctx.session.raidcandidates[ind]
+      const selectedraid = ctx.session.raidcandidates[ind]
       if (selectedraid.raidid === 0) {
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_cancel'), Markup.removeKeyboard().extra())
           .then(() => {
@@ -82,7 +82,7 @@ function JoinRaidWizard (bot) {
 
       const user = ctx.from
       // Check already registered? If so; update else store new
-      let raiduser = await models.Raiduser.findOne({
+      const raiduser = await models.Raiduser.findOne({
         where: {
           [Op.and]: [{ uid: user.id }, { raidId: joinedraid.raidid }]
         }
@@ -107,7 +107,7 @@ function JoinRaidWizard (bot) {
         }
       } else {
         // new raid user
-        let raiduser = models.Raiduser.build({
+        const raiduser = models.Raiduser.build({
           raidId: joinedraid.raidid,
           username: user.first_name,
           uid: user.id,
@@ -128,7 +128,7 @@ function JoinRaidWizard (bot) {
         gymname: joinedraid.gymname
       })
       ctx.i18n.locale(oldlocale)
-      let out = await listRaids(`${reason}\n\n`, ctx)
+      const out = await listRaids(`${reason}\n\n`, ctx)
       if (out === null) {
         return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())

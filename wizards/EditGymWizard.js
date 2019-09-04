@@ -81,7 +81,7 @@ function EditGymWizard (bot) {
             })
         } else {
           // retrieve selected candidate from session
-          let selectedgym = ctx.session.gymcandidates[selectedIndex]
+          const selectedgym = ctx.session.gymcandidates[selectedIndex]
           ctx.session.editgym = selectedgym
         }
       }
@@ -174,8 +174,8 @@ function EditGymWizard (bot) {
       }
     },
     async (ctx) => {
-      let key = ctx.session.editattr
-      let value = ctx.update.message.text.trim()
+      const key = ctx.session.editattr
+      const value = ctx.update.message.text.trim()
       if (key === 'exRaidTrigger') {
         ctx.session.editgym.exRaidTrigger = value.toLowerCase() === ctx.i18n.t('yes').toLowerCase() ? 1 : 0
       } else if (key === 'delete') {
@@ -183,7 +183,7 @@ function EditGymWizard (bot) {
           // yes, delete and close
           await models.Gym.update(
             {
-              'removed': true
+              removed: true
             }, {
               where: {
                 id: ctx.session.editgym.id
@@ -202,7 +202,7 @@ function EditGymWizard (bot) {
           ctx.session.editgym.lat = null
           ctx.session.editgym.lon = null
         } else {
-          let coords = value.split(',')
+          const coords = value.split(',')
           ctx.session.editgym.lat = coords[0].trim()
           ctx.session.editgym.lon = coords[1].trim()
           ctx.session.editgym.googleMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${ctx.session.editgym.lat},${ctx.session.editgym.lon}`
@@ -212,7 +212,7 @@ function EditGymWizard (bot) {
       } else {
         ctx.session.editgym[key] = value
       }
-      let out = `${ctx.i18n.t('btn_edit_gym_name')}: ${ctx.session.editgym.gymname}\n${ctx.i18n.t('btn_edit_gym_address')}: ${ctx.session.editgym.address !== null ? ctx.session.editgym.address : ctx.i18n.t('no_input')}\n${ctx.i18n.t('btn_edit_gym_gmlink')}: ${ctx.session.editgym.googleMapsLink !== null ? '[' + ctx.i18n.t('map') + '](' + ctx.session.editgym.googleMapsLink + ')' : ctx.i18n.t('no_input')}\n${ctx.i18n.t('coordinates')}: ${ctx.session.editgym.lat !== null ? ctx.session.editgym.lat + ', ' + ctx.session.editgym.lon : ctx.i18n.t('no_input')}\n${ctx.i18n.t('btn_edit_gym_exraid')}: ${ctx.session.editgym.exRaidTrigger === 1 ? ctx.i18n.t('yes') : ctx.i18n.t('no')}\n\n`
+      const out = `${ctx.i18n.t('btn_edit_gym_name')}: ${ctx.session.editgym.gymname}\n${ctx.i18n.t('btn_edit_gym_address')}: ${ctx.session.editgym.address !== null ? ctx.session.editgym.address : ctx.i18n.t('no_input')}\n${ctx.i18n.t('btn_edit_gym_gmlink')}: ${ctx.session.editgym.googleMapsLink !== null ? '[' + ctx.i18n.t('map') + '](' + ctx.session.editgym.googleMapsLink + ')' : ctx.i18n.t('no_input')}\n${ctx.i18n.t('coordinates')}: ${ctx.session.editgym.lat !== null ? ctx.session.editgym.lat + ', ' + ctx.session.editgym.lon : ctx.i18n.t('no_input')}\n${ctx.i18n.t('btn_edit_gym_exraid')}: ${ctx.session.editgym.exRaidTrigger === 1 ? ctx.i18n.t('yes') : ctx.i18n.t('no')}\n\n`
 
       ctx.session.savebtns = [
         ctx.i18n.t('edit_gym_btn_save_close'),

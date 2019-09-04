@@ -16,7 +16,7 @@ const personalTop = 10
 const globalTop = 10
 
 function sortDictionaryOnValue (dictionary) {
-  let items = Object.keys(dictionary).map(function (key) {
+  const items = Object.keys(dictionary).map(function (key) {
     return [key, dictionary[key]]
   })
 
@@ -28,7 +28,7 @@ function sortDictionaryOnValue (dictionary) {
 }
 
 function sortRaidsOnGymcount (raids) {
-  let gyms = {}
+  const gyms = {}
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
     if (raids[a].Gym.exRaidTrigger) {
@@ -47,7 +47,7 @@ function sortRaidsOnGymcount (raids) {
 }
 
 async function processPersonalOwnRaids (user, time, ctx) {
-  let ownraids = await models.Raid.findAll({
+  const ownraids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: time
@@ -62,7 +62,7 @@ async function processPersonalOwnRaids (user, time, ctx) {
   let statMessage = ''
   if (ownraids.length > 0) {
     statMessage += `${ctx.i18n.t('stats_your_total_raids_reported', { ownraids: ownraids })} \n`
-    let ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
+    const ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
     if (ownedRaids.length > 0) {
       statMessage += `_${ctx.i18n.t('stats_your_most_reported_gyms')}:_\n`
     }
@@ -78,8 +78,8 @@ function processPersonalRaids (raids, splice, ctx) {
   let statMessage = ''
   if (raids.length > 0) {
     statMessage += `${ctx.i18n.t('stats_total_times_joined') + ': *' + raids.length + '* \n'}`
-    let gymcount = sortRaidsOnGymcount(raids)
-    let joinedRaids = splice ? gymcount.splice(0, personalTop) : gymcount
+    const gymcount = sortRaidsOnGymcount(raids)
+    const joinedRaids = splice ? gymcount.splice(0, personalTop) : gymcount
     if (joinedRaids.length > 0) {
       statMessage += `_${ctx.i18n.t('stats_your_most_visited_gyms')}:_\n`
     }
@@ -91,7 +91,7 @@ function processPersonalRaids (raids, splice, ctx) {
 }
 
 async function processPersonalJoinedRaids (user, time, ctx) {
-  let raids = await models.Raid.findAll({
+  const raids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: time
@@ -102,7 +102,7 @@ async function processPersonalJoinedRaids (user, time, ctx) {
       {
         model: models.Raiduser,
         where: {
-          'uid': user.id
+          uid: user.id
         }
       }
     ]
@@ -111,7 +111,7 @@ async function processPersonalJoinedRaids (user, time, ctx) {
 }
 
 async function processPersonalExRaidGyms (user, start, end, ctx) {
-  let raids = await models.Raid.findAll({
+  const raids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: start.unix()
@@ -126,7 +126,7 @@ async function processPersonalExRaidGyms (user, start, end, ctx) {
       {
         model: models.Gym,
         where: {
-          'exRaidTrigger': {
+          exRaidTrigger: {
             [Op.eq]: true
           }
         }
@@ -134,7 +134,7 @@ async function processPersonalExRaidGyms (user, start, end, ctx) {
       {
         model: models.Raiduser,
         where: {
-          'uid': user.id
+          uid: user.id
         }
       }
     ]
@@ -157,7 +157,7 @@ async function determinePersonalExRaids (user, start, end, ctx) {
 
 function processRaidcount (raids, ctx) {
   let statMessage = ''
-  let gymcount = sortRaidsOnGymcount(raids).slice(0, globalTop)
+  const gymcount = sortRaidsOnGymcount(raids).slice(0, globalTop)
   if (gymcount.length > 0) {
     statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: *${raids.length}* \n`
     statMessage += `_${ctx.i18n.t('stats_most_reported_gyms')}:_\n`
@@ -170,12 +170,12 @@ function processRaidcount (raids, ctx) {
 }
 
 function getGymcounts (raids, countMethod) {
-  let gyms = {}
+  const gyms = {}
   let total = 0
   for (var a = 0; a < raids.length; a++) {
-    let key = raids[a].Gym.gymname
+    const key = raids[a].Gym.gymname
     let count = gyms[key]
-    let totalRaid = countMethod(raids[a])
+    const totalRaid = countMethod(raids[a])
 
     if (!count) {
       count = totalRaid
@@ -189,10 +189,10 @@ function getGymcounts (raids, countMethod) {
 }
 
 function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
-  let filteredRaids = filterRaidsOnViability(raids)
+  const filteredRaids = filterRaidsOnViability(raids)
 
-  let raidTotals = getGymcounts(filteredRaids, raid => 1)
-  let countMethod = !countAccounts ? raid => raid.Raidusers.length : raid => {
+  const raidTotals = getGymcounts(filteredRaids, raid => 1)
+  const countMethod = !countAccounts ? raid => raid.Raidusers.length : raid => {
     let totals = 0
     for (const raiduser of raid.Raidusers) {
       totals += raiduser.accounts
@@ -200,11 +200,11 @@ function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
     return totals
   }
 
-  let { gyms, total } = getGymcounts(filteredRaids, countMethod)
+  const { gyms, total } = getGymcounts(filteredRaids, countMethod)
 
   let statMessage = ''
-  let value = sortDictionaryOnValue(gyms)
-  let gymcount = splice ? value.splice(0, globalTop) : value
+  const value = sortDictionaryOnValue(gyms)
+  const gymcount = splice ? value.splice(0, globalTop) : value
   if (gymcount.length > 0) {
     if (countAccounts) {
       statMessage += `${ctx.i18n.t('stats_total_accounts_for_these_raids')}: *${total}* \n`
@@ -221,7 +221,7 @@ function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
 }
 
 function filterRaidsOnViability (raids) {
-  let viableRaids = []
+  const viableRaids = []
   for (const raid of raids) {
     // No raidusers? dont count
     if (raid.Raidusers.length === 0) {
@@ -234,9 +234,9 @@ function filterRaidsOnViability (raids) {
       continue
     } else {
       // get the first number of accounts and compare it!
-      let regex = /(\d)/g
-      let match = regex.exec(raid.Raidboss.accounts)
-      let minAccounts = match[1]
+      const regex = /(\d)/g
+      const match = regex.exec(raid.Raidboss.accounts)
+      const minAccounts = match[1]
       let totals = 0
       for (const raiduser of raid.Raidusers) {
         totals += raiduser.accounts
@@ -261,11 +261,11 @@ function processAllRaids (raids, ctx) {
 
 function processRaidusers (raids, ctx) {
   let statMessage = ''
-  let users = {}
-  let userNames = {}
+  const users = {}
+  const userNames = {}
   for (let a = 0; a < raids.length; a++) {
     for (let b = 0; b < raids[a].Raidusers.length; b++) {
-      let key = raids[a].Raidusers[b].uid
+      const key = raids[a].Raidusers[b].uid
       let count = users[key]
       if (!count) {
         count = 1
@@ -277,11 +277,11 @@ function processRaidusers (raids, ctx) {
     }
   }
 
-  let userCount = sortDictionaryOnValue(users).splice(0, globalTop)
+  const userCount = sortDictionaryOnValue(users).splice(0, globalTop)
   if (userCount.length > 0) {
     statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
     for (let i = 0; i < userCount.length; i++) {
-      let userId = userCount[i][0]
+      const userId = userCount[i][0]
       statMessage += `- ${userNames[userId]}: *${userCount[i][1]} ${ctx.i18n.t('stats_times_raided')}*\n`
     }
     statMessage += '\n'
@@ -292,9 +292,9 @@ function processRaidusers (raids, ctx) {
 
 async function processRaidreporters (raids, ctx) {
   let statMessage = ''
-  let reporters = {}
+  const reporters = {}
   for (let a = 0; a < raids.length; a++) {
-    let reporterKey = raids[a].reporterId
+    const reporterKey = raids[a].reporterId
     let reporterCount = reporters[reporterKey]
     if (!reporterCount) {
       reporterCount = 1
@@ -303,12 +303,12 @@ async function processRaidreporters (raids, ctx) {
     }
     reporters[reporterKey] = reporterCount
   }
-  let reporterCount = sortDictionaryOnValue(reporters).splice(0, globalTop)
+  const reporterCount = sortDictionaryOnValue(reporters).splice(0, globalTop)
   if (reporterCount.length > 0) {
     statMessage += `_${ctx.i18n.t('stats_heroes_most_reported')}:_\n`
     for (let i = 0; i < reporterCount.length; i++) {
-      let reporterId = reporterCount[i][0]
-      let user = await models.User.findOne({
+      const reporterId = reporterCount[i][0]
+      const user = await models.User.findOne({
         where: {
           tId: {
             [Op.eq]: reporterId
@@ -324,7 +324,7 @@ async function processRaidreporters (raids, ctx) {
 }
 
 async function determineGlobalStats (time, ctx) {
-  let raids = await models.Raid.findAll({
+  const raids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: time
@@ -340,7 +340,7 @@ async function determineGlobalStats (time, ctx) {
 }
 
 async function determineGlobalExRaids (start, end, ctx) {
-  let raids = await models.Raid.findAll({
+  const raids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: start.unix()
@@ -355,19 +355,19 @@ async function determineGlobalExRaids (start, end, ctx) {
       {
         model: models.Gym,
         where: {
-          'exRaidTrigger': {
+          exRaidTrigger: {
             [Op.eq]: true
           }
         }
       }, models.Raiduser, models.Raidboss]
   })
-  let statMessage = processRaidVsRaidusers(raids, true, false, ctx)
+  const statMessage = processRaidVsRaidusers(raids, true, false, ctx)
 
   return statMessage
 }
 
 function determineChosenTime (chosenTime) {
-  let starttime = moment()
+  const starttime = moment()
   let time
   if (chosenTime === 0) {
     time = starttime.startOf('day').unix()
@@ -383,9 +383,9 @@ function determineChosenTime (chosenTime) {
 
 async function isAdmin (ctx, bot) {
   const user = ctx.from
-  let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+  const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database
-  let dbAdmin = await models.User.findOne({
+  const dbAdmin = await models.User.findOne({
     where: {
       tId: {
         [Op.eq]: user.id
@@ -442,7 +442,7 @@ var StatsWizard = function (bot) {
         return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong'), Markup.removeKeyboard().extra())
       }
 
-      let dates = await lastExRaidPassDate()
+      const dates = await lastExRaidPassDate()
 
       ctx.session.periodbtns = [
         ctx.i18n.t('stats_today'),
@@ -458,11 +458,11 @@ var StatsWizard = function (bot) {
     },
 
     async (ctx) => {
-      let chosenStat = ctx.session.chosenStat
-      let chosenTime = ctx.session.periodbtns.indexOf(ctx.update.message.text)
+      const chosenStat = ctx.session.chosenStat
+      const chosenTime = ctx.session.periodbtns.indexOf(ctx.update.message.text)
       let statMessage = ''
       if (chosenTime < 4) {
-        let time = determineChosenTime(chosenTime)
+        const time = determineChosenTime(chosenTime)
         if (chosenStat === 0) {
           statMessage = await determinePersonalStats(ctx.from, time, ctx)
         }
@@ -475,7 +475,7 @@ var StatsWizard = function (bot) {
       } else { // ex raid stats
         let start
         let end
-        let dates = await lastExRaidPassDate()
+        const dates = await lastExRaidPassDate()
         if (chosenTime === 4) {
           start = dates.lastExwaveDate
           end = moment()
@@ -498,7 +498,7 @@ var StatsWizard = function (bot) {
         statMessage = ctx.i18n.t('stats_no_stat_identified')
       }
 
-      let message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
+      const message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
       return ctx.replyWithMarkdown(message, Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     },

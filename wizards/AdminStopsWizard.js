@@ -105,8 +105,7 @@ function AdminStopsWizard (bot) {
 
     // Edit stop
     async (ctx) => {
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_edit')}`, Markup.keyboard([{
-        text: ctx.i18n.t('admin_stops_list_nearby'), request_location: true }]).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_stops_edit')}`, Markup.keyboard([{ text: ctx.i18n.t('admin_stops_list_nearby'), request_location: true }]).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -117,7 +116,7 @@ function AdminStopsWizard (bot) {
         const sf = 3.14159 / 180 // scaling factor
         const er = 6371 // earth radius in km, approximate
         const mr = 1.0 // max radius in Km
-        let $sql = `SELECT id, name, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM stops WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
+        const $sql = `SELECT id, name, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM stops WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
         candidates = await models.sequelize.query($sql, {
           model: models.Stop,
           mapToModel: {
@@ -153,7 +152,7 @@ function AdminStopsWizard (bot) {
         ctx.i18n.t('admin_stops_name'),
         ctx.i18n.t('coordinates')
       ]
-      for (let cand of ctx.session.candidates) {
+      for (const cand of ctx.session.candidates) {
       // NOTE: possible problem when stopnames are not unique!
         if (cand.name === input) {
           ctx.session.editstop = cand
@@ -260,7 +259,7 @@ function AdminStopsWizard (bot) {
         const sf = 3.14159 / 180 // scaling factor
         const er = 6371 // earth radius in km, approximate
         const mr = 1.0 // max radius in Km
-        let $sql = `SELECT id, name, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM stops WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
+        const $sql = `SELECT id, name, lat, lon, (ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})))*${er} AS d FROM stops WHERE ${mr} >= ${er} * ACOS(SIN(lat*${sf})*SIN(${lat}*${sf}) + COS(lat*${sf})*COS(${lat}*${sf})*COS((lon-${lon})*${sf})) ORDER BY d`
         candidates = await models.sequelize.query($sql, {
           model: models.Stop,
           mapToModel: {

@@ -8,7 +8,7 @@ const models = require('../models')
  * TODO: send in batches
  */
 module.exports = async (ctx, bot, raidbossId, gymname, target, starttime) => {
-  let notifications = await models.RaidbossNotification.findAll({
+  const notifications = await models.RaidbossNotification.findAll({
     include: [
       models.User
     ],
@@ -20,7 +20,7 @@ module.exports = async (ctx, bot, raidbossId, gymname, target, starttime) => {
   })
   const oldlocale = ctx.i18n.locale()
   console.log('SENDING RAIDBOSS NOTIFICATION', notifications.length, target)
-  for (let notification of notifications) {
+  for (const notification of notifications) {
     ctx.i18n.locale(notification.User.locale)
     try {
       bot.telegram.sendMessage(notification.User.tId, ctx.i18n.t('noti_raidboss_notification', {

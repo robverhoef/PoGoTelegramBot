@@ -30,8 +30,8 @@ function EditRaidbossWizard (bot) {
     // Step 1
     // Raidboss lookup by name
     async (ctx) => {
-      let term = ctx.update.message.text.trim()
-      let bosses = await models.Raidboss.findAll({
+      const term = ctx.update.message.text.trim()
+      const bosses = await models.Raidboss.findAll({
         where: {
           name: { [Op.like]: '%' + term + '%' }
         }
@@ -79,7 +79,7 @@ function EditRaidbossWizard (bot) {
         [`${ctx.i18n.t('edit_raidboss_btn_number_of_accounts')}: ${ctx.session.editboss.accounts}`, 'accounts'],
         [ctx.i18n.t('edit_raidboss_btn_do_nothing'), '0']
       ]
-      return ctx.replyWithMarkdown(`Wat wil je wijzigen?`, Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx.replyWithMarkdown('Wat wil je wijzigen?', Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
 
@@ -121,9 +121,9 @@ function EditRaidbossWizard (bot) {
     // Step 4
     // Handle value, ask what's next?
     async (ctx) => {
-      let value = ctx.update.message.text.trim()
+      const value = ctx.update.message.text.trim()
       ctx.session.editboss[ctx.session.key] = value
-      let out = `${ctx.i18n.t('edit_raidboss_overview_name')}: ${ctx.session.editboss.name}\n${ctx.i18n.t('edit_raidboss_overview_level')}: ${ctx.session.editboss.level}\n${ctx.i18n.t('edit_raidboss_overview_accounts')}: ${ctx.session.editboss.accounts}`
+      const out = `${ctx.i18n.t('edit_raidboss_overview_name')}: ${ctx.session.editboss.name}\n${ctx.i18n.t('edit_raidboss_overview_level')}: ${ctx.session.editboss.level}\n${ctx.i18n.t('edit_raidboss_overview_accounts')}: ${ctx.session.editboss.accounts}`
 
       ctx.session.savebtns = [
         ctx.i18n.t('edit_raidboss_btn_save_close'),
@@ -140,7 +140,7 @@ function EditRaidbossWizard (bot) {
     // Step 5
     // Handle value, ask whats next?
     async (ctx) => {
-      let action = ctx.session.savebtns.indexOf(ctx.update.message.text)
+      const action = ctx.session.savebtns.indexOf(ctx.update.message.text)
       switch (action) {
         case 0:
           // Save

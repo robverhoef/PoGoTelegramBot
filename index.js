@@ -147,7 +147,7 @@ bot.use(stage.middleware())
 async function showMainMenu (ctx, user) {
   ctx.session = {}
   ctx.scene.leave()
-  let raids = await models.Raid.findAll({
+  const raids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: moment().unix()
@@ -158,12 +158,12 @@ async function showMainMenu (ctx, user) {
       {
         model: models.Raiduser,
         where: {
-          'uid': user.id
+          uid: user.id
         }
       }
     ]
   })
-  let btns = []
+  const btns = []
   btns.push(ctx.i18n.t('btn_join_raid'))
   if (raids.length > 0) {
     btns.push(ctx.i18n.t('btn_exit_raid'))
@@ -178,9 +178,9 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_exraids'))
 
   // group admins:
-  let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+  const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database
-  let dbAdmin = await models.User.findOne({
+  const dbAdmin = await models.User.findOne({
     where: {
       [Op.and]: [
         {
@@ -218,7 +218,7 @@ bot.command('/start', async (ctx) => {
     return
   }
 
-  let user = ctx.update.message.from
+  const user = ctx.update.message.from
   // validate the user
   var fuser = await models.User.findOne({
     where: {
@@ -242,25 +242,25 @@ bot.command('cancel', (ctx) => cancelConversation(ctx))
 bot.command('lang', Stage.enter('locale-wizard'))
 // iterate over languages
 for (var key in i18n.repository) {
-  bot.hears(i18n.repository[key]['btn_join_raid'].call(), Stage.enter('join-raid-wizard'))
-  bot.hears(i18n.repository[key]['btn_exit_raid'].call(), Stage.enter('exit-raid-wizard'))
-  bot.hears(i18n.repository[key]['btn_add_raid'].call(), Stage.enter('add-raid-wizard'))
-  bot.hears(i18n.repository[key]['btn_edit_raid'].call(), Stage.enter('edit-raid-wizard'))
-  bot.hears(i18n.repository[key]['btn_find_gym'].call(), Stage.enter('find-gym-wizard'))
-  bot.hears(i18n.repository[key]['btn_field_researches'].call(), Stage.enter('fieldresearch-wizard'))
-  bot.hears(i18n.repository[key]['btn_stats'].call(), Stage.enter('stats-wizard'))
+  bot.hears(i18n.repository[key].btn_join_raid.call(), Stage.enter('join-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_exit_raid.call(), Stage.enter('exit-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_add_raid.call(), Stage.enter('add-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_edit_raid.call(), Stage.enter('edit-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_find_gym.call(), Stage.enter('find-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_field_researches.call(), Stage.enter('fieldresearch-wizard'))
+  bot.hears(i18n.repository[key].btn_stats.call(), Stage.enter('stats-wizard'))
 
-  bot.hears(i18n.repository[key]['btn_exraids'].call(), Stage.enter('exraid-wizard'))
+  bot.hears(i18n.repository[key].btn_exraids.call(), Stage.enter('exraid-wizard'))
 
-  bot.hears(i18n.repository[key]['btn_notifications'].call(), Stage.enter('notification-wizard'))
-  bot.hears(i18n.repository[key]['btn_user_delayed'].call(), Stage.enter('user-delayed-wizard'))
+  bot.hears(i18n.repository[key].btn_notifications.call(), Stage.enter('notification-wizard'))
+  bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
   // Admin
-  bot.hears(i18n.repository[key]['btn_manage_fieldresearches'].call(), Stage.enter('admin-field-research-wizard'))
-  bot.hears(i18n.repository[key]['btn_add_gym'].call(), Stage.enter('add-gym-wizard'))
-  bot.hears(i18n.repository[key]['btn_edit_gym'].call(), Stage.enter('edit-gym-wizard'))
-  bot.hears(i18n.repository[key]['btn_add_boss'].call(), Stage.enter('add-raidboss-wizard'))
-  bot.hears(i18n.repository[key]['btn_edit_boss'].call(), Stage.enter('edit-raidboss-wizard'))
-  bot.hears(i18n.repository[key]['btn_admin_stops'].call(), Stage.enter('admin-stops-wizard'))
+  bot.hears(i18n.repository[key].btn_manage_fieldresearches.call(), Stage.enter('admin-field-research-wizard'))
+  bot.hears(i18n.repository[key].btn_add_gym.call(), Stage.enter('add-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_edit_gym.call(), Stage.enter('edit-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_add_boss.call(), Stage.enter('add-raidboss-wizard'))
+  bot.hears(i18n.repository[key].btn_edit_boss.call(), Stage.enter('edit-raidboss-wizard'))
+  bot.hears(i18n.repository[key].btn_admin_stops.call(), Stage.enter('admin-stops-wizard'))
 }
 
 /**
@@ -268,7 +268,7 @@ for (var key in i18n.repository) {
 */
 bot.on('inline_query', async ctx => {
   // console.log('inline_query', ctx.update)
-  let user = await models.User.findOne({
+  const user = await models.User.findOne({
     where: {
       [Op.and]: [
         { tId: ctx.inlineQuery.from.id },
@@ -301,7 +301,7 @@ bot.hears(/\/hi/i, async (ctx) => {
     return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_group_warning'))
   }
   console.log('Somebody said hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
-  let olduser = await models.User.find({
+  const olduser = await models.User.find({
     where: {
       [Op.and]: [
         { tGroupID: process.env.GROUP_ID.toString() },
@@ -322,7 +322,7 @@ bot.hears(/\/hi/i, async (ctx) => {
   //  process.env.GROUP_ID, ctx.update.message.chat.id.toString() === process.env.GROUP_ID
   // )
   if (ctx.update.message.chat.id.toString() === process.env.GROUP_ID) {
-    let newuser = models.User.build({
+    const newuser = models.User.build({
       tId: ctx.update.message.from.id,
       tUsername: ctx.update.message.from.first_name,
       tGroupID: process.env.GROUP_ID.toString()
@@ -373,7 +373,7 @@ bot.on('new_chat_members', async (ctx) => {
   // Find the user's language
   const lang = newusr.language_code
   let userlang = process.env.LOCALE
-  let rawlocales = process.env.LOCALES
+  const rawlocales = process.env.LOCALES
   for (const rawlocale of rawlocales) {
     if (lang === rawlocale[0]) {
       userlang = lang
@@ -381,7 +381,7 @@ bot.on('new_chat_members', async (ctx) => {
     }
   }
   if (ctx.message.chat.id.toString() === process.env.GROUP_ID) {
-    let newuser = models.User.build({
+    const newuser = models.User.build({
       tId: newusr.id,
       tUsername: newusr.first_name,
       tGroupID: process.env.GROUP_ID.toString(),
@@ -421,7 +421,7 @@ bot.on('left_chat_member', async (ctx) => {
 */
 bot.hears(/\/raids/i, async (ctx) => {
   setLocale(ctx)
-  let raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
+  const raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
       include: [
         models.Gym,

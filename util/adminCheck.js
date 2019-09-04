@@ -10,7 +10,7 @@ const { Markup } = require('telegraf')
 module.exports = async (ctx, bot) => {
   const user = ctx.from
   let isAdmin = false
-  let admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
+  const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   for (let a = 0; a < admins.length; a++) {
     if (admins[a].user.id === user.id) {
       isAdmin = true
@@ -18,7 +18,7 @@ module.exports = async (ctx, bot) => {
   }
   // or marked admin from database?
   if (!isAdmin) {
-    let dbAdmin = await models.User.findOne({
+    const dbAdmin = await models.User.findOne({
       where: {
         tId: {
           [Op.eq]: user.id
@@ -37,7 +37,7 @@ module.exports = async (ctx, bot) => {
 
   if (!isAdmin) {
     console.log('Illegal admin attempt', user)
-    return ctx.replyWithMarkdown(`Really nice try. And smart too! \r\nBut only admins are allowed here…`, Markup.removeKeyboard())
+    return ctx.replyWithMarkdown('Really nice try. And smart too! \r\nBut only admins are allowed here…', Markup.removeKeyboard())
       .then(() => ctx.scene.leave())
   }
   return false

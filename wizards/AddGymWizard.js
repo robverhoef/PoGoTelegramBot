@@ -25,10 +25,10 @@ function AddGymWizard (bot) {
     // Step 1
     // Adres of x
     async (ctx) => {
-      let gymname = ctx.update.message.text.trim()
-      let user = ctx.update.message.from
+      const gymname = ctx.update.message.text.trim()
+      const user = ctx.update.message.from
       // check if exists
-      let oldgyms = await models.Gym.findAll({
+      const oldgyms = await models.Gym.findAll({
         where: {
           gymname: gymname
         }
@@ -47,7 +47,7 @@ function AddGymWizard (bot) {
     // Handle address
     // Gym GPS location
     async (ctx) => {
-      let gymadres = ctx.update.message.text.trim()
+      const gymadres = ctx.update.message.text.trim()
       ctx.session.newgym.address = gymadres.toLowerCase() === 'x' ? null : gymadres
       return ctx.replyWithMarkdown(`${ctx.i18n.t('add_gym_loc_question')}`, Markup.keyboard([{ text: ctx.i18n.t('send_my_gps_location'), request_location: true }]).oneTime().resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
@@ -72,7 +72,7 @@ function AddGymWizard (bot) {
       } else {
         const input = ctx.update.message.text
         if (input.toLowerCase() !== 'x') {
-          let coords = input.split(',')
+          const coords = input.split(',')
           ctx.session.newgym.lat = coords[0].trim()
           ctx.session.newgym.lon = coords[1].trim()
           ctx.session.newgym.googleMapsLink = 'https://www.google.com/maps/dir/?api=1&destination=' + ctx.session.newgym.lat + ',' + ctx.session.newgym.lon
@@ -115,7 +115,7 @@ function AddGymWizard (bot) {
     // Handle exraid
     // Show overview & save conformation
     async (ctx) => {
-      let exraid = ctx.session.exraidbtns.indexOf(ctx.update.message.text) === 0
+      const exraid = ctx.session.exraidbtns.indexOf(ctx.update.message.text) === 0
       ctx.session.newgym.exRaidTrigger = exraid
       ctx.session.savebtns = [
         ctx.i18n.t('yes'),
@@ -127,9 +127,9 @@ function AddGymWizard (bot) {
     // Step 6
     async (ctx) => {
       // save …or maybe not
-      let savenow = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
+      const savenow = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
       if (savenow) {
-        let gym = models.Gym.build(ctx.session.newgym)
+        const gym = models.Gym.build(ctx.session.newgym)
         try {
           await gym.save()
         } catch (error) {
