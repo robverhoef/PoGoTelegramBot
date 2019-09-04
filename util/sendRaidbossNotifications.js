@@ -19,6 +19,7 @@ module.exports = async (ctx, bot, raidbossId, gymname, target, starttime) => {
     }
   })
   const oldlocale = ctx.i18n.locale()
+  console.log('SENDING RAIDBOSS NOTIFICATION', notifications.length, target)
   for (let notification of notifications) {
     ctx.i18n.locale(notification.User.locale)
     try {

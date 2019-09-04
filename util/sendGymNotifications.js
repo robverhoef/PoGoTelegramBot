@@ -19,6 +19,7 @@ module.exports = async (ctx, bot, gymId, gymname, target, starttime) => {
     }
   })
   const oldlocale = ctx.i18n.locale()
+  console.log('SENDING GYM NOTIFICATION', notifications.length, gymname)
   for (let notification of notifications) {
     ctx.i18n.locale(notification.User.locale)
     try {
