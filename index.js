@@ -301,7 +301,7 @@ bot.hears(/\/hi/i, async (ctx) => {
     return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_group_warning'))
   }
   console.log('Somebody said hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
-  const olduser = await models.User.find({
+  const olduser = await models.User.findOne({
     where: {
       [Op.and]: [
         { tGroupID: process.env.GROUP_ID.toString() },
