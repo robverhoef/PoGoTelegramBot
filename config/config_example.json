@@ -7,8 +7,7 @@
     "dialect": "mysql",
     "dialectOptions": {
       "charset": "utf8mb4"
-    },
-    "logging": "console.log"
+    }
   },
   "test": {
     "username": "root",
@@ -18,8 +17,7 @@
     "dialect": "mysql",
     "dialectOptions": {
       "charset": "utf8mb4"
-    },
-    "logging": false
+    }
   },
   "production": {
     "username": "root",
@@ -29,7 +27,6 @@
     "dialect": "mysql",
     "dialectOptions": {
       "charset": "utf8mb4"
-    },
-    "logging": false
+    }
   }
 }
