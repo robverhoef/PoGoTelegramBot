@@ -11,6 +11,7 @@ const models = require('./models')
 require('./locales.js')
 const setLocale = require('./util/setLocale')
 
+const listRaids = require('./util/listRaids')
 // =====================
 // Let's go!
 // =====================
@@ -207,6 +208,10 @@ async function showMainMenu (ctx, user) {
       break
     }
   }
+
+  // for testing only
+  // btns.push('Trigger raidlist')
+
   return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: user }), Markup.keyboard(
     btns).oneTime().resize().extra())
 }
@@ -261,6 +266,13 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key].btn_add_boss.call(), Stage.enter('add-raidboss-wizard'))
   bot.hears(i18n.repository[key].btn_edit_boss.call(), Stage.enter('edit-raidboss-wizard'))
   bot.hears(i18n.repository[key].btn_admin_stops.call(), Stage.enter('admin-stops-wizard'))
+
+  bot.hears('Trigger raidlist', async (ctx) => {
+    console.log('RAIDLIST TRIGGERED')
+    const out = await listRaids('Testing', ctx)
+    console.log(out)
+    bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+  })
 }
 
 /**
