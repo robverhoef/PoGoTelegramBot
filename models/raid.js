@@ -15,8 +15,23 @@ module.exports = (sequelize, DataTypes) => {
     start3: DataTypes.DATE,
     reporterName: DataTypes.STRING,
     reporterId: DataTypes.INTEGER,
-    raidbossId: DataTypes.INTEGER
-  }, {tableName: 'raids'})
+    raidbossId: DataTypes.INTEGER,
+    shiny: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+      allowNull: true
+    },
+    accountsplayed: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+      allowNull: true
+    },
+    newaccounts: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+      allowNull: true
+    }
+  }, { tableName: 'raids' })
 
   Raid.associate = function (models) {
     models.Raid.belongsTo(models.Gym, {

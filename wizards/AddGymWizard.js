@@ -2,103 +2,145 @@
 // add gym wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
+const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function AddGymWizard (bot) {
   return new WizardScene('add-gym-wizard',
-    // Gym naam
+    // Step 0
+    // Gym name
     async (ctx) => {
+      await setLocale(ctx)
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
+      }
+
       ctx.session.newgym = {}
-      return ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Je wilt een nieuwe gym toevoegen.\n*Voer de naam in…*`))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_gym_welcome')}`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
+    // Step 1
     // Adres of x
     async (ctx) => {
-      console.info('gymname: ', ctx.update.message.from)
-      let gymname = ctx.update.message.text.trim()
-      let user = ctx.update.message.from
+      const gymname = ctx.update.message.text.trim()
+      const user = ctx.update.message.from
       // check if exists
-      let oldgyms = await models.Gym.findAll({
+      const oldgyms = await models.Gym.findAll({
         where: {
           gymname: gymname
         }
       })
       if (oldgyms.length > 0) {
-        return ctx.replyWithMarkdown(`Deze gym bestaat al…\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`)
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('gym_exists_warning')}`, Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
       ctx.session.newgym.reporterName = user.first_name
       ctx.session.newgym.reporterId = user.id
       ctx.session.newgym.gymname = gymname
-      console.info('session: ', ctx.session)
-      ctx.replyWithMarkdown('*Wat is het adres (straat en eventueel nummer)?*\nAls je deze niet weet, vul een *x* in…')
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('address_question')}`, Markup.removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
-    // Google maps of x
+    // Step 2
+    // Handle address
+    // Gym GPS location
     async (ctx) => {
-      let gymadres = ctx.update.message.text.trim()
+      const gymadres = ctx.update.message.text.trim()
       ctx.session.newgym.address = gymadres.toLowerCase() === 'x' ? null : gymadres
-      ctx.replyWithMarkdown(`Top!\n*Kan je een Google Maps link geven?* \n\n[Hulp bij het maken van een Google Maps link](https://dev.romeen.nl/pogo_googlemaps/)\n Als je deze link niet kunt geven, verstuur dan een letter *x*…`)
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_gym_loc_question')}`, Markup.keyboard([{ text: ctx.i18n.t('send_my_gps_location'), request_location: true }]).oneTime().resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
-    // Exraid vraag ja/nee, weet niet
+
+    // Step 3
+    // Handle gps location
+    // Google maps Link or x
     async (ctx) => {
-      let gmlink = ctx.update.message.text.trim()
-      gmlink = gmlink.toLowerCase() === 'x' ? null : gmlink
-      ctx.session.newgym.googleMapsLink = gmlink
-      if (gmlink !== null && gmlink.substr(0, 4) !== 'http') {
-        ctx.replyWithMarkdown(`Geen geldige link. Links starten met 'http'. \n*Probeer nog eens.*`)
-          .then(() => ctx.wizard.back())
+      if (ctx.update.message.location) {
+        ctx.session.newgym.lat = ctx.update.message.location.latitude
+        ctx.session.newgym.lon = ctx.update.message.location.longitude
+        ctx.session.newgym.googleMapsLink = 'https://www.google.com/maps/dir/?api=1&destination=' + ctx.session.newgym.lat + ',' + ctx.session.newgym.lon
+
+        ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
+          .resize().oneTime().extra())
+          .then(() => {
+            ctx.wizard.selectStep(4)
+            return ctx.wizard.steps[4](ctx)
+          })
+      } else {
+        const input = ctx.update.message.text
+        if (input.toLowerCase() !== 'x') {
+          const coords = input.split(',')
+          ctx.session.newgym.lat = coords[0].trim()
+          ctx.session.newgym.lon = coords[1].trim()
+          ctx.session.newgym.googleMapsLink = 'https://www.google.com/maps/dir/?api=1&destination=' + ctx.session.newgym.lat + ',' + ctx.session.newgym.lon
+          ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
+          // return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
+          //   .resize().oneTime().extra())
+          //   .then(() => {
+          ctx.wizard.selectStep(4)
+          return ctx.wizard.steps[4](ctx)
+          //  })
+        } else {
+          ctx.session.newgym.lat = null
+          ctx.session.newgym.lon = null
+        }
       }
-      ctx.replyWithMarkdown(`Okidoki…\nIs dit een kanshebber voor een ExRaid?`, Markup.inlineKeyboard([
-        Markup.callbackButton(`Ja`, 'yes'),
-        Markup.callbackButton(`Nee / Weet ik niet`, 'no')
-      ], {columns: 1}).extra())
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('gmlink_question')}`, Markup.removeKeyboard().extra())
         .then(() => ctx.wizard.next())
     },
-    // toon samenvatting & bevestiging
+    // Step 4
+    // Handle gm link
+    // Exraid question
     async (ctx) => {
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Klik op een knop*')
+      if (ctx.session.newgym.lat === null) {
+        let gmlink = ctx.update.message.text.trim()
+        gmlink = gmlink.toLowerCase() === 'x' ? null : gmlink
+        ctx.session.newgym.googleMapsLink = gmlink
+        if (gmlink !== null && gmlink.substr(0, 4) !== 'http') {
+          return ctx.replyWithMarkdown(`${ctx.i18n.t('invalid_link')}`)
+            .then(() => {
+
+            })
+        }
       }
-      let exraid = ctx.update.callback_query.data === 'yes' ? 1 : 0
+      ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
+      ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
+        .resize().oneTime().extra())
+        .then(() => ctx.wizard.next())
+    },
+    // Step 5
+    // Handle exraid
+    // Show overview & save conformation
+    async (ctx) => {
+      const exraid = ctx.session.exraidbtns.indexOf(ctx.update.message.text) === 0
       ctx.session.newgym.exRaidTrigger = exraid
-      return ctx.answerCbQuery('', undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNieuwe gym: *${ctx.session.newgym.gymname}*\nAdres: ${ctx.session.newgym.address === null ? 'Niet opgegeven' : ctx.session.newgym.address}\nKaart: ${ctx.session.newgym.googleMapsLink === null ? 'Niet opgegeven' : ctx.session.newgym.googleMapsLink}\nEX Raid kanshebber: ${ctx.session.newgym.exRaidTrigger === 1 ? 'Ja' : 'Nee / weet niet'}\n\n*Opslaan?*`, Markup.inlineKeyboard([
-          Markup.callbackButton(`Ja`, 'yes'),
-          Markup.callbackButton(`Nee`, 'no')
-        ], {columns: 1}).extra()))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      ctx.session.savebtns = [
+        ctx.i18n.t('yes'),
+        ctx.i18n.t('no')
+      ]
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('new_gym_almost_done_confirm')}: *${ctx.session.newgym.gymname}*\n${ctx.i18n.t('address')}: ${ctx.session.newgym.address === null ? ctx.i18n.t('no_input') : ctx.session.newgym.address}\n${ctx.i18n.t('map')}: ${ctx.session.newgym.googleMapsLink === null ? ctx.i18n.t('no_input') : ctx.session.newgym.googleMapsLink}\n${ctx.i18n.t('coordinates')}: ${(ctx.session.newgym.lat !== null && ctx.session.newgym.lon !== null ? ctx.session.newgym.lat + ' ' + ctx.session.newgym.lon : ctx.i18n.t('no_input'))}\n${ctx.i18n.t('exraid_candidate')}: ${ctx.session.newgym.exRaidTrigger === true ? ctx.i18n.t('yes') : ctx.i18n.t('no_dont_know')}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
+    // Step 6
     async (ctx) => {
       // save …or maybe not
-      if (!ctx.update.callback_query) {
-        ctx.replyWithMarkdown('Hier ging iets niet goed… *Klik op een knop*')
-      }
-      let savenow = ctx.update.callback_query.data === 'yes'
+      const savenow = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
       if (savenow) {
-        let gym = models.Gym.build(ctx.session.newgym)
+        const gym = models.Gym.build(ctx.session.newgym)
         try {
           await gym.save()
         } catch (error) {
           console.log('Whoops… saving new gym failed', error)
-          return ctx.answerCbQuery('', undefined, true)
-            .then(() => ctx.replyWithMarkdown(`Sorry, hier ging iets *niet* goed… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*`))
-            .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('Dankjewel!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       } else {
-        return ctx.answerCbQuery('', undefined, true)
-          .then(() => ctx.replyWithMarkdown('OK. *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
     })

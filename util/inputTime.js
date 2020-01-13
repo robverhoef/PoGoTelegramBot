@@ -7,15 +7,15 @@ moment.tz.setDefault('Europe/Amsterdam')
 * @param timein {string}
 */
 module.exports = (timein) => {
-  let thetime = timein.split(':')
+  const thetime = timein.split(':')
   if (thetime[0] === undefined || thetime[1] === undefined) {
     return false
   }
-  let hours = parseInt(thetime[0].trim())
+  const hours = parseInt(thetime[0].trim())
   if (hours < 0 || hours > 23) {
     return false
   }
-  let minutes = parseInt(thetime[1].trim())
+  const minutes = parseInt(thetime[1].trim())
   if (minutes < 0 || minutes > 59) {
     return false
   }

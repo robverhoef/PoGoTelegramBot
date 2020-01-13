@@ -15,7 +15,19 @@ module.exports = (sequelize, DataTypes) => {
     qualifier: DataTypes.STRING,
     region: DataTypes.STRING,
     reporterName: DataTypes.STRING,
-    reporterId: DataTypes.INTEGER
+    reporterId: DataTypes.INTEGER,
+    lat: {
+      type: DataTypes.DECIMAL,
+      defaultValue: null
+    },
+    lon: {
+      type: DataTypes.DECIMAL,
+      defaultValue: null
+    },
+    removed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
   }, {
     tableName: 'gyms'
   })

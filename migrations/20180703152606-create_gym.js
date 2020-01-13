@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('gyms', {
-      id: {type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey:true},
+      id: { type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
       address: Sequelize.STRING,
       exRaidTrigger: Sequelize.BOOLEAN,
       geo: Sequelize.STRING,
@@ -15,10 +15,10 @@ module.exports = {
       // Timestamps
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE
-    });
+    })
   },
 
   down: (queryInterface, Sequelize) => {
-      return queryInterface.dropTable('gyms');
+    return queryInterface.dropTable('gyms')
   }
-};
+}

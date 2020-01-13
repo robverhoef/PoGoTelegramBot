@@ -2,21 +2,23 @@
 // add gym wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const setLocale = require('../util/setLocale')
 
 var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
-    (ctx) => {
-      ctx.replyWithMarkdown(`Geef minstens 2 tekens van de gymnaam…`)
+    async (ctx) => {
+      await setLocale(ctx)
+      return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_intro'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
-        ctx.replyWithMarkdown(`Minimaal 2 tekens van de gymnaam… \n*Probeer het nog eens.* 🤨`)
-          .then(() => ctx.wizard.back())
+        ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
       } else {
         const candidates = await models.Gym.findAll({
           where: {
@@ -26,20 +28,24 @@ var FindGymWizard = function () {
           }
         })
         let out = ''
-        let l = candidates.length
+        const l = candidates.length
         for (let i = 0; i < l; i++) {
           out += `*${candidates[i].gymname}\n*`
           if (candidates[i].exRaidTrigger) {
-            out += `ExRaid Trigger\n`
+            out += `${ctx.i18n.t('exraid_candidate')}\n`
           }
           if (candidates[i].googleMapsLink) {
-            out += `[Kaart](${candidates[i].googleMapsLink})`
+            out += `[${ctx.i18n.t('map')}](${candidates[i].googleMapsLink})`
           } else {
-            out += `[Geen locatie beschikbaar]`
+            out += `[${ctx.i18n.t('no_input')}]`
           }
           out += '\n\n'
         }
-        ctx.replyWithMarkdown(`Ik heb ${l} gym${l === 1 ? '' : 's'} gevonden voor '${term}' 🤓\n\n${out}*Gebruik */start* als je nog een actie wilt uitvoeren. Of ga terug naar de groep.*`, {disable_web_page_preview: true})
+        ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_overview', {
+          out: out,
+          term: term,
+          l: l
+        }), { disable_web_page_preview: true })
           .then(() => ctx.scene.leave())
       }
     }

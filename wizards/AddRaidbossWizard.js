@@ -2,41 +2,52 @@
 // add raidboss wizard
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
-const {Markup} = require('telegraf')
-var models = require('../models')
+const { Markup } = require('telegraf')
+const models = require('../models')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
+const metaphone = require('metaphone')
+const adminCheck = require('../util/adminCheck')
+const setLocale = require('../util/setLocale')
 
 function AddRaidbossWizard (bot) {
   return new WizardScene('add-raidboss-wizard',
     // Step 0: Raidboss name request
     async (ctx) => {
-      ctx.session.newboss = {}
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
+      await setLocale(ctx)
+      const invalidAdmin = await adminCheck(ctx, bot)
+      if (invalidAdmin !== false) {
+        return invalidAdmin
       }
-      return ctx.replyWithMarkdown(`Je wilt een nieuwe raidboss toevoegen.\n*Voer de naam in…*`)
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      ctx.session.newboss = {}
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raidboss_intro')}`, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
 
     // Step 1: Handle raidboss name and ask for level
     async (ctx) => {
-      let bossname = ctx.update.message.text.trim()
+      const bossname = ctx.update.message.text.trim()
       ctx.session.newboss.name = bossname
       // lookup raidboss, prevent double bosses
-      let oldboss = await models.Raidboss.find({
+      const oldboss = await models.Raidboss.findOne({
         where: {
-          name: bossname
+          name: {
+            [Op.eq]: bossname
+          }
         }
       })
       if (oldboss !== null) {
-        return ctx.replyWithMarkdown('Deze raidboss bestaat al!\n\n*Wil je nog een actie uitvoeren? Klik dan hier op */start')
+        return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_exists'))
           .then(() => ctx.scene.leave())
       }
-      let btns = []
-      for (let i = 0; i < 5; i++) {
-        btns.push(Markup.callbackButton(i + 1, i + 1))
-      }
-      return ctx.replyWithMarkdown(`Welk level heeft ${bossname}?`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      const btns = ['1', '2', '3', '4', '5']
+      return ctx.replyWithMarkdown(`${ctx.i18n.t('raidboss_level_question', {
+        bossname: bossname
+      })}`, Markup.keyboard(btns)
+        .resize()
+        .oneTime()
+        .extra()
+      )
         .then(() => {
           return ctx.wizard.next()
         })
@@ -44,23 +55,26 @@ function AddRaidbossWizard (bot) {
 
     // Handle level, ask for recommended number of accounts
     (ctx) => {
-      ctx.session.newboss.level = ctx.update.callback_query.data
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
-      return ctx.replyWithMarkdown(`Wat is het aanbevolen aantal accounts voor ${ctx.session.newboss.name}?`)
+      ctx.session.newboss.level = parseInt(ctx.update.message.text.trim())
+      return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_recommended_accounts', {
+        bossname: ctx.session.newboss.name
+      }))
         .then(() => ctx.wizard.next())
     },
 
     // Handle recommended number of accounts
     async (ctx) => {
-      ctx.session.newboss.accounts = ctx.update.message.text.trim()
-      let btns = [
-        Markup.callbackButton('Ja', 'yes'),
-        Markup.callbackButton('Nee', 'no')
-      ]
-      ctx.replyWithMarkdown(`Raidboss: ${ctx.session.newboss.name}\nLevel: ${ctx.session.newboss.level}\nAanbevolen aantal accounts: ${ctx.session.newboss.accounts}\n\n*Opslaan?*`, Markup.inlineKeyboard(btns, {columns: 1}).removeKeyboard().extra())
+      ctx.session.newboss.accounts = parseInt(ctx.update.message.text.trim())
+      ctx.session.savebtns = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
+      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_question', {
+        bossname: ctx.session.newboss.name,
+        bosslevel: ctx.session.newboss.level,
+        numaccounts: ctx.session.newboss.accounts
+      }), Markup.keyboard(ctx.session.savebtns)
+        .oneTime()
+        .resize()
+        .extra()
+      )
         .then(() => {
           return ctx.wizard.next()
         })
@@ -68,33 +82,27 @@ function AddRaidbossWizard (bot) {
 
     // Handle save
     async (ctx) => {
-      if (ctx.update.callback_query.data === 'yes') {
-        let newboss = models.Raidboss.build({
+      const dosave = ctx.session.savebtns.indexOf(ctx.update.message.text) === 0
+      if (dosave) {
+        const newboss = models.Raidboss.build({
           name: ctx.session.newboss.name,
           level: ctx.session.newboss.level,
-          accounts: ctx.session.newboss.accounts
+          accounts: ctx.session.newboss.accounts,
+          metaphone: metaphone(ctx.session.newboss.name)
         })
+        console.log('new boss', newboss)
         try {
           await newboss.save()
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(`Hier ging iets *niet* goed tijdens het saven… Misschien toch maar eens opnieuw proberen.`)
+          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
             .then(() => ctx.scene.leave())
         }
       } else {
-        if (ctx.update.callback_query) {
-          ctx.answerCbQuery(null, undefined, true)
-          ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-        }
-        return ctx.replyWithMarkdown(`OK, de nieuwe raidboss wordt niet bewaard.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`)
+        return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_canceled'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
-      if (ctx.update.callback_query) {
-        ctx.answerCbQuery(null, undefined, true)
-        ctx.deleteMessage(ctx.update.callback_query.message.message_id)
-      }
-
-      return ctx.replyWithMarkdown('Dankjewel!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
+      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_finished'), Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
   )

@@ -3,20 +3,22 @@
 // ===================
 const WizardScene = require('telegraf/scenes/wizard')
 const moment = require('moment-timezone')
-const {Markup} = require('telegraf')
+const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
+const setLocale = require('../util/setLocale')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
 function ExitRaidWizard (bot) {
   return new WizardScene('exit-raid-wizard',
     async (ctx) => {
+      await setLocale(ctx)
       const user = ctx.from
       // ToDo: check for endtime
-      let raids = await models.Raid.findAll({
+      const raids = await models.Raid.findAll({
         where: {
           endtime: {
             [Op.gt]: moment().unix()
@@ -27,43 +29,42 @@ function ExitRaidWizard (bot) {
           {
             model: models.Raiduser,
             where: {
-              'uid': user.id
+              uid: user.id
             }
           }
         ]
       })
       if (raids.length === 0) {
-        ctx.replyWithMarkdown('Je doet nog niet mee met raids…\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
-          .then(() => {
-            return ctx.scene.leave()
-          })
+        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_not_participating'), Markup.removeKeyboard())
+          .then(() => ctx.scene.leave())
       } else {
-        let btns = []
+        ctx.session.raidbtns = []
         ctx.session.gymnames = {}
         for (var a = 0; a < raids.length; a++) {
           ctx.session.gymnames[raids[a].id] = raids[a].Gym.gymname
 
-          let strttm = moment.unix(raids[a].start1).format('H:mm')
+          const strttm = moment.unix(raids[a].start1).format('H:mm')
           // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
-          btns.push(Markup.callbackButton(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id))
+          ctx.session.raidbtns.push([`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id])
         }
-        btns.push(Markup.callbackButton('Mijn raid staat er niet bij…', 0))
-        return ctx.replyWithMarkdown('Kies een raid…', Markup.inlineKeyboard(btns, {columns: 1}).extra())
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        ctx.session.raidbtns.push([ctx.i18n.t('exit_raid_not_listed'), 0])
+        console.log(ctx.session.raidbtns.map(el => el[0]))
+        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_select_raid'), Markup.keyboard(ctx.session.raidbtns.map(el => el[0])).oneTime().resize().extra())
           .then(() => ctx.wizard.next())
       }
     },
     async (ctx) => {
       const user = ctx.from
-      if (!ctx.update.callback_query) {
-        // console.log('afhandeling raidkeuze, geen callbackquery!')
-        ctx.replyWithMarkdown('Hier ging iets niet goed…\n*Je moet op een knop klikken 👆. Of */cancel* gebruiken om mij te resetten.*')
+      let selectedraid = 0
+      for (let i = 0; i < ctx.session.raidbtns.length; i++) {
+        if (ctx.session.raidbtns[i][0] === ctx.update.message.text) {
+          selectedraid = ctx.session.raidbtns[i][1]
+          break
+        }
       }
-      let selectedraid = parseInt(ctx.update.callback_query.data)
+
       if (selectedraid === 0) {
-        return ctx.replyWithMarkdown('OK.\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start')
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
           .then(() => {
             return ctx.scene.leave()
           })
@@ -73,10 +74,10 @@ function ExitRaidWizard (bot) {
           where: {
             [Op.and]: [
               {
-                'uid': user.id
+                uid: user.id
               },
               {
-                'raidId': selectedraid
+                raidId: selectedraid
               }
             ]
           }
@@ -84,17 +85,23 @@ function ExitRaidWizard (bot) {
       } catch (error) {
         console.log('Error removing user from raid', error)
       }
-      let out = await listRaids(`[${user.first_name}](tg://user?id=${user.id}) meldde zich af voor raid bij ${ctx.session.gymnames[selectedraid]}\n\n`)
+      // save users langugage
+      const oldlocale = ctx.i18n.locale()
+      // reason should always be in default locale
+      ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+      const reason = ctx.i18n.t('exit_raid_list_message', {
+        user: user,
+        gymname: ctx.session.gymnames[selectedraid]
+      })
+      // restore user locale
+      ctx.i18n.locale(oldlocale)
+      const out = await listRaids(reason, ctx)
       if (out === null) {
-        ctx.answerCbQuery(null, undefined, true)
-          .then(() => ctx.replyWithMarkdown(`Mmmm, geen raid te vinden`))
-          .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+        ctx.replyWithMarkdown(ctx.i18n.t('no_raids_found'), Markup.removeKeyboard().extra())
           .then(() => ctx.scene.leave())
       }
-      bot.telegram.sendMessage(process.env.GROUP_ID, out, {parse_mode: 'Markdown', disable_web_page_preview: true})
-      ctx.answerCbQuery(null, undefined, true)
-        .then(() => ctx.replyWithMarkdown(`Klaar!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start`))
-        .then(() => ctx.deleteMessage(ctx.update.callback_query.message.message_id))
+      bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+      return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
         .then(() => ctx.scene.leave())
     }
   )

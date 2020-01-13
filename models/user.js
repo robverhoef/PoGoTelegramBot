@@ -17,8 +17,15 @@ module.exports = (sequelize, DataTypes) => {
     tGroupID: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN
+    },
+    locale: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
-  }, {tableName: 'users'})
+  }, { tableName: 'users' })
   User.associate = function (models) {
     // associations can be defined here
   }

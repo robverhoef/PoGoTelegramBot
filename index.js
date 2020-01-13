@@ -1,42 +1,49 @@
 require('dotenv').config()
-// const fs = require('fs')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const moment = require('moment-timezone')
 const Telegraf = require('telegraf')
-const {Markup} = require('telegraf')
-// const MySQLSession = require('telegraf-session-mysql')
+const { Markup } = require('telegraf')
 const Stage = require('telegraf/stage')
-// const {session} = require('telegraf')
-var models = require('./models')
+const TelegrafI18n = require('telegraf-i18n')
+const path = require('path')
+const models = require('./models')
+require('./locales.js')
+const setLocale = require('./util/setLocale')
 
-// var env = process.env.NODE_ENV || 'development'
-// var sessconfig = require(`${__dirname}/config/config.json`)[env]
-// const session = new MySQLSession({
-//   host: sessconfig.host,
-//   user: sessconfig.username,
-//   password: sessconfig.password,
-//   database: sessconfig.database
-// })
-
+const listRaids = require('./util/listRaids')
 // =====================
 // Let's go!
 // =====================
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
+bot.catch((err) => {
+  console.log('Ooops', err)
+})
+
+bot.use(Telegraf.session())
+const i18n = new TelegrafI18n({
+  defaultLanguage: 'nl',
+  useSession: true,
+  sessionName: 'session',
+  allowMissing: true,
+  directory: path.resolve(__dirname, 'locales')
+})
+bot.use(i18n.middleware())
 // Set the default timezone.
 // ToDo: this should could come from env
 moment.tz.setDefault('Europe/Amsterdam')
-
 /**
 * This will stop the conversation immeditaly
 * @param context
 */
-function cancelConversation (ctx) {
+async function cancelConversation (ctx) {
   // Since something might be failing… reset session
   ctx.session = {}
+  // session cleared; resetting locale
+  await setLocale(ctx)
   return ctx.scene.leave()
-    .then(() => ctx.replyWithMarkdown('Ok.\n *Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start'))
+    .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra()))
 }
 
 // Setup for all wizards
@@ -80,6 +87,34 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const ExraidWizard = require('./wizards/ExraidWizard')
+const exraidWizard = ExraidWizard(bot)
+exraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const AddNotificationWizard = require('./wizards/NotificationWizard')
+const addNotificationWizard = AddNotificationWizard(bot)
+addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const LocaleWizard = require('./wizards/LocaleWizard')
+const localeWizard = LocaleWizard(bot)
+localeWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const UserDelayedWizard = require('./wizards/UserDelayedWizard')
+const userDelayedWizard = UserDelayedWizard(bot)
+userDelayedWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const FieldresearchWizard = require('./wizards/FieldresearchWizard')
+const fieldresearchWizard = FieldresearchWizard(bot)
+fieldresearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const AdminFieldResearchWizard = require('./wizards/AdminFieldResearchWizard')
+const adminFieldResearchWizard = AdminFieldResearchWizard(bot)
+adminFieldResearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const AdminStopsWizard = require('./wizards/AdminStopsWizard')
+const adminStopsWizard = AdminStopsWizard(bot)
+adminStopsWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -90,7 +125,14 @@ const stage = new Stage([
   editGymWizard,
   addRaidbossWizard,
   editRaidbossWizard,
-  statsWizard
+  statsWizard,
+  exraidWizard,
+  addNotificationWizard,
+  localeWizard,
+  userDelayedWizard,
+  fieldresearchWizard,
+  adminFieldResearchWizard,
+  adminStopsWizard
 ])
 
 /**
@@ -98,19 +140,15 @@ const stage = new Stage([
 * @param context
 */
 function showHelp (ctx) {
-  bot.telegram.getChat(process.env.GROUP_ID)
-    .then((ch) => {
-      console.log('showHelp', ch, 'pinned message', ch.pinned_message)
-    })
-    .then(() => ctx.reply('Doet de bot vaag? Heb je een foutje gemaakt?\nJe kunt een chat met de bot altijd afbreken met het \'/cancel\' commando.'))
+  setLocale(ctx)
+  ctx.reply(ctx.i18n.t('helpmessage'))
 }
-
-// bot.use(session.middleware())
-bot.use(Telegraf.session())
 bot.use(stage.middleware())
 
 async function showMainMenu (ctx, user) {
-  let raids = await models.Raid.findAll({
+  ctx.session = {}
+  ctx.scene.leave()
+  const raids = await models.Raid.findAll({
     where: {
       endtime: {
         [Op.gt]: moment().unix()
@@ -121,91 +159,140 @@ async function showMainMenu (ctx, user) {
       {
         model: models.Raiduser,
         where: {
-          'uid': user.id
+          uid: user.id
         }
       }
     ]
   })
-
-  let btns = []
-  btns.push(Markup.callbackButton(`Meedoen met een raid`, 'joinRaid'))
+  const btns = []
+  btns.push(ctx.i18n.t('btn_join_raid'))
   if (raids.length > 0) {
-    btns.push(Markup.callbackButton(`Afmelden bij een raid`, 'exitRaid'))
+    btns.push(ctx.i18n.t('btn_exit_raid'))
+    btns.push(ctx.i18n.t('btn_user_delayed'))
   }
-  btns.push(Markup.callbackButton(`Een nieuwe raid melden`, 'addRaid'))
-  btns.push(Markup.callbackButton(`Een raid wijzigen`, 'editRaid'))
-  btns.push(Markup.callbackButton(`Vind een gymlocatie`, 'findGym'))
+  btns.push(ctx.i18n.t('btn_add_raid'))
+  btns.push(ctx.i18n.t('btn_edit_raid'))
+  btns.push(ctx.i18n.t('btn_field_researches'))
+  btns.push(ctx.i18n.t('btn_find_gym'))
+  btns.push(ctx.i18n.t('btn_notifications'))
+  btns.push(ctx.i18n.t('btn_stats'))
+  btns.push(ctx.i18n.t('btn_exraids'))
 
-  // admin only:
+  // group admins:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
-
+  // or marked admin from database
+  const dbAdmin = await models.User.findOne({
+    where: {
+      [Op.and]: [
+        {
+          tId: {
+            [Op.eq]: user.id
+          }
+        },
+        {
+          isAdmin: {
+            [Op.eq]: true
+          }
+        }
+      ]
+    }
+  })
   for (let a = 0; a < admins.length; a++) {
-    if (admins[a].user.id === user.id) {
-      btns.push(Markup.callbackButton(`Een gym toevoegen`, 'addGym'))
-      btns.push(Markup.callbackButton(`Een gym wijzigen`, 'editGym'))
-      btns.push(Markup.callbackButton(`Een raidboss toevoegen`, 'addBoss'))
-      btns.push(Markup.callbackButton(`Een raidboss wijzigen`, 'editBoss'))
+    if (admins[a].user.id === user.id || dbAdmin !== null) {
+      btns.push(ctx.i18n.t('btn_manage_fieldresearches'))
+      btns.push(ctx.i18n.t('btn_add_gym'))
+      btns.push(ctx.i18n.t('btn_edit_gym'))
+      btns.push(ctx.i18n.t('btn_admin_stops'))
+      btns.push(ctx.i18n.t('btn_add_boss'))
+      btns.push(ctx.i18n.t('btn_edit_boss'))
       break
     }
   }
 
-  btns.push(Markup.callbackButton(`Statistieken`, 'stats'))
+  // for testing only
+  // btns.push('Trigger raidlist')
 
-  return ctx.replyWithMarkdown(`Hallo ${user.first_name}.\nWat wil je doen?`, Markup.inlineKeyboard(
-    btns, {columns: 1}).extra())
+  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: user }), Markup.keyboard(
+    btns).oneTime().resize().extra())
 }
 
-// This runs after the user has 'start'ed from an inline query in the group or /start in private mode
+// This runs after the user has started from an inline query in the group or /start in private mode
 bot.command('/start', async (ctx) => {
   // check if start is not directly coming from the group
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
     return
   }
-  let user = ctx.update.message.from
+
+  const user = ctx.update.message.from
   // validate the user
-  var fuser = await models.User.find({
+  var fuser = await models.User.findOne({
     where: {
       tId: user.id
     }
   })
   // if (ctx.message.text === '/start help_fromgroup') {
   if (fuser !== null) {
+    ctx.locale = fuser.locale
+    ctx.i18n.locale(fuser.locale)
     return showMainMenu(ctx, user)
   } else {
-    return ctx.replyWithMarkdown(`Ik help je graag verder als je via de Raid groep komt… 🤔`)
+    // ToDo: check if user language is available
+    ctx.i18n.locale(ctx.from.language_code)
+    return ctx.replyWithMarkdown(ctx.i18n.t('help_from_group'))
   }
 })
 
 // set cancel command here too, not only in wizards
 bot.command('cancel', (ctx) => cancelConversation(ctx))
-bot.action('joinRaid', Stage.enter('join-raid-wizard'))
-bot.action('exitRaid', Stage.enter('exit-raid-wizard'))
-bot.action('addRaid', Stage.enter('add-raid-wizard'))
-bot.action('editRaid', Stage.enter('edit-raid-wizard'))
-bot.action('findGym', Stage.enter('find-gym-wizard'))
-bot.action('addGym', Stage.enter('add-gym-wizard'))
-bot.action('editGym', Stage.enter('edit-gym-wizard'))
-bot.action('addBoss', Stage.enter('add-raidboss-wizard'))
-bot.action('editBoss', Stage.enter('edit-raidboss-wizard'))
-bot.action('stats', Stage.enter('stats-wizard'))
+bot.command('lang', Stage.enter('locale-wizard'))
+// iterate over languages
+for (var key in i18n.repository) {
+  bot.hears(i18n.repository[key].btn_join_raid.call(), Stage.enter('join-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_exit_raid.call(), Stage.enter('exit-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_add_raid.call(), Stage.enter('add-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_edit_raid.call(), Stage.enter('edit-raid-wizard'))
+  bot.hears(i18n.repository[key].btn_find_gym.call(), Stage.enter('find-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_field_researches.call(), Stage.enter('fieldresearch-wizard'))
+  bot.hears(i18n.repository[key].btn_stats.call(), Stage.enter('stats-wizard'))
+
+  bot.hears(i18n.repository[key].btn_exraids.call(), Stage.enter('exraid-wizard'))
+
+  bot.hears(i18n.repository[key].btn_notifications.call(), Stage.enter('notification-wizard'))
+  bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
+  // Admin
+  bot.hears(i18n.repository[key].btn_manage_fieldresearches.call(), Stage.enter('admin-field-research-wizard'))
+  bot.hears(i18n.repository[key].btn_add_gym.call(), Stage.enter('add-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_edit_gym.call(), Stage.enter('edit-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_add_boss.call(), Stage.enter('add-raidboss-wizard'))
+  bot.hears(i18n.repository[key].btn_edit_boss.call(), Stage.enter('edit-raidboss-wizard'))
+  bot.hears(i18n.repository[key].btn_admin_stops.call(), Stage.enter('admin-stops-wizard'))
+
+  bot.hears('Trigger raidlist', async (ctx) => {
+    console.log('RAIDLIST TRIGGERED')
+    const out = await listRaids('Testing', ctx)
+    console.log(out)
+    bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+  })
+}
 
 /**
 * Check if valid user and show START button to switch to private mode
 */
 bot.on('inline_query', async ctx => {
   // console.log('inline_query', ctx.update)
-  let user = await models.User.find({
+  const user = await models.User.findOne({
     where: {
       [Op.and]: [
-        {tId: ctx.inlineQuery.from.id},
-        {tGroupID: process.env.GROUP_ID.toString()}
+        { tId: ctx.inlineQuery.from.id },
+        { tGroupID: process.env.GROUP_ID.toString() }
       ]
     }
   })
   if (!user) {
-    console.log(`NIET OK, ik ken ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name} niet`)
+    console.log(`NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name}`)
     return
   }
+
   // if (ctx.inlineQuery.query === 'actie') {
   return ctx.answerInlineQuery([],
     {
@@ -215,35 +302,29 @@ bot.on('inline_query', async ctx => {
   // }
 })
 
-/**
-* Sillyness example ;-)
-*/
-bot.hears(/^(dankjewel|dank|bedankt|thanx|thx)/i, (ctx) => {
-  return ctx.replyWithMarkdown('Graag gedaan!')
-})
-
 // ================
 // authorize new group user
 // ================
 bot.hears(/\/hi/i, async (ctx) => {
   let chattitle = ''
   const me = await ctx.telegram.getMe()
+  setLocale(ctx)
   if (ctx.update.message.chat === undefined) {
-    return ctx.replyWithMarkdown(`Nee joh… doe dit vanuit de groep!`)
+    return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_group_warning'))
   }
-  console.log('Iemand zei hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
-  let olduser = await models.User.find({
+  console.log('Somebody said hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
+  const olduser = await models.User.findOne({
     where: {
       [Op.and]: [
-        {tGroupID: process.env.GROUP_ID.toString()},
-        {tId: ctx.update.message.from.id}
+        { tGroupID: process.env.GROUP_ID.toString() },
+        { tId: ctx.update.message.from.id }
       ]
     }
   })
   // console.log('olduser', olduser)
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(olduser.tId, `Dag ${ctx.from.first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit *${chattitle}* met \n*@${me.username} actie*`, {parse_mode: 'Markdown'})
+    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
     return
   }
   // console.log(
@@ -253,7 +334,7 @@ bot.hears(/\/hi/i, async (ctx) => {
   //  process.env.GROUP_ID, ctx.update.message.chat.id.toString() === process.env.GROUP_ID
   // )
   if (ctx.update.message.chat.id.toString() === process.env.GROUP_ID) {
-    let newuser = models.User.build({
+    const newuser = models.User.build({
       tId: ctx.update.message.from.id,
       tUsername: ctx.update.message.from.first_name,
       tGroupID: process.env.GROUP_ID.toString()
@@ -267,12 +348,12 @@ bot.hears(/\/hi/i, async (ctx) => {
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      await bot.telegram.sendMessage(newuser.tId, `Dag ${ctx.from.first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*`, {parse_mode: 'Markdown'})
+      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
   } else {
-    return ctx.replyWithMarkdown(`Uhm… ik ken je niet, sorry. Meldt je bij mij aan in je groep met \n\n*/hi@${me.username}*\n\nDan stuur ik je instructies.`)
+    return ctx.replyWithMarkdown(ctx.i18n.t('user_unknown_warning', { me: me }))
   }
 })
 
@@ -301,11 +382,22 @@ bot.on('new_chat_members', async (ctx) => {
     console.log('A bot tried to become a group member…')
     return
   }
+  // Find the user's language
+  const lang = newusr.language_code
+  let userlang = process.env.LOCALE
+  const rawlocales = process.env.LOCALES
+  for (const rawlocale of rawlocales) {
+    if (lang === rawlocale[0]) {
+      userlang = lang
+      break
+    }
+  }
   if (ctx.message.chat.id.toString() === process.env.GROUP_ID) {
-    let newuser = models.User.build({
+    const newuser = models.User.build({
       tId: newusr.id,
       tUsername: newusr.first_name,
-      tGroupID: process.env.GROUP_ID.toString()
+      tGroupID: process.env.GROUP_ID.toString(),
+      locale: userlang
     })
     try {
       await newuser.save()
@@ -340,7 +432,8 @@ bot.on('left_chat_member', async (ctx) => {
 * Convenience method, just for checking
 */
 bot.hears(/\/raids/i, async (ctx) => {
-  let raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
+  setLocale(ctx)
+  const raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
       include: [
         models.Gym,
@@ -348,38 +441,40 @@ bot.hears(/\/raids/i, async (ctx) => {
       ],
       where: {
         endtime: {
-          [Op.gt]: moment().add(2, 'hours').format('YYYY-MM-DD HH:mm:ss')
+          [Op.gt]: moment().unix()
         }
-      }
+      },
+      order: [
+        ['start1', 'ASC']
+      ]
     }))
   let out = ''
   if (raids.length === 0) {
-    ctx.reply('Geen raids gevonden…')
+    ctx.reply(ctx.i18n.t('no_raids_found'))
     return
   }
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment(new Date(raids[a].endtime))
-    out += `Tot: ${endtime.format('H:mm')} `
+    out += `${ctx.i18n.t('until')}: ${endtime.format('H:mm')} `
     out += `* ${raids[a].target}*\n`
     out += `${raids[a].Gym.gymname}\n`
     if (raids[a].Gym.googleMapsLink) {
-      out += `[Kaart](${raids[a].Gym.googleMapsLink})\n`
+      out += `[${ctx.i18n.t('map')}](${raids[a].Gym.googleMapsLink})\n`
     }
     const strtime = moment(raids[a].start1)
-    out += `Start: ${strtime.format('H:mm')} `
+    out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
     let userlist = ''
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       accounter += raids[a].Raidusers[b].accounts
       userlist += `${raids[a].Raidusers[b].username} `
     }
-    out += `Aantal: ${accounter}\n`
-    out += `Deelnemers: ${userlist}`
+    out += `${ctx.i18n.t('number')}: ${accounter}\n`
+    out += `${ctx.i18n.t('participants')}: ${userlist}`
     out += '\n\n'
   }
-  return ctx.replyWithMarkdown(out, {disable_web_page_preview: true})
+  return ctx.replyWithMarkdown(out, { disable_web_page_preview: true })
 })
-
 // Let's fire up!
 bot.telegram.setWebhook(process.env.BOT_URL)
   .then((data) => {
