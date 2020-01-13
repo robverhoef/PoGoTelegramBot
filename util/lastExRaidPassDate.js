@@ -21,7 +21,11 @@ module.exports = async () => {
     await axios.get('https://www.p337.info/pokemongo/pages/ex-invites/', { responseType: 'text' }).then(response => {
       const regex = /pokemon = {"response":([^]*)};/g
       const match = regex.exec(response.data)
-      const list = JSON.parse(match[1])
+
+      const listJson = match[1].trim()
+      const resultJson = listJson.endsWith('},\n]') ? listJson.replace('},\n]', '}]') : listJson
+
+      const list = JSON.parse(resultJson)
 
       lastExwaveParseCheck = moment().unix()
 
