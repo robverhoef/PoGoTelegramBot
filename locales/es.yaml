@@ -24,8 +24,8 @@ no_dont_know: "No / No lo se"
 no_input: "Ninguna entrada"
 number: "número"
 ok: "OK"
-participants: "Participantes Localmente ⬇"
-participants_remotely: "Participantes Remote 🚀"
+participants: "Localmente ⬇"
+participants_remotely: "Remote 🚀"
 select_a_gym: "Elige un gimnasio."
 send_my_gps_location: "Enviar mi ubicación de GPS"
 problem_while_saving: "Lo siento, algo *no* salió bien durante guardar… ¿Quieres volver  a intentar con /start?\n*O puedes volver al grupo…*"
@@ -108,7 +108,7 @@ add_raid_0_45_min_error: "Los minutos ingresados tienen que estar entre 0 y ${bo
 btn_gym_find_location: "Busca gimnasios a mis alrededores…"
 remote_raid_question: "Participarás de forma Remote?"
 remote_raid_confirm: "Sí, de distancia! 🚀"
-local_raid_confirm: "No, cerca del gym ⬇" 
+local_raid_confirm: "No, cerca del gym ⬇"
 maximum_remote_raid_reached: "Que pena, el límite de cantidad de usuarios remote se ha alcanzado. \n\nEl numero límite es: "
 try_again_remote_limit: "\nA lo mejor lo puedes volver a intentar con una cantidad menor, pulsa aqui en /start...."
 
@@ -411,6 +411,7 @@ exraid_registered_without_pass: "OK, je staat *voorlopig* geregistreerd. \nAnder
 exraid_selected_raid: "Selecteer een Ex R aid om verder te gaan. Of kies voor Toevoegen of Afsluiten"
 exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan EX Raid bij ${gymname}"
 exraid_user_left: "OK, je doet niet meer mee met deze Ex Raid.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
+exraids_today: "EX RAIDS today"
 
 # Months
 jan: "Enero"

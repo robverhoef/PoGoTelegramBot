@@ -379,94 +379,95 @@ function AddRaidWizard (bot) {
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
-    //step 10
-      async (ctx) => {
-        //save number of accounts to session
-        ctx.session.accounts = parseInt(ctx.update.message.text)
-        ctx.session.remoteOptions = [ctx.i18n.t('remote_raid_confirm'), ctx.i18n.t('local_raid_confirm')]
-        return ctx.replyWithMarkdown(`*${ctx.i18n.t('remote_raid_question')}*\n\n*${ctx.i18n.t('covid19_disclaimer')}*`, Markup.keyboard(ctx.session.remoteOptions)
-          .resize().oneTime().extra())
-          .then(() => ctx.wizard.next())
-        },
-        //step 11
-      async (ctx) => {
-        const remoteraidanswer = ctx.update.message.text
-        console.log(remoteraidanswer)
-        ctx.session.newraid.remote = false
-        if (remoteraidanswer === ctx.i18n.t('remote_raid_confirm')){
-          ctx.session.newraid.remote = true
-          console.log(ctx.session.newraid.remote)
-                if ( ctx.session.accounts > parseInt(process.env.Thresold_Remote_Users) && remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
-                    return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.Thresold_Remote_Users}. ${ctx.i18n.t('try_again_remote_limit')}`)
-                      .then(() => ctx.scene.leave())
-                }}   
-        if  (remoteraidanswer !== ctx.i18n.t('remote_raid_confirm') && remoteraidanswer !== ctx.i18n.t('local_raid_confirm')) {
-          console.log('test nrw'),  console.log(ctx.i18n.t('remote_raid_confirm'))
-          ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
-          .then(() => {
-            return
-              })}
-        else {
-      const accounts = ctx.session.accounts 
-      const user = ctx.from
-      // Check already registered? If so; update else store new
-      const raiduser = await models.Raiduser.findOne({
-        where: {
-          [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }]
-        }
-      })
-      if (raiduser) {
-        // update
-        try {
-          await models.Raiduser.update(
-            { accounts: accounts },
-            { where: { [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }] } }
-          )
-        } catch (error) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
-            .then(() => ctx.scene.leave())
-        }
-      } else {
-        // new raid user
-        const raiduser = models.Raiduser.build({
-          raidId: ctx.session.savedraid.id,
-          username: user.first_name,
-          uid: user.id,
-          accounts: accounts,
-          remote: ctx.session.newraid.remote
-        })
-        try {
-          await raiduser.save()
-        } catch (error) {
-          console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+    // step 10
+    async (ctx) => {
+      // save number of accounts to session
+      ctx.session.accounts = parseInt(ctx.update.message.text)
+      ctx.session.remoteOptions = [ctx.i18n.t('remote_raid_confirm'), ctx.i18n.t('local_raid_confirm')]
+      return ctx.replyWithMarkdown(`*${ctx.i18n.t('remote_raid_question')}*\n\n*${ctx.i18n.t('covid19_disclaimer')}*`, Markup.keyboard(ctx.session.remoteOptions)
+        .resize().oneTime().extra())
+        .then(() => ctx.wizard.next())
+    },
+    // step 11
+    async (ctx) => {
+      const remoteraidanswer = ctx.update.message.text
+      console.log(remoteraidanswer)
+      ctx.session.newraid.remote = false
+      if (remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
+        ctx.session.newraid.remote = true
+        console.log(ctx.session.newraid.remote)
+        if (ctx.session.accounts > parseInt(process.env.THRESHOLD_REMOTE_USERS) && remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
+          return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.THRESHOLD_REMOTE_USERS}. ${ctx.i18n.t('try_again_remote_limit')}`)
             .then(() => ctx.scene.leave())
         }
       }
-      const oldlang = ctx.i18n.locale()
-      ctx.i18n.locale(process.env.DEFAULT_LOCALE)
-      const reason = ctx.i18n.t('raid_user_added_list', {
-        user: user,
-        gymname: ctx.session.newraid.gymname
-      })
-      ctx.i18n.locale(oldlang)
-      const out = await listRaids(reason, ctx)
-      if (out === null) {
-        ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
+      if (remoteraidanswer !== ctx.i18n.t('remote_raid_confirm') && remoteraidanswer !== ctx.i18n.t('local_raid_confirm')) {
+        console.log('test nrw', ctx.i18n.t('remote_raid_confirm'))
+        ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
+          .then(() => {
+
+          })
+      } else {
+        const accounts = ctx.session.accounts
+        const user = ctx.from
+        // Check already registered? If so; update else store new
+        const raiduser = await models.Raiduser.findOne({
+          where: {
+            [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }]
+          }
+        })
+        if (raiduser) {
+        // update
+          try {
+            await models.Raiduser.update(
+              { accounts: accounts },
+              { where: { [Op.and]: [{ uid: user.id }, { raidId: ctx.session.savedraid.id }] } }
+            )
+          } catch (error) {
+            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+              .then(() => ctx.scene.leave())
+          }
+        } else {
+        // new raid user
+          const raiduser = models.Raiduser.build({
+            raidId: ctx.session.savedraid.id,
+            username: user.first_name,
+            uid: user.id,
+            accounts: accounts,
+            remote: ctx.session.newraid.remote
+          })
+          try {
+            await raiduser.save()
+          } catch (error) {
+            console.log('Woops… registering raiduser failed', error)
+            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+              .then(() => ctx.scene.leave())
+          }
+        }
+        const oldlang = ctx.i18n.locale()
+        ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+        const reason = ctx.i18n.t('raid_user_added_list', {
+          user: user,
+          gymname: ctx.session.newraid.gymname
+        })
+        ctx.i18n.locale(oldlang)
+        const out = await listRaids(reason, ctx)
+        if (out === null) {
+          ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
+            .then(() => ctx.scene.leave())
+        }
+        return ctx.replyWithMarkdown(ctx.i18n.t('raid_add_finish', {
+          gymname: ctx.session.newraid.gymname,
+          starttm: moment.unix(ctx.session.newraid.start1).format('HH:mm')
+        }), Markup.removeKeyboard().extra())
+
+          .then(async () => {
+            bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+          })
           .then(() => ctx.scene.leave())
       }
-      return ctx.replyWithMarkdown(ctx.i18n.t('raid_add_finish', {
-        gymname: ctx.session.newraid.gymname,
-        starttm: moment.unix(ctx.session.newraid.start1).format('HH:mm')
-      }), Markup.removeKeyboard().extra())
-
-        .then(async () => {
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-        })
-        .then(() => ctx.scene.leave())
-    }
-      })
-  }
+    })
+}
 async function sendGyms (ctx, bot) {
   const gymId = ctx.session.newraid.gymId
   const gymname = ctx.session.newraid.gymname

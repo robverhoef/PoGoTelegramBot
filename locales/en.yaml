@@ -24,8 +24,8 @@ no_dont_know: "No / I don't know"
 no_input: "Nothing specified"
 number: "Number"
 ok: "OK"
-participants: "Participants Local ⬇"
-participants_remotely: "Participants Remote 🚀"
+participants: "Local ⬇"
+participants_remotely: "Remote 🚀"
 select_a_gym: "Choose a gym."
 send_my_gps_location: "Send my GPS location"
 problem_while_saving: "Sorry, something was *went wrong* during storage ... Would you like to try again with /start?\n*Or you can also return to the group…*"
@@ -108,7 +108,7 @@ add_raid_0_45_min_error: "Minutes input must be between 0 and ${bosstime}. \n*Tr
 btn_gym_find_location: "Look for gyms in my neighborhood…"
 remote_raid_question: "Are you joining Remotely?"
 remote_raid_confirm: "Yes, remotely! 🚀"
-local_raid_confirm: "No, near the gym ⬇" 
+local_raid_confirm: "No, near the gym ⬇"
 maximum_remote_raid_reached: "Unfortunately, the maximum amount of remote users for this raid has been reached.\n The maximum number is: "
 try_again_remote_limit: "\nPerhaps try again with a lower amount, press /start...."
 
@@ -410,6 +410,7 @@ exraid_registered_without_pass: "OK, you are registered *provisionally*. \nOther
 exraid_selected_raid: "Select an Ex Raid to continue. Or select Add or Done"
 exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) added to Ex Raid at ${gymname}"
 exraid_user_left: "OK, you have left this Ex Raid.\n\n*You can now return to the group. Do you want to take another action? Click */start"
+exraids_today: "EX RAIDS today"
 
 # months
 jan: "January"
