@@ -98,8 +98,8 @@ function JoinRaidWizard (bot) {
       // some people manage to enter a NaN… so: || 1
       ctx.session.accounts = parseInt(ctx.update.message.text, 10) || 1
       ctx.session.remote = false
-      console.log(ctx.session.remote)
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
+      let remotecurrentusers = 0
       if (ctx.session.remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
         ctx.session.remote = true
 
@@ -108,10 +108,8 @@ function JoinRaidWizard (bot) {
           type: models.sequelize.QueryTypes.SELECT
         })
         remotecurrentusers = remoteuserscount.length > 0 ? parseInt(remoteuserscount[0].remotes, 10) : 0
-
         remoteraidusers = remotecurrentusers + parseInt(ctx.session.accounts, 10)
       }
-      console.log(remoteraidusers, ' > ', parseInt(process.env.THRESHOLD_REMOTE_USERS, 10), ': ', (remoteraidusers > parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)))
       if (remoteraidusers > parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)) {
         return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.THRESHOLD_REMOTE_USERS}\n\n${ctx.i18n.t('current_number_remote_users')} ${remotecurrentusers} ${ctx.i18n.t('try_again_remote_limit')}`)
           .then(() => ctx.scene.leave())
