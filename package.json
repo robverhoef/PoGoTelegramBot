@@ -28,7 +28,7 @@
     "moment-timezone": "^0.5.28",
     "mysql2": "^1.7.0",
     "sequelize": "^5.21.6",
-    "telegraf": "^3.37.0",
+    "telegraf": "^3.38.0",
     "telegraf-i18n": "^6.6.0",
     "telegraf-session-mysql": "^5.1.0"
   },
@@ -41,7 +41,7 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "forever": "^1.0.1",
+    "forever": "^2.0.0",
     "mocha": "^6.2.3",
     "sequelize-cli": "^5.5.1"
   }
