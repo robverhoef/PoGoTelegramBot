@@ -51,17 +51,22 @@ module.exports = async (reason, ctx) => {
     const strtime = moment.unix(raids[a].start1)
     out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
     let userlist = ''
+    let remoteuserlist = ''
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       accounter += raids[a].Raidusers[b].accounts
       if (raids[a].Raidusers[b].delayed != null) {
         userlist += `[<⏰ ${raids[a].Raidusers[b].delayed} ${raids[a].Raidusers[b].username}>](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
-      } else {
+      } else if (raids[a].Raidusers[b].remote == true) {
+        remoteuserlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+      }
+      else {
         userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
       }
     }
     out += `${ctx.i18n.t('number')}: ${accounter}\n`
-    out += `${ctx.i18n.t('participants')}: ${userlist}`
+    out += `${ctx.i18n.t('participants')}: ${userlist}\n`
+    out += `${ctx.i18n.t('participants_remotely')}: ${remoteuserlist}`
     out += '\n\n'
   }
 
@@ -121,6 +126,7 @@ module.exports = async (reason, ctx) => {
       }
       out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
       let userlist = ''
+      let remoteuserlist = ''
       let wantedlist = ''
       let accounter = 0
       for (var b = 0; b < exraid.Exraidusers.length; b++) {

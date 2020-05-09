@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
     delayed: {
       type: DataTypes.STRING(32),
       allowNull: true
+    },
+    remote: {
+      type: DataTypes.BOOLEAN
     }
   }, { tableName: 'raidusers' })
 

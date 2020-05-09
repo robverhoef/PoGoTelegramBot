@@ -24,7 +24,8 @@ no_dont_know: "Nee / Weet ik niet"
 no_input: "Niets opgegeven"
 number: "Aantal"
 ok: "OK"
-participants: "Deelnemers"
+participants: "Deelnemers Lokaal ⬇"
+participants_remotely: "Deelnemers Remote 🚀"
 select_a_gym: "Kies een gym."
 send_my_gps_location: "Stuur mijn GPS locatie"
 problem_while_saving: "Sorry, hier ging iets *niet* goed tijdens het bewaren… Wil je het nog eens proberen met /start?\n*Of je kan ook weer terug naar de groep gaan…*"
@@ -35,6 +36,7 @@ something_wrong_press_button: "Hier ging iets niet goed…\n*Je moet op een knop
 start: "Start"
 until: "Tot"
 yes: "Ja"
+covid19_disclaimer: "*Let op:* Als je lokaal meedoet, zorg ervoor dat je de Corona maatregelen volgt zoals die door de overheid zijn gesteld!\n\n*-Houd ten alle tijde 1.5m afstand van elkaar*"
 
 # index.js
 
@@ -104,6 +106,11 @@ unexpected_raid_not_found: "Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt 
 add_raid_wrong_while_selecting: "Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*"
 add_raid_0_45_min_error: "Opgegeven minuten moeten tussen de 0 en ${bosstime} liggen. \n*Probeer het nog eens.*"
 btn_gym_find_location: "Zoek gyms in mijn omgeving…"
+remote_raid_question: "Doe jij remote mee?"
+remote_raid_confirm: "Ja, op afstand! 🚀"
+local_raid_confirm: "Nee, bij de gym ⬇" 
+maximum_remote_raid_reached: "Helaas, het maximaal aantal remote raid users is bereikt. \n\n Het maximale aantal is: "
+try_again_remote_limit: "\nProbeer het met een lager aantal wellicht, klik hier op /start...."
 
 #  AddRaidbossWizard.js
 add_raidboss_finished: "Dankjewel!\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
@@ -197,6 +204,7 @@ join_raid_accounts_question: "Met hoeveel accounts/mensen kom je naar *${gymname
 join_raid_list_reason: "[${user.first_name}](tg://user?id=${user.id}) toegevoegd aan raid bij ${gymname}"
 join_raid_finished: "Je bent aangemeld voor ${joinedraid.gymname} om ${joinedraid.startsat} 👍\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
 join_raid_not_found: "Raid niet gevonden!\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op */start"
+current_number_remote_users: "Op dit moment is het aantal remote deelnemers:"
 
 #  UserDelayedWizard
 btn_user_delayed: "Ik kom te laat voor een raid…"

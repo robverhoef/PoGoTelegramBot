@@ -59,8 +59,8 @@ function JoinRaidWizard (bot) {
       if (ind === -1) {
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_not_found'), Markup.removeKeyboard().extra())
       }
-      const selectedraid = ctx.session.raidcandidates[ind]
-      if (selectedraid.raidid === 0) {
+      ctx.session.selectedraid = ctx.session.raidcandidates[ind]
+      if (ctx.session.selectedraid.raidid === 0) {
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_cancel'), Markup.removeKeyboard().extra())
           .then(() => {
             ctx.session.raidcandidates = null
@@ -69,15 +69,51 @@ function JoinRaidWizard (bot) {
       }
       // save selected index to session
       ctx.session.joinedraid = parseInt(ind)
+      // Extra question for remote raid
+      ctx.session.remoteOptions = [ctx.i18n.t('remote_raid_confirm'), ctx.i18n.t('local_raid_confirm')]
+      return ctx.replyWithMarkdown(`*${ctx.i18n.t('remote_raid_question')}*\n\n${ctx.i18n.t('covid19_disclaimer')}`, Markup.keyboard(ctx.session.remoteOptions)
+      .resize().oneTime().extra())
+      .then(() => ctx.wizard.next())
+    },
+
+    async (ctx) => {
+      // save selected answer to session
+      ctx.session.remoteraidanswer = ctx.update.message.text.trim()
+      if  (ctx.session.remoteraidanswer !== ctx.i18n.t('remote_raid_confirm') && ctx.session.remoteraidanswer !== ctx.i18n.t('local_raid_confirm')) {
+        ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
+        .then(() => {
+          return
+            })}
+      else{
+      //ctx.session.remoteraidanswer  How many accounts question
       ctx.session.accountbtns = [['1'], ['2', '3', '4', '5']]
       return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
-        gymname: selectedraid.gymname
+        gymname: ctx.session.selectedraid.gymname
       }), Markup.keyboard(ctx.session.accountbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
-    },
+    }},
     async (ctx) => {
       // some people manage to enter a NaN… so: || 1
-      const accounts = parseInt(ctx.update.message.text) || 1
+      ctx.session.accounts = parseInt(ctx.update.message.text) || 1
+      ctx.session.remote = false
+      console.log(ctx.session.remote)
+      const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
+      if  (ctx.session.remoteraidanswer  === ctx.i18n.t('remote_raid_confirm')){
+        ctx.session.remote = true
+        console.log(ctx.session.remote)
+        ctx.session.remotecurrentusers = await models.Raiduser.count({
+          where: { raidId: joinedraid.raidid  }
+          })
+        remoteraiduser = ctx.session.remotecurrentusers  + ctx.session.accounts    
+        ctx.session.remoteraiduser = remoteraiduser
+      }
+      if ( ctx.session.remoteraiduser > parseInt(process.env.Thresold_Remote_Users)) {
+        return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.Thresold_Remote_Users}\n\n${ctx.i18n.t('current_number_remote_users')} ${ctx.session.remotecurrentusers} ${ctx.i18n.t('try_again_remote_limit')}`)
+        .then(() => ctx.scene.leave())
+        } 
+        else {     
+      // // some people manage to enter a NaN… so: || 1
+      const accounts = ctx.session.accounts
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
 
       const user = ctx.from
@@ -91,7 +127,8 @@ function JoinRaidWizard (bot) {
         // update
         try {
           await models.Raiduser.update(
-            { accounts: accounts },
+            { accounts: accounts, 
+              remote:ctx.session.remote  },
             {
               where: {
                 [Op.and]: [
@@ -111,7 +148,8 @@ function JoinRaidWizard (bot) {
           raidId: joinedraid.raidid,
           username: user.first_name,
           uid: user.id,
-          accounts: accounts
+          accounts: accounts,
+          remote: ctx.session.remote
         })
         try {
           await raiduser.save()
@@ -140,7 +178,9 @@ function JoinRaidWizard (bot) {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
         })
         .then(() => ctx.scene.leave())
-    }
+    }}
   )
 }
 module.exports = JoinRaidWizard
+
+

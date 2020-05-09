@@ -24,7 +24,8 @@ no_dont_know: "No / I don't know"
 no_input: "Nothing specified"
 number: "Number"
 ok: "OK"
-participants: "Participants"
+participants: "Participants Local ⬇"
+participants_remotely: "Participants Remote 🚀"
 select_a_gym: "Choose a gym."
 send_my_gps_location: "Send my GPS location"
 problem_while_saving: "Sorry, something was *went wrong* during storage ... Would you like to try again with /start?\n*Or you can also return to the group…*"
@@ -35,6 +36,7 @@ something_wrong_press_button: "Something went wrong here… \n*You have to click
 start: "Start"
 until: "Until"
 yes: "Yes"
+covid19_disclaimer: "*Warning:* If you participate locally, make sure to comply with the Corona rules set out by the government!\n\n*-Keep your distance - 1.5m - from each other at all times*"
 
 # index.js
 
@@ -104,6 +106,12 @@ unexpected_raid_not_found: "Mmmm, weird. Sorry, no raid found.\n*You can now ret
 add_raid_wrong_while_selecting: "Something went wrong while selecting the gym.\n*Use */start* to try again…*"
 add_raid_0_45_min_error: "Minutes input must be between 0 and ${bosstime}. \n*Try again.*"
 btn_gym_find_location: "Look for gyms in my neighborhood…"
+remote_raid_question: "Are you joining Remotely?"
+remote_raid_confirm: "Yes, remotely! 🚀"
+local_raid_confirm: "No, near the gym ⬇" 
+maximum_remote_raid_reached: "Unfortunately, the maximum amount of remote users for this raid has been reached.\n The maximum number is: "
+try_again_remote_limit: "\nPerhaps try again with a lower amount, press /start...."
+
 
 #  AddRaidbossWizard.js
 add_raidboss_finished: "Thanks!\n\n*You can now return to the group. Do you want to take another action? Click on */start"
@@ -195,6 +203,7 @@ join_raid_accounts_question: "With how many accounts/people are you coming to *$
 join_raid_list_reason: "[${user.first_name}](tg://user?id=${user.id}) added to raid at ${gymname}"
 join_raid_finished: "You are registered for ${joinedraid.gymname} at ${joinedraid.startsat} 👍\n\n*You can now return to the group. Do you want to take another action? Click on */start"
 join_raid_not_found: "Raid not found!\n*You can now return to the group. Do you want to take another action? Click on */start"
+current_number_remote_users: "Currently the number of remote participants is:"
 
 #  UserDelayedWizard
 btn_user_delayed: "I will be late for a raid…"

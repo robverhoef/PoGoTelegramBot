@@ -201,7 +201,7 @@ function AddRaidWizard (bot) {
       ctx.replyWithMarkdown(ctx.i18n.t('starttime_proposal', { starttm: starttime.format('HH:mm'), endtm: moment.unix(endtime).format('HH:mm') }))
         .then(() => ctx.wizard.next())
     },
-    // step 4
+    // step 5
     async (ctx) => {
       const endtime = ctx.session.newraid.endtime
       // calculate minimum start time
@@ -250,7 +250,7 @@ function AddRaidWizard (bot) {
       ctx.replyWithMarkdown(ctx.i18n.t('raidboss_question'), Markup.keyboard(buttons).resize().extra({ disable_web_page_preview: true }))
         .then(() => ctx.wizard.next())
     },
-    // step 5
+    // step 7
     async (ctx) => {
       const target = ctx.update.message.text.trim()
       const boss = await resolveRaidBoss(target)
@@ -271,7 +271,7 @@ function AddRaidWizard (bot) {
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
-    // step 6
+    // step 8
     async (ctx) => {
       const user = ctx.from
       const saveme = ctx.session.saveOptions.indexOf(ctx.update.message.text) === 0
@@ -364,7 +364,7 @@ function AddRaidWizard (bot) {
           .then(() => ctx.scene.leave())
       }
     },
-    // Step 7
+    // Step 9
     async (ctx) => {
       const participate = ctx.session.participateOptions.indexOf(ctx.update.message.text)
       if (participate === 1) {
@@ -379,10 +379,35 @@ function AddRaidWizard (bot) {
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
-
-    // Step 8
-    async (ctx) => {
-      const accounts = parseInt(ctx.update.message.text)
+    //step 10
+      async (ctx) => {
+        //save number of accounts to session
+        ctx.session.accounts = parseInt(ctx.update.message.text)
+        ctx.session.remoteOptions = [ctx.i18n.t('remote_raid_confirm'), ctx.i18n.t('local_raid_confirm')]
+        return ctx.replyWithMarkdown(`*${ctx.i18n.t('remote_raid_question')}*\n\n*${ctx.i18n.t('covid19_disclaimer')}*`, Markup.keyboard(ctx.session.remoteOptions)
+          .resize().oneTime().extra())
+          .then(() => ctx.wizard.next())
+        },
+        //step 11
+      async (ctx) => {
+        const remoteraidanswer = ctx.update.message.text
+        console.log(remoteraidanswer)
+        ctx.session.newraid.remote = false
+        if (remoteraidanswer === ctx.i18n.t('remote_raid_confirm')){
+          ctx.session.newraid.remote = true
+          console.log(ctx.session.newraid.remote)
+                if ( ctx.session.accounts > parseInt(process.env.Thresold_Remote_Users) && remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
+                    return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.Thresold_Remote_Users}. ${ctx.i18n.t('try_again_remote_limit')}`)
+                      .then(() => ctx.scene.leave())
+                }}   
+        if  (remoteraidanswer !== ctx.i18n.t('remote_raid_confirm') && remoteraidanswer !== ctx.i18n.t('local_raid_confirm')) {
+          console.log('test nrw'),  console.log(ctx.i18n.t('remote_raid_confirm'))
+          ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
+          .then(() => {
+            return
+              })}
+        else {
+      const accounts = ctx.session.accounts 
       const user = ctx.from
       // Check already registered? If so; update else store new
       const raiduser = await models.Raiduser.findOne({
@@ -407,7 +432,8 @@ function AddRaidWizard (bot) {
           raidId: ctx.session.savedraid.id,
           username: user.first_name,
           uid: user.id,
-          accounts: accounts
+          accounts: accounts,
+          remote: ctx.session.newraid.remote
         })
         try {
           await raiduser.save()
@@ -439,9 +465,8 @@ function AddRaidWizard (bot) {
         })
         .then(() => ctx.scene.leave())
     }
-  )
-}
-
+      })
+  }
 async function sendGyms (ctx, bot) {
   const gymId = ctx.session.newraid.gymId
   const gymname = ctx.session.newraid.gymname
