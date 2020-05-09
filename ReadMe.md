@@ -36,6 +36,8 @@ This bot will assist a Telegram (super)group to arrange Pokemon Go Raids. A raid
 * All users are known and linked which enables quick communication when a situation changes
 * Only group admins can add or modify gyms and raidbosses
 * Personal and group statistics (who is the most active player, the most reported gym, etc)
+* Remotes raids are listed seperately
+* Remote raids are limited to configurable amount of accounts
 
 ## A few screenshots
 ![Report a raid](https://raw.githubusercontent.com/RobVerhoef/PoGoTelegramBot/master/bot_reportraid.png)
