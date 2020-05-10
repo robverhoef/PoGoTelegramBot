@@ -36,7 +36,7 @@ something_wrong_press_button: "Hier ging iets niet goed…\n*Je moet op een knop
 start: "Start"
 until: "Tot"
 yes: "Ja"
-covid19_disclaimer: "*Let op:* Als je lokaal meedoet, zorg ervoor dat je de Corona maatregelen volgt zoals die door de overheid zijn gesteld!\n\n*-Houd ten alle tijde 1.5m afstand van elkaar*"
+covid19_disclaimer: "*Let op:* Als je lokaal meedoet, zorg ervoor dat je de coronamaatregelen volgt zoals die door de overheid zijn gesteld!\n\n*-Houd te allen tijde 1.5m afstand van elkaar*"
 
 # index.js
 
