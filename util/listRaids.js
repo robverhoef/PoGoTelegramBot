@@ -55,18 +55,23 @@ module.exports = async (reason, ctx) => {
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       accounter += raids[a].Raidusers[b].accounts
-      if (raids[a].Raidusers[b].delayed != null) {
-        userlist += `[<⏰ ${raids[a].Raidusers[b].delayed} ${raids[a].Raidusers[b].username}>](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
-      } else if (raids[a].Raidusers[b].remote == true) {
-        remoteuserlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
-      }
-      else {
-        userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+      if (raids[a].Raidusers[b].remote !== true) {
+        if (raids[a].Raidusers[b].delayed != null) {
+          userlist += `[<⏰ ${raids[a].Raidusers[b].delayed} ${raids[a].Raidusers[b].username}>](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+        } else {
+          userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+        }
+      } else {
+        if (raids[a].Raidusers[b].delayed != null) {
+          remoteuserlist += `[<⏰ ${raids[a].Raidusers[b].delayed} ${raids[a].Raidusers[b].username}>](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+        } else {
+          remoteuserlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+        }
       }
     }
     out += `${ctx.i18n.t('number')}: ${accounter}\n`
-    out += `${ctx.i18n.t('participants')}: ${userlist}\n`
-    out += `${ctx.i18n.t('participants_remotely')}: ${remoteuserlist}`
+    out += userlist.length ? `${ctx.i18n.t('participants')}: ${userlist}\n` : ''
+    out += remoteuserlist.length ? `${ctx.i18n.t('participants_remotely')}: ${remoteuserlist}` : ''
     out += '\n\n'
   }
 
@@ -110,7 +115,7 @@ module.exports = async (reason, ctx) => {
   // }
   if (exraids.length > 0) {
     out += '------------------------------\n'
-    out += '*EX RAIDS vandaag*\n'
+    out += `*${ctx.i18n.t('exraids_today')}*\n`
     out += '------------------------------\n'
     for (const exraid of exraids) {
       const strtime = moment.unix(exraid.start1)
@@ -126,10 +131,9 @@ module.exports = async (reason, ctx) => {
       }
       out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
       let userlist = ''
-      let remoteuserlist = ''
       let wantedlist = ''
       let accounter = 0
-      for (var b = 0; b < exraid.Exraidusers.length; b++) {
+      for (b = 0; b < exraid.Exraidusers.length; b++) {
         if (exraid.Exraidusers[b].hasinvite) {
           accounter += exraid.Exraidusers[b].accounts
           if (exraid.Exraidusers[b].delayed != null) {
