@@ -23,7 +23,7 @@ module.exports = async (ctx, bot, raidbossId, gymname, target, starttime) => {
   for (const notification of notifications) {
     ctx.i18n.locale(notification.User.locale)
     try {
-      bot.telegram.sendMessage(notification.User.tId, ctx.i18n.t('noti_raidboss_notification', {
+      await bot.telegram.sendMessage(notification.User.tId, ctx.i18n.t('noti_raidboss_notification', {
         target: target,
         gymname: gymname,
         starttime: moment.unix(starttime).format('H:mm')

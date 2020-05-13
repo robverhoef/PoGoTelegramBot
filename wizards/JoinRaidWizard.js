@@ -103,14 +103,18 @@ function JoinRaidWizard (bot) {
       if (ctx.session.remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
         ctx.session.remote = true
 
-        const remoteuserscount = await models.sequelize.query('select sum(accounts) as remotes from raidusers where raidId = ? and uid != ?', {
+        const rucount = await models.sequelize.query('select sum(accounts) as remotes from raidusers where raidId = ? and uid != ? and remote = 1', {
           replacements: [joinedraid.raidid, ctx.from.id],
           type: models.sequelize.QueryTypes.SELECT
         })
-        remotecurrentusers = remoteuserscount.length > 0 ? parseInt(remoteuserscount[0].remotes, 10) : 0
+        remotecurrentusers = 0
+        if (rucount !== null) {
+          remotecurrentusers = rucount.length > 0 ? parseInt(rucount[0].remotes, 10) : 0
+        }
         remoteraidusers = remotecurrentusers + parseInt(ctx.session.accounts, 10)
       }
       if (remoteraidusers > parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)) {
+        console.info(`TOO MANY REMOTES current remotes ${remotecurrentusers}, requested to add: ${parseInt(ctx.session.accounts, 10)} limit ${parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)}`)
         return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.THRESHOLD_REMOTE_USERS}\n\n${ctx.i18n.t('current_number_remote_users')} ${remotecurrentusers} ${ctx.i18n.t('try_again_remote_limit')}`)
           .then(() => ctx.scene.leave())
       }

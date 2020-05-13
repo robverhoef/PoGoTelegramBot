@@ -22,7 +22,7 @@ function AddRaidWizard (bot) {
     // step 0
     async (ctx) => {
       await setLocale(ctx)
-      console.log('HELLO ADD RAID WIZARD')
+      // console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
       return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raid_welcome')}\r\n`, Markup.keyboard([{ text: ctx.i18n.t('btn_gym_find_location'), request_location: true }]).resize().extra({ disable_web_page_preview: true }))
@@ -391,18 +391,18 @@ function AddRaidWizard (bot) {
     // step 11
     async (ctx) => {
       const remoteraidanswer = ctx.update.message.text
-      console.log(remoteraidanswer)
+      // console.log(remoteraidanswer)
       ctx.session.newraid.remote = false
       if (remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
         ctx.session.newraid.remote = true
-        console.log(ctx.session.newraid.remote)
         if (ctx.session.accounts > parseInt(process.env.THRESHOLD_REMOTE_USERS) && remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
+          // console.info('To many remotes, current:',  )
           return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.THRESHOLD_REMOTE_USERS}. ${ctx.i18n.t('try_again_remote_limit')}`)
             .then(() => ctx.scene.leave())
         }
       }
       if (remoteraidanswer !== ctx.i18n.t('remote_raid_confirm') && remoteraidanswer !== ctx.i18n.t('local_raid_confirm')) {
-        console.log('test nrw', ctx.i18n.t('remote_raid_confirm'))
+        // console.log('test nrw', ctx.i18n.t('remote_raid_confirm'))
         ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
           .then(() => {
 
