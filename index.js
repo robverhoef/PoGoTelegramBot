@@ -168,7 +168,7 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_join_raid'))
   if (raids.length > 0) {
     btns.push(ctx.i18n.t('btn_exit_raid'))
-    btns.push(ctx.i18n.t('btn_user_delayed'))
+    // btns.push(ctx.i18n.t('btn_user_delayed'))
   }
   btns.push(ctx.i18n.t('btn_add_raid'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
@@ -258,7 +258,7 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key].btn_exraids.call(), Stage.enter('exraid-wizard'))
 
   bot.hears(i18n.repository[key].btn_notifications.call(), Stage.enter('notification-wizard'))
-  bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
+  // bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
   // Admin
   bot.hears(i18n.repository[key].btn_manage_fieldresearches.call(), Stage.enter('admin-field-research-wizard'))
   bot.hears(i18n.repository[key].btn_add_gym.call(), Stage.enter('add-gym-wizard'))
