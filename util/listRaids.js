@@ -50,23 +50,33 @@ module.exports = async (reason, ctx) => {
     }
     const strtime = moment.unix(raids[a].start1)
     out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
+
+    // After 2 minutes, stop tagging people. Raid has passed, carry on..
+    const startTimeHasPassed = strtime.isBefore(moment().add(-2, 'minutes'))
+
     let userlist = ''
     let remoteuserlist = ''
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
-      accounter += raids[a].Raidusers[b].accounts
-      if (raids[a].Raidusers[b].remote !== true) {
-        if (raids[a].Raidusers[b].delayed != null) {
-          userlist += `[<⏰ ${raids[a].Raidusers[b].delayed} ${raids[a].Raidusers[b].username}>](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+      const raiduser = raids[a].Raidusers[b]
+      accounter += raiduser.accounts
+      const tag = startTimeHasPassed ? '' : `(tg://user?id=${raiduser.uid})`
+      const accounts = `${raiduser.accounts > 1 ? ('+' + (raiduser.accounts - 1)) : ''} `
+
+      const getUserString = () => {
+        if (raiduser.delayed != null) {
+          return `[<⏰ ${raiduser.delayed} ${raiduser.username}>]${tag}${accounts}`
         } else {
-          userlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
+          return `[${raiduser.username}]${tag}${accounts}`
         }
+      }
+
+      const userString = getUserString()
+
+      if (raiduser.remote !== true) {
+        userlist += userString
       } else {
-        if (raids[a].Raidusers[b].delayed != null) {
-          remoteuserlist += `[<⏰ ${raids[a].Raidusers[b].delayed} ${raids[a].Raidusers[b].username}>](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
-        } else {
-          remoteuserlist += `[${raids[a].Raidusers[b].username}](tg://user?id=${raids[a].Raidusers[b].uid})${raids[a].Raidusers[b].accounts > 1 ? ('+' + (raids[a].Raidusers[b].accounts - 1)) : ''} `
-        }
+        remoteuserlist += userString
       }
     }
     out += `${ctx.i18n.t('number')}: ${accounter}\n`
