@@ -68,7 +68,7 @@ async function listResearchOptionButtons () {
   return out
 }
 
-function FielresearchWizard (bot) {
+function FieldresearchWizard (bot) {
   const wizsteps = {
     mainmenu: 0,
     listresearch: 2,
@@ -559,4 +559,4 @@ function FielresearchWizard (bot) {
     }
   )
 }
-module.exports = FielresearchWizard
+module.exports = FieldresearchWizard
