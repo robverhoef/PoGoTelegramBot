@@ -412,6 +412,35 @@ exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) added to 
 exraid_user_left: "OK, you have left this Ex Raid.\n\n*You can now return to the group. Do you want to take another action? Click */start"
 exraids_today: "EX RAIDS today"
 
+# remote invites
+btn_remote_invites: "Remote invites"
+btn_remote_invites_want: "I want to receive invites"
+btn_remote_invites_stop: "I don't want to receive invites now"
+remote_invites_until: "For how long do you want to receive invites?"
+remote_invites_stop: "I want to stop receiving invites"
+remote_invites_finish_start: "From now on you are marked as wanting to receive invites.\n\n*You can now return to the group. Do you want to take another action? Click */start"
+remote_invites_finish_stop: "From now on you will not be marked as wanting to receive invites\n\n*You can now return to the group. Do you want to take another action? Click */start"
+hour: "${pluralize(hour, 'uur', 'uren')}"
+remote_invite_list: "[${first_name}](tg://user?id=${userid}) wants to receive invites.\n\n"
+remote_invite_stop_list: "${first_name} doesn't want to receive invites.\n\n"
+remote_invitables_list: "These trainers want an invite: "
+
+# user settings
+btn_usersettings: "Your data"
+btn_usersettings_language: "Language"
+btn_usersettings_friend_code: "Pokemon friend code"
+btn_usersettings_pokemon_naam: "Your Pokemon trainer name"
+btn_edit_more_or_finish: "Do you want to edit more or save and quit?"
+btn_usersettings_edit_more: 'Edit something else…'
+usersettings_welcome: "Hi ${first_name}, what do you want to edit?"
+usersettings_language_question: "What do you want as your default language?"
+usersettings_friendcode_question: "What is your friend code? \nEnter an x to clear your code."
+usersettings_wrong_friendcode: "A friend code is 12 characters long\nTry again or quit by using /cancel"
+usersetings_pokemon_name_question:  "What is your name in Pokemon?\nEnter an x to clear your name."
+telegram_name: "Telegram name"
+friend_code: "Friend code"
+trainer_name: "Trainer name"
+
 # months
 jan: "January"
 feb: "February"

@@ -24,6 +24,14 @@ module.exports = (sequelize, DataTypes) => {
     locale: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    friendcode: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    pokemonname: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, { tableName: 'users' })
   User.associate = function (models) {

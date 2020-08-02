@@ -412,6 +412,35 @@ exraid_user_added_list: "[${user.first_name}](tg://user?id=${user.id}) toegevoeg
 exraid_user_left: "OK, je doet niet meer mee met deze Ex Raid.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
 exraids_today: "EX RAIDS vandaag"
 
+# remote invites
+btn_remote_invites: "Remote invites"
+btn_remote_invites_want: "Ik wil invites ontvangen"
+btn_remote_invites_stop: "Ik wil nu geen invites meer ontvangen"
+remote_invites_until: "Hoe lang wil je - vanaf nu - invites ontvangen?"
+remote_invites_stop: "Ik wil geen invites meer ontvangen"
+remote_invites_finish_start: "Vanaf nu wordt je naam genoemd als speler die invites wilt ontvangen. Je kunt dit altijd stoppen door hier terug te komen.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
+remote_invites_finish_stop: "Vanaf nu wordt je naam niet meer genoemd in de lijst met  beschikbare spelers\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
+hour: "${pluralize(hour, 'uur', 'uur')}"
+remote_invite_list: "[${first_name}](tg://user?id=${userid}) wil invites ontvangen\n\n"
+remote_invite_stop_list: "${first_name} wil geen invites meer ontvangen\n\n"
+remote_invitables_list: "Deze gebruikers willen een invite: "
+
+# user settings
+btn_usersettings: "Jouw gegevens"
+btn_usersettings_language: "Taal"
+btn_usersettings_friend_code: "Pokemon friend code"
+btn_usersettings_pokemon_naam: "Jouw Pokemon trainer naam"
+btn_edit_more_or_finish: "Wil je nog iets wijzigen of opslaan en aflsuiten?"
+btn_usersettings_edit_more: "Nog iets wijzigen…"
+usersettings_welcome: "Hoi ${first_name}, wat wil je wijzigen?"
+usersettings_language_question: "Welke taal wil je nu als standaard?"
+usersettings_friendcode_question: "Wat is jouw friend code? \nGebruik een x om je code te wissen."
+usersettings_wrong_friendcode: "Een friend code bestaat uit 12 tekens\nProbeer het nog eens of breek af met /cancel…"
+usersetings_pokemon_name_question:  "Wat is jou naam in Pokemon?\n Gebruik een x om je naam te wissen"
+telegram_name: "Telegram naam"
+friend_code: "Friend code"
+trainer_name: "Trainer naam"
+
 # Months:
 jan: "Januari"
 feb: "Februari"

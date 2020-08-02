@@ -92,10 +92,34 @@ module.exports = async (reason, ctx) => {
 
   const tomorrow = today.clone().add(1, 'day')
 
+  // List people who want to receive invites;
+  const now = moment().unix()
+  const invitables = await models.Invitables.findAll({
+    where: {
+      endTime: {
+        [Op.gt]: now
+      }
+    },
+    include: [
+      { model: models.User }
+    ]
+  })
+  if (invitables.length > 0) {
+    out += '------------------------------\n'
+    out += `*${ctx.i18n.t('remote_invitables_list')}*\n`
+    for (const invite of invitables) {
+      if (invite.User.pokemonname || invite.User.friendcode) {
+        const usr = encodeURI(`https://t.me/pogodevbot?start=udetail_${invite.User.id}`)
+        out += `[${invite.User.tUsername}](${usr}) `
+      } else {
+        out += `[${invite.User.tUsername}](tg://user?id=${invite.User.tId})`
+      }
+    }
+    out += '\n------------------------------\n'
+  }
+
   // List today's Ex Raids
-  // console.log('TODAYS EXRAIDS?')
-  // console.log(`between ${today.unix()} and ${tomorrow.unix()}`)
-  const exraids = await models.Exraid.findAll({
+   const exraids = await models.Exraid.findAll({
     include: [
       models.Gym,
       models.Exraiduser
@@ -119,10 +143,6 @@ module.exports = async (reason, ctx) => {
       [models.Exraiduser, 'hasinvite', 'DESC']
     ]
   })
-  // console.log('\r\nEXRAIDS FOUND:')
-  // for (const eraid of exraids) {
-  //   console.log(eraid.Gym.gymname, eraid.target, eraid.start1)
-  // }
   if (exraids.length > 0) {
     out += '------------------------------\n'
     out += `*${ctx.i18n.t('exraids_today')}*\n`

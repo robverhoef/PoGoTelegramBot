@@ -115,6 +115,14 @@ const AdminStopsWizard = require('./wizards/AdminStopsWizard')
 const adminStopsWizard = AdminStopsWizard(bot)
 adminStopsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
+const RemoteInvitesWizard = require('./wizards/RemoteInvitesWizard')
+const remoteInvitesWizard = RemoteInvitesWizard(bot)
+remoteInvitesWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const UserSettingsWizard = require('./wizards/UserSettingsWizard')
+const userSettingsWizard = UserSettingsWizard(bot)
+userSettingsWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
 const stage = new Stage([
   addRaidWizard,
   editRaidWizard,
@@ -132,7 +140,9 @@ const stage = new Stage([
   userDelayedWizard,
   fieldresearchWizard,
   adminFieldResearchWizard,
-  adminStopsWizard
+  adminStopsWizard,
+  remoteInvitesWizard,
+  userSettingsWizard
 ])
 
 /**
@@ -145,6 +155,10 @@ function showHelp (ctx) {
 }
 bot.use(stage.middleware())
 
+// async function showRemoteInviteData (ctx, user) {
+//   ctx.session = {}
+//   ctx.scene.leave()
+// }
 async function showMainMenu (ctx, user) {
   ctx.session = {}
   ctx.scene.leave()
@@ -172,6 +186,8 @@ async function showMainMenu (ctx, user) {
   }
   btns.push(ctx.i18n.t('btn_add_raid'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
+  btns.push(ctx.i18n.t('btn_usersettings'))
+  btns.push(ctx.i18n.t('btn_remote_invites'))
   btns.push(ctx.i18n.t('btn_field_researches'))
   btns.push(ctx.i18n.t('btn_find_gym'))
   btns.push(ctx.i18n.t('btn_notifications'))
@@ -234,6 +250,17 @@ bot.command('/start', async (ctx) => {
   if (fuser !== null) {
     ctx.locale = fuser.locale
     ctx.i18n.locale(fuser.locale)
+    if (ctx.update.message.text.indexOf('udetail_') > -1) {
+      const uid = parseInt(ctx.update.message.text.split('udetail_')[1], 10)
+      const inv = await models.User.findOne({
+        where: {
+          id: uid
+        }
+      })
+      if (inv) {
+        return ctx.replyWithMarkdown(`${ctx.i18n.t('telegram_name')}: ${inv.tUsername}\n${ctx.i18n.t('trainer_name')}: ${inv.pokemonname ? inv.pokemonname : '?'}\n${ctx.i18n.t('friend_code')}: ${inv.friendcode ? inv.friendcode : '?'}\n`)
+      }
+    }
     return showMainMenu(ctx, user)
   } else {
     // ToDo: check if user language is available
@@ -252,12 +279,14 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key].btn_add_raid.call(), Stage.enter('add-raid-wizard'))
   bot.hears(i18n.repository[key].btn_edit_raid.call(), Stage.enter('edit-raid-wizard'))
   bot.hears(i18n.repository[key].btn_find_gym.call(), Stage.enter('find-gym-wizard'))
+  bot.hears(i18n.repository[key].btn_usersettings.call(), Stage.enter('user-settings-wizard'))
   bot.hears(i18n.repository[key].btn_field_researches.call(), Stage.enter('fieldresearch-wizard'))
   bot.hears(i18n.repository[key].btn_stats.call(), Stage.enter('stats-wizard'))
 
   bot.hears(i18n.repository[key].btn_exraids.call(), Stage.enter('exraid-wizard'))
 
   bot.hears(i18n.repository[key].btn_notifications.call(), Stage.enter('notification-wizard'))
+  bot.hears(i18n.repository[key].btn_remote_invites.call(), Stage.enter('remote-invites-wizard'))
   // bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
   // Admin
   bot.hears(i18n.repository[key].btn_manage_fieldresearches.call(), Stage.enter('admin-field-research-wizard'))
@@ -268,9 +297,7 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key].btn_admin_stops.call(), Stage.enter('admin-stops-wizard'))
 
   bot.hears('Trigger raidlist', async (ctx) => {
-    console.log('RAIDLIST TRIGGERED')
-    const out = await listRaids('Testing', ctx)
-    console.log(out)
+    const out = await listRaids("\n", ctx)
     bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
   })
 }
@@ -279,7 +306,6 @@ for (var key in i18n.repository) {
 * Check if valid user and show START button to switch to private mode
 */
 bot.on('inline_query', async ctx => {
-  // console.log('inline_query', ctx.update)
   const user = await models.User.findOne({
     where: {
       [Op.and]: [
@@ -321,7 +347,6 @@ bot.hears(/\/hi/i, async (ctx) => {
       ]
     }
   })
-  // console.log('olduser', olduser)
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
     bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
@@ -376,7 +401,6 @@ bot.hears(/\/whoisthebot/i, async (ctx) => {
 * Register new member
 */
 bot.on('new_chat_members', async (ctx) => {
-  // console.log('new chat member', ctx.message)
   var newusr = ctx.message.new_chat_member
   if (newusr.is_bot === true) {
     console.log('A bot tried to become a group member…')
@@ -414,7 +438,6 @@ bot.on('new_chat_members', async (ctx) => {
 * Removing members who left the group
 */
 bot.on('left_chat_member', async (ctx) => {
-  // console.log('chat member left', ctx.message.left_chat_member)
   var removed = ctx.message.left_chat_member
   try {
     await models.User.destroy({
@@ -475,6 +498,7 @@ bot.hears(/\/raids/i, async (ctx) => {
   }
   return ctx.replyWithMarkdown(out, { disable_web_page_preview: true })
 })
+
 // Let's fire up!
 bot.telegram.setWebhook(process.env.BOT_URL)
   .then((data) => {

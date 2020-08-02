@@ -27,8 +27,8 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.removeColumn('gyms', 'lat')
-    .then(() =>
-      queryInterface.removeColumn('gyms', 'lon')
-    )
+      .then(() =>
+        queryInterface.removeColumn('gyms', 'lon')
+      )
   }
 }
