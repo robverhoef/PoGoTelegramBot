@@ -109,7 +109,7 @@ module.exports = async (reason, ctx) => {
     out += `*${ctx.i18n.t('remote_invitables_list')}*\n`
     for (const invite of invitables) {
       if (invite.User.pokemonname || invite.User.friendcode) {
-        const usr = encodeURI(`https://t.me/pogodevbot?start=udetail_${invite.User.id}`)
+        const usr = encodeURI(`https://t.me/${process.env.BOT_USERNAME}?start=udetail_${invite.User.id}`)
         out += `[${invite.User.tUsername}](${usr}) `
       } else {
         out += `[${invite.User.tUsername}](tg://user?id=${invite.User.tId})`
@@ -119,7 +119,7 @@ module.exports = async (reason, ctx) => {
   }
 
   // List today's Ex Raids
-   const exraids = await models.Exraid.findAll({
+  const exraids = await models.Exraid.findAll({
     include: [
       models.Gym,
       models.Exraiduser
