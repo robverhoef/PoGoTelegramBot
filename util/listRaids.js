@@ -112,7 +112,7 @@ module.exports = async (reason, ctx) => {
         const usr = encodeURI(`https://t.me/${process.env.BOT_USERNAME}?start=udetail_${invite.User.id}`)
         out += `[${invite.User.tUsername}](${usr}) `
       } else {
-        out += `[${invite.User.tUsername}](tg://user?id=${invite.User.tId})`
+        out += `[${invite.User.tUsername}](tg://user?id=${invite.User.tId}) `
       }
     }
     out += '\n------------------------------\n'
