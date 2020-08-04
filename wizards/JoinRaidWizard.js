@@ -86,7 +86,7 @@ function JoinRaidWizard (bot) {
           })
       } else {
       // ctx.session.remoteraidanswer  How many accounts question
-        ctx.session.accountbtns = [['1'], ['2', '3', '4', '5']]
+        ctx.session.accountbtns = [['1'], ['2', '3', '4'], ['5', '6', '7']]
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
           gymname: ctx.session.selectedraid.gymname
         }), Markup.keyboard(ctx.session.accountbtns).oneTime().resize().extra())

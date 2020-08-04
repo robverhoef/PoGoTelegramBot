@@ -375,7 +375,7 @@ function AddRaidWizard (bot) {
       // user does participate
       return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
         gymname: ctx.session.newraid.gymname
-      }), Markup.keyboard([['1'], ['2', '3', '4', '5']])
+      }), Markup.keyboard([['1'], ['2', '3', '4'], ['5', '6', '7']])
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
