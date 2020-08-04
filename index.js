@@ -192,7 +192,7 @@ async function showMainMenu (ctx, user) {
   btns.push(ctx.i18n.t('btn_find_gym'))
   btns.push(ctx.i18n.t('btn_notifications'))
   btns.push(ctx.i18n.t('btn_stats'))
-  btns.push(ctx.i18n.t('btn_exraids'))
+  // btns.push(ctx.i18n.t('btn_exraids'))
 
   // group admins:
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
@@ -297,7 +297,7 @@ for (var key in i18n.repository) {
   bot.hears(i18n.repository[key].btn_admin_stops.call(), Stage.enter('admin-stops-wizard'))
 
   bot.hears('Trigger raidlist', async (ctx) => {
-    const out = await listRaids("\n", ctx)
+    const out = await listRaids('\n', ctx)
     bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
   })
 }

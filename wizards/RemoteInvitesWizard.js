@@ -67,15 +67,42 @@ var RemoteInvitesWizard = function (bot) {
         .extra())
         .then(() => ctx.wizard.next())
     },
-
+    // step 1
     async (ctx) => {
-      const user = ctx.from
       // simple look up table
       const hours = [0.5, 1, 1.5, 2, -1]
       const term = ctx.update.message.text.trim()
       const index = ctx.session.invitebtns.findIndex(e => e === term)
-      const val = hours[index]
-      if (val === -1) {
+      ctx.session.timeval = hours[index]
+      if (hours[index] === -1) {
+        // no need to ask for a pokemon
+        ctx.wizard.selectStep(4)
+        return ctx.wizard.steps[4](ctx)
+      } else {
+        ctx.wizard.selectStep(2)
+        return ctx.wizard.steps[2](ctx)
+      }
+    },
+    // step 2
+    async (ctx) => {
+      return ctx.replyWithMarkdown(ctx.i18n.t('remote_invitables_pokemon'), Markup.removeKeyboard()).then(() => {
+        return ctx.wizard.next()
+      })
+    },
+    // store pokemon
+    // step 3
+    async (ctx) => {
+      const pok = ctx.update.message.text.trim()
+      ctx.session.pokemon = pok.toLowerCase() !== 'x' ? pok : null
+      ctx.wizard.selectStep(4)
+      return ctx.wizard.steps[4](ctx)
+    },
+
+    // finish
+    // step 4
+    async (ctx) => {
+      const user = ctx.from
+      if (ctx.session.timeval === -1) {
         // delete
         models.Invitables.destroy({
           where: {
@@ -93,7 +120,7 @@ var RemoteInvitesWizard = function (bot) {
       } else {
         // store
         const starttime = moment()
-        const endtime = moment(starttime).add(val, 'hours')
+        const endtime = moment(starttime).add(ctx.session.timeval, 'hours')
 
         let invitable = await models.Invitables.findOne({
           where: {
@@ -108,7 +135,8 @@ var RemoteInvitesWizard = function (bot) {
             await models.Invitables.update(
               {
                 starttime: starttime.unix(),
-                endtime: endtime.unix()
+                endtime: endtime.unix(),
+                pokemon: ctx.session.pokemon
               },
               {
                 where: { userId: ctx.session.userId }
@@ -123,7 +151,8 @@ var RemoteInvitesWizard = function (bot) {
           invitable = models.Invitables.build({
             userId: ctx.session.userId,
             starttime: starttime.unix(),
-            endtime: endtime.unix()
+            endtime: endtime.unix(),
+            pokemon: ctx.session.pokemon
           })
           try {
             await invitable.save()

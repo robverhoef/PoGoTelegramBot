@@ -415,16 +415,17 @@ exraids_today: "EX RAIDS today"
 
 # remote invites
 btn_remote_invites: "Remote invites"
-btn_remote_invites_want: "Ik wil invites ontvangen"
-btn_remote_invites_stop: "Ik wil nu geen invites meer ontvangen"
-remote_invites_until: "Hoe lang wil je invites ontvangen?"
-remote_invites_stop: "Ik wil geen invites meer ontvangen"
-remote_invites_finish_start: "Vanaf nu wordt je naam genoemd als speler die invites wilt onntvangen. Je kunt dit altijd stoppen door hier terug te komen.\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
-remote_invites_finish_stop: "Vanaf nu wordt je naam niet meer genoemd in de lijst met  beschikbare spelers\n\n*Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op */start"
+btn_remote_invites_want: "I want to receive invites"
+btn_remote_invites_stop: "I don't want to receive invites now"
+remote_invites_until: "For how long do you want to receive invites?"
+remote_invites_stop: "I want to stop receiving invites"
+remote_invites_finish_start: "From now on you are marked as wanting to receive invites.\n\n*You can now return to the group. Do you want to take another action? Click */start"
+remote_invites_finish_stop: "From now on you will not be marked as wanting to receive invites\n\n*You can now return to the group. Do you want to take another action? Click */start"
 hour: "${pluralize(hour, 'uur', 'uren')}"
 remote_invite_list: "[${first_name}](tg://user?id=${userid}) wants to receive invites\n\n"
 remote_invite_stop_list: "${first_name} doesn't want to receive invites\n\n"
 remote_invitables_list: "These trainers want an invite: "
+remote_invitables_pokemon: "*For which Pokemon do you want an invite?*\nEnter x for all Pokemons."
 
 # user settings
 btn_usersettings: "Your data"

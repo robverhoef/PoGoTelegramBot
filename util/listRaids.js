@@ -16,6 +16,19 @@ module.exports = async (reason, ctx) => {
 
   // list should always be in default locale
   ctx.i18n.locale(process.env.DEFAULT_LOCALE)
+
+  const getInvitableString = (invitable) => {
+    const pokemon = invitable.pokemon ? `(${invitable.pokemon})` : ''
+    let invstring = ''
+    if (invitable.User.pokemonname || invitable.User.friendcode) {
+      const usr = encodeURI(`https://t.me/${process.env.BOT_USERNAME}?start=udetail_${invitable.User.id}`)
+      invstring = `[${invitable.User.tUsername} ${pokemon}](${usr}) `
+    } else {
+      invstring = `[${invitable.User.tUsername} ${pokemon}](tg://user?id=${invitable.User.tId}) `
+    }
+    return invstring
+  }
+
   let out = reason
   const raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
     .then(() => models.Raid.findAll({
@@ -70,7 +83,6 @@ module.exports = async (reason, ctx) => {
           return `[${raiduser.username}]${tag}${accounts}`
         }
       }
-
       const userString = getUserString()
 
       if (raiduser.remote !== true) {
@@ -108,12 +120,7 @@ module.exports = async (reason, ctx) => {
     out += '------------------------------\n'
     out += `*${ctx.i18n.t('remote_invitables_list')}*\n`
     for (const invite of invitables) {
-      if (invite.User.pokemonname || invite.User.friendcode) {
-        const usr = encodeURI(`https://t.me/${process.env.BOT_USERNAME}?start=udetail_${invite.User.id}`)
-        out += `[${invite.User.tUsername}](${usr}) `
-      } else {
-        out += `[${invite.User.tUsername}](tg://user?id=${invite.User.tId}) `
-      }
+      out += getInvitableString(invite)
     }
     out += '\n------------------------------\n'
   }

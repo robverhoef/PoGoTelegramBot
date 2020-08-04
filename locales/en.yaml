@@ -424,6 +424,7 @@ hour: "${pluralize(hour, 'uur', 'uren')}"
 remote_invite_list: "[${first_name}](tg://user?id=${userid}) wants to receive invites.\n\n"
 remote_invite_stop_list: "${first_name} doesn't want to receive invites.\n\n"
 remote_invitables_list: "These trainers want an invite: "
+remote_invitables_pokemon: "*For which Pokemon do you want an invite?*\nEnter x for all Pokemons."
 
 # user settings
 btn_usersettings: "Your data"
