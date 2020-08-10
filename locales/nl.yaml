@@ -66,7 +66,7 @@ invalid_time_minutes_retry: "Opgegeven minuten moeten tussen de 0 en ${hatchtime
 invalid_time_range: "Dit is geen geldige tijd. Geef de tijd tussen *${range_start}* en 5 minuten voor *${range_end}*  of vul een *x* in om deze leeg te laten. \n*Probeer het nog eens.*"
 invalid_time_range_too_early: "De starttijd is te kort op de eindtijd om de raid te kunnen spelen. "
 just_met_message: "Dag ${first_name}!\n Je kunt mij vanaf nu aanspreken vanuit *${chattitle}* met *@${me.username} actie*"
-main_menu_greeting: "Hallo ${user.first_name}.\nWat wil je doen?"
+main_menu_greeting: "Hallo ${'Riki_Ria'} ${user.first_name}.\nWat wil je doen?"
 
 user_unknown_warning: "Uhm… ik ken je niet, sorry. Meldt je bij mij aan in je groep met \n\n*/hi@${me.username}*\n\nDan stuur ik je instructies."
 no_raids_found: "Geen raids gevonden…"
@@ -106,9 +106,10 @@ unexpected_raid_not_found: "Mmmm, vreemd. Sorry, geen raid te vinden.\n*Je kunt 
 add_raid_wrong_while_selecting: "Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*"
 add_raid_0_45_min_error: "Opgegeven minuten moeten tussen de 0 en ${bosstime} liggen. \n*Probeer het nog eens.*"
 btn_gym_find_location: "Zoek gyms in mijn omgeving…"
-remote_raid_question: "Doe jij remote mee?"
-remote_raid_confirm: "Ja, op afstand! 🚀"
-local_raid_confirm: "Nee, bij de gym ⬇"
+remote_raid_question: "Hoe doe jij mee?"
+remote_raid_confirm: "Op afstand! 🚀"
+local_raid_confirm: "Lokaal, bij de gym ⬇"
+private_raid_confirm: "Private raid; remote of lokaal 🤫"
 maximum_remote_raid_reached: "Helaas, het maximaal aantal remote raid users is bereikt. \n\n Het maximale aantal is: "
 try_again_remote_limit: "\nProbeer het met een lager aantal wellicht, klik hier op /start...."
 

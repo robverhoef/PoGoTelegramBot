@@ -109,6 +109,7 @@ btn_gym_find_location: "Busca gimnasios a mis alrededores…"
 remote_raid_question: "Participarás de forma Remote?"
 remote_raid_confirm: "Sí, de distancia! 🚀"
 local_raid_confirm: "No, cerca del gym ⬇"
+private_raid_confirm: "Private raid; remotely or locally 🤫"
 maximum_remote_raid_reached: "Que pena, el límite de cantidad de usuarios remote se ha alcanzado. \n\nEl numero límite es: "
 try_again_remote_limit: "\nA lo mejor lo puedes volver a intentar con una cantidad menor, pulsa aqui en /start...."
 

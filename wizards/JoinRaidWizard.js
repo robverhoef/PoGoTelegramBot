@@ -70,7 +70,11 @@ function JoinRaidWizard (bot) {
       // save selected index to session
       ctx.session.joinedraid = parseInt(ind, 10)
       // Extra question for remote raid
-      ctx.session.remoteOptions = [ctx.i18n.t('remote_raid_confirm'), ctx.i18n.t('local_raid_confirm')]
+      ctx.session.remoteOptions = [
+        ctx.i18n.t('remote_raid_confirm'),
+        ctx.i18n.t('local_raid_confirm'),
+        ctx.i18n.t('private_raid_confirm')
+      ]
       return ctx.replyWithMarkdown(`*${ctx.i18n.t('remote_raid_question')}*\n\n${ctx.i18n.t('covid19_disclaimer')}`, Markup.keyboard(ctx.session.remoteOptions)
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
@@ -78,14 +82,15 @@ function JoinRaidWizard (bot) {
 
     async (ctx) => {
       // save selected answer to session
-      ctx.session.remoteraidanswer = ctx.update.message.text.trim()
-      if (ctx.session.remoteraidanswer !== ctx.i18n.t('remote_raid_confirm') && ctx.session.remoteraidanswer !== ctx.i18n.t('local_raid_confirm')) {
+      ctx.session.raidtype = ctx.update.message.text.trim()
+      if (
+        ctx.session.raidtype !== ctx.i18n.t('remote_raid_confirm') &&
+        ctx.session.raidtype !== ctx.i18n.t('local_raid_confirm') &&
+        ctx.session.raidtype !== ctx.i18n.t('private_raid_confirm')
+      ) {
         ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
-          .then(() => {
-
-          })
       } else {
-      // ctx.session.remoteraidanswer  How many accounts question
+      // ctx.session.raidtype  How many accounts question
         ctx.session.accountbtns = [['1'], ['2', '3', '4'], ['5', '6', '7']]
         return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
           gymname: ctx.session.selectedraid.gymname
@@ -100,7 +105,10 @@ function JoinRaidWizard (bot) {
       ctx.session.remote = false
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
       let remotecurrentusers = 0
-      if (ctx.session.remoteraidanswer === ctx.i18n.t('remote_raid_confirm')) {
+      if (ctx.session.raidtype === ctx.i18n.t('private_raid_confirm')) {
+        ctx.session.private = true
+      }
+      if (ctx.session.raidtype === ctx.i18n.t('remote_raid_confirm')) {
         ctx.session.remote = true
 
         const rucount = await models.sequelize.query('select sum(accounts) as remotes from raidusers where raidId = ? and uid != ? and remote = 1', {
