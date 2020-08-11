@@ -9,6 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const setLocale = require('../util/setLocale')
 const listRaids = require('../util/listRaids')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -112,7 +113,7 @@ var RemoteInvitesWizard = function (bot) {
         ctx.replyWithMarkdown(ctx.i18n.t('remote_invites_finish_stop'), Markup.removeKeyboard().extra())
           .then(async () => {
             const out = await listRaids(ctx.i18n.t('remote_invite_stop_list', {
-              first_name: user.first_name
+              first_name: escapeMarkDown(user.first_name)
             }), ctx)
             bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })
@@ -165,7 +166,7 @@ var RemoteInvitesWizard = function (bot) {
         ctx.replyWithMarkdown(`${ctx.i18n.t('remote_invites_finish_start')}`, Markup.removeKeyboard().extra())
           .then(async () => {
             const out = await listRaids(ctx.i18n.t('remote_invite_list', {
-              first_name: user.first_name, userid: user.id
+              first_name: escapeMarkDown(user.first_name), userid: user.id
             }), ctx)
             bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
           })

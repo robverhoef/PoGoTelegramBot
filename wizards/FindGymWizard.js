@@ -7,6 +7,7 @@ var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const setLocale = require('../util/setLocale')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 var FindGymWizard = function () {
   return new WizardScene('find-gym-wizard',
@@ -43,7 +44,7 @@ var FindGymWizard = function () {
         }
         ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_overview', {
           out: out,
-          term: term,
+          term: escapeMarkDown(term),
           l: l
         }), { disable_web_page_preview: true })
           .then(() => ctx.scene.leave())

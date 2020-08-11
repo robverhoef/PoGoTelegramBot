@@ -9,7 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 const setLocale = require('../util/setLocale')
-
+const escapeMarkDown = require('../util/escapeMarkDown')
 moment.tz.setDefault('Europe/Amsterdam')
 
 function JoinRaidWizard (bot) {
@@ -178,6 +178,7 @@ function JoinRaidWizard (bot) {
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('join_raid_list_reason', {
         user: user,
+        user_first_name: escapeMarkDown(user.first_name),
         gymname: joinedraid.gymname
       })
       ctx.i18n.locale(oldlocale)

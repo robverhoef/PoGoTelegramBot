@@ -9,6 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 const setLocale = require('../util/setLocale')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -101,7 +102,7 @@ var UserDelayedGymWizard = function (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_2min', {
-              first_name: user.first_name,
+              first_name: escapeMarkDown(user.first_name),
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
@@ -113,7 +114,7 @@ var UserDelayedGymWizard = function (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_5min', {
-              first_name: user.first_name,
+              first_name: escapeMarkDown(user.first_name),
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
@@ -125,7 +126,7 @@ var UserDelayedGymWizard = function (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_on_time', {
-              first_name: user.first_name,
+              first_name: escapeMarkDown(user.first_name),
               uid: user.id,
               gymname: delayedraid.gymname
             })}`

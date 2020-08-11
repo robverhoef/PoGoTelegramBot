@@ -9,6 +9,7 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 const setLocale = require('../util/setLocale')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -91,6 +92,7 @@ function ExitRaidWizard (bot) {
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('exit_raid_list_message', {
         user: user,
+        user_first_name: escapeMarkDown(user.first_name),
         gymname: ctx.session.gymnames[selectedraid]
       })
       // restore user locale

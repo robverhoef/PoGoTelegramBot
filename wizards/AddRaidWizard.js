@@ -14,6 +14,7 @@ const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
 const resolveRaidBoss = require('../util/resolveRaidBoss')
 const setLocale = require('../util/setLocale')
 const TIMINGS = require('../timeSettings.js')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -69,7 +70,7 @@ function AddRaidWizard (bot) {
             }
           })
           if (candidates.length === 0) {
-            ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: term }))
+            ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: escapeMarkDown(term) }))
             return
           }
         }
@@ -340,6 +341,7 @@ function AddRaidWizard (bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('raid_added_list', {
           gymname: ctx.session.newraid.gymname,
+          user_first_name: escapeMarkDown(user.first_name),
           user: user
         })
         ctx.i18n.locale(oldlang)
@@ -448,6 +450,7 @@ function AddRaidWizard (bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('raid_user_added_list', {
           user: user,
+          user_first_name: escapeMarkDown(user.first_name),
           gymname: ctx.session.newraid.gymname
         })
         ctx.i18n.locale(oldlang)
