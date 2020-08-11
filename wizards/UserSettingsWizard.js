@@ -8,8 +8,9 @@ var models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const setLocale = require('../util/setLocale')
-moment.tz.setDefault('Europe/Amsterdam')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
+moment.tz.setDefault('Europe/Amsterdam')
 var UserSettingsWizard = function (bot) {
   const steps = {
     start: 0,
@@ -59,7 +60,7 @@ var UserSettingsWizard = function (bot) {
         `${ctx.i18n.t('btn_usersettings_pokemon_naam')}`,
         `${ctx.i18n.t('btn_usersettings_language')}`
       ]
-      ctx.replyWithMarkdown(`*${ctx.i18n.t('usersettings_welcome', { first_name: user.first_name })}*`, Markup.keyboard(ctx.session.settingbtns)
+      ctx.replyWithMarkdown(`*${ctx.i18n.t('usersettings_welcome', { first_name: escapeMarkDown(user.first_name) })}*`, Markup.keyboard(ctx.session.settingbtns)
         .oneTime()
         .resize()
         .extra())

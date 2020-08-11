@@ -13,6 +13,7 @@ const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
 const resolveRaidBoss = require('../util/resolveRaidBoss')
 const setLocale = require('../util/setLocale')
 const TIMINGS = require('../timeSettings.js')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -278,6 +279,7 @@ function EditRaidWizard (bot) {
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             const reason = ctx.i18n.t('edit_raid_list_message', {
               gymname: ctx.session.editraid.gymname,
+              user_first_name: escapeMarkDown(user.first_name),
               user: user
             })
             // restore user locale

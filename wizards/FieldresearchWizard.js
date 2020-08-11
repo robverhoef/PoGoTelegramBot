@@ -9,6 +9,7 @@ const listRaids = require('../util/listRaids')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const setLocale = require('../util/setLocale')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 async function researchExists (stopId) {
   const today = moment()
@@ -91,7 +92,7 @@ function FieldresearchWizard (bot) {
         [ctx.i18n.t('fres_btn_mainmenu_remove_research'), 'deleteresearch'],
         [ctx.i18n.t('cancel'), 'cancelresearch']
       ]
-      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: ctx.from }), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: ctx.from, user_first_name: escapeMarkDown(ctx.from.first_name) }), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -289,7 +290,7 @@ function FieldresearchWizard (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             const reason = ctx.i18n.t('fres_list_reason', {
-              firstname: ctx.from.first_name,
+              firstname: escapeMarkDown(ctx.from.first_name),
               uid: ctx.from.id
             })
             // restore user locale
@@ -391,7 +392,7 @@ function FieldresearchWizard (bot) {
               // reason should always be in default locale
               ctx.i18n.locale(process.env.DEFAULT_LOCALE)
               const reason = ctx.i18n.t('fres_list_reason_modified', {
-                firstname: ctx.from.first_name,
+                firstname: escapeMarkDown(ctx.from.first_name),
                 uid: ctx.from.id
               })
               // restore user locale
@@ -497,14 +498,14 @@ function FieldresearchWizard (bot) {
               // reason should always be in default locale
               ctx.i18n.locale(process.env.DEFAULT_LOCALE)
               const reason = ctx.i18n.t('fres_list_reason_delete', {
-                firstname: ctx.from.first_name,
+                firstname: escapeMarkDown(ctx.from.first_name),
                 uid: ctx.from.id
               })
               // restore user locale
               ctx.i18n.locale(oldlocale)
               const raidlist = await listRaids(`${reason}\n\n`, ctx)
               bot.telegram.sendMessage(process.env.GROUP_ID, raidlist, { parse_mode: 'Markdown', disable_web_page_preview: true })
-              console.log(`Research deleted ${ctx.session.destroyresearch} by ${ctx.from.first_name}, ${ctx.from.id}`)
+              console.log(`Research deleted ${ctx.session.destroyresearch} by ${escapeMarkDown(ctx.from.first_name)}, ${ctx.from.id}`)
             }
           } catch (error) {
             console.log(`Could not delete ${ctx.session.destroyresearch}`, error)

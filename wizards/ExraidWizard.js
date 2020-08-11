@@ -12,6 +12,7 @@ const setLocale = require('../util/setLocale')
 const inputExRaidTime = require('../util/inputExRaidTime')
 const resolveRaidBoss = require('../util/resolveRaidBoss')
 const TIMINGS = require('../timeSettings.js')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 async function listExraids () {
   const today = moment()
@@ -397,7 +398,8 @@ function ExraidWizard (bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('exraid_added_list', {
           gymname: ctx.session.newexraid.gymname,
-          user: user
+          user: user,
+          user_first_name: escapeMarkDown(user.first_name)
         })
         // restore user locale
         ctx.i18n.locale(oldlocale)
@@ -490,7 +492,8 @@ function ExraidWizard (bot) {
           ctx.i18n.locale(process.env.DEFAULT_LOCALE)
           const reason = ctx.i18n.t('exraid_joined_noinvite_message', {
             gymname: ctx.session.newexraid.gymname,
-            user: user
+            user: user,
+            user_first_name: escapeMarkDown(user.first_name)
           })
           // restore user locale
           ctx.i18n.locale(oldlocale)
@@ -569,7 +572,8 @@ function ExraidWizard (bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('exraid_joined_message', {
           gymname: ctx.session.newexraid.gymname,
-          user: user
+          user: user,
+          user_first_name: user.first_name,
         })
         // restore user locale
         ctx.i18n.locale(oldlocale)
@@ -640,7 +644,8 @@ function ExraidWizard (bot) {
           ctx.i18n.locale(process.env.DEFAULT_LOCALE)
           const reason = ctx.i18n.t('exraid_exit_list_message', {
             gymname: ctx.session.selectedRaid.Gym.gymname,
-            user: user
+            user: user,
+            user_first_name: escapeMarkDown(user.first_name)
           })
           // restore user locale
           ctx.i18n.locale(oldlocale)
@@ -736,7 +741,8 @@ function ExraidWizard (bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('exraid_joined_noinvite_message', {
           gymname: ctx.session.selectedRaid.Gym.gymname,
-          user: user
+          user: user,
+          user_first_name: escapeMarkDown(user.first_name)
         })
         // restore user locale
         ctx.i18n.locale(oldlocale)
@@ -823,7 +829,8 @@ function ExraidWizard (bot) {
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('exraid_user_added_list', {
         gymname: ctx.session.selectedRaid.Gym.gymname,
-        user: user
+        user: user,
+        user_first_name: escapeMarkDown(user.first_name)
       })
       const out = await listRaids(reason + '\n\n', ctx)
       // restore user locale
@@ -1075,7 +1082,8 @@ function ExraidWizard (bot) {
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             const reason = ctx.i18n.t('edit_exraid_list_message', {
               gymname: ctx.session.selectedRaid.Gym.gymname,
-              user: user
+              user: user,
+              user_first_name: escapeMarkDown(user.first_name),
             })
             // restore user locale
             ctx.i18n.locale(oldlocale)

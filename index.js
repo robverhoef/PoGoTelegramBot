@@ -9,6 +9,7 @@ const TelegrafI18n = require('telegraf-i18n')
 const path = require('path')
 const models = require('./models')
 require('./locales.js')
+const escapeMarkDown = require('./util/escapeMarkDown.js')
 const setLocale = require('./util/setLocale')
 
 const listRaids = require('./util/listRaids')
@@ -16,7 +17,6 @@ const listRaids = require('./util/listRaids')
 // Let's go!
 // =====================
 const bot = new Telegraf(process.env.BOT_TOKEN)
-
 bot.catch((err) => {
   console.log('Ooops', err)
 })
@@ -228,7 +228,7 @@ async function showMainMenu (ctx, user) {
   // for testing only
   // btns.push('Trigger raidlist')
 
-  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: user }), Markup.keyboard(
+  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { first_name: escapeMarkDown(user.first_name) }), Markup.keyboard(
     btns).oneTime().resize().extra())
 }
 
@@ -315,7 +315,7 @@ bot.on('inline_query', async ctx => {
     }
   })
   if (!user) {
-    console.log(`NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name}`)
+    console.log(`NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${escapeMarkDown(ctx.inlineQuery.from.first_name)}`)
     return
   }
 
@@ -349,7 +349,7 @@ bot.hears(/\/hi/i, async (ctx) => {
   })
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
+    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', { first_name: escapeMarkDown(ctx.from.first_name), me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
     return
   }
   // console.log(
@@ -373,7 +373,7 @@ bot.hears(/\/hi/i, async (ctx) => {
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', { first_name: ctx.from.first_name, me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
+      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', { first_name: escapeMarkDown(ctx.from.first_name), me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
