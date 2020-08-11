@@ -11,6 +11,7 @@ const lastExRaidPassDate = require('../util/lastExRaidPassDate')
 const Op = Sequelize.Op
 const setLocale = require('../util/setLocale')
 const adminCheck = require('../util/adminCheck')
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 const personalTop = 10
 const globalTop = 10
@@ -282,7 +283,7 @@ function processRaidusers (raids, ctx) {
     statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
     for (let i = 0; i < userCount.length; i++) {
       const userId = userCount[i][0]
-      statMessage += `- ${userNames[userId]}: *${userCount[i][1]} ${ctx.i18n.t('stats_times_raided')}*\n`
+      statMessage += `- ${escapeMarkDown(userNames[userId])}: *${userCount[i][1]} ${ctx.i18n.t('stats_times_raided')}*\n`
     }
     statMessage += '\n'
   }
@@ -316,7 +317,7 @@ async function processRaidreporters (raids, ctx) {
         }
       })
       if (user !== null) {
-        statMessage += `- ${user.tUsername}: *${reporterCount[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
+        statMessage += `- ${escapeMarkDown(user.tUsername)}: *${reporterCount[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
       }
     }
   }
