@@ -18,7 +18,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     remote: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    private: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   }, { tableName: 'raidusers' })
 

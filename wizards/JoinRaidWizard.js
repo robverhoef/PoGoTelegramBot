@@ -105,9 +105,9 @@ function JoinRaidWizard (bot) {
       ctx.session.remote = false
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
       let remotecurrentusers = 0
-      if (ctx.session.raidtype === ctx.i18n.t('private_raid_confirm')) {
-        ctx.session.private = true
-      }
+
+      ctx.session.private = ctx.session.raidtype === ctx.i18n.t('private_raid_confirm')
+
       if (ctx.session.raidtype === ctx.i18n.t('remote_raid_confirm')) {
         ctx.session.remote = true
 
@@ -142,7 +142,8 @@ function JoinRaidWizard (bot) {
           await models.Raiduser.update(
             {
               accounts: accounts,
-              remote: ctx.session.remote
+              remote: ctx.session.remote,
+              private: ctx.session.private
             },
             {
               where: {
@@ -164,7 +165,8 @@ function JoinRaidWizard (bot) {
           username: user.first_name,
           uid: user.id,
           accounts: accounts,
-          remote: ctx.session.remote
+          remote: ctx.session.remote,
+          private: ctx.session.private
         })
         try {
           await raiduser.save()

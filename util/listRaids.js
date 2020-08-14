@@ -69,6 +69,7 @@ module.exports = async (reason, ctx) => {
 
     let userlist = ''
     let remoteuserlist = ''
+    let privateuserlist = ''
     let accounter = 0
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       const raiduser = raids[a].Raidusers[b]
@@ -85,15 +86,12 @@ module.exports = async (reason, ctx) => {
       }
       const userString = getUserString()
 
-      if (raiduser.remote !== true) {
-        userlist += userString
-      } else {
-        remoteuserlist += userString
-      }
+      raiduser.remote ? remoteuserlist += userString : raiduser.private ? privateuserlist += userString : userlist += userString
     }
     out += `${ctx.i18n.t('number')}: ${accounter}\n`
     out += userlist.length ? `${ctx.i18n.t('participants')}: ${userlist}\n` : ''
     out += remoteuserlist.length ? `${ctx.i18n.t('participants_remotely')}: ${remoteuserlist}` : ''
+    out += privateuserlist.length ? `${ctx.i18n.t('participants_private')}: ${privateuserlist}` : ''
     out += '\n\n'
   }
 

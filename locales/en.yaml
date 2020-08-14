@@ -110,6 +110,7 @@ remote_raid_question: "How are you joining this raid?"
 remote_raid_confirm: "Remotely! 🚀"
 local_raid_confirm: "Locally, near the gym ⬇"
 private_raid_confirm: "Private raid; remotely or locally 🤫"
+participants_private: "Private raid"
 maximum_remote_raid_reached: "Unfortunately, the maximum amount of remote users for this raid has been reached.\n The maximum number is: "
 try_again_remote_limit: "\nPerhaps try again with a lower amount, press /start...."
 

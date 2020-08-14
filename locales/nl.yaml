@@ -110,6 +110,7 @@ remote_raid_question: "Hoe doe jij mee?"
 remote_raid_confirm: "Op afstand! 🚀"
 local_raid_confirm: "Lokaal, bij de gym ⬇"
 private_raid_confirm: "Private raid; remote of lokaal 🤫"
+participants_private: "Private raid 🤫"
 maximum_remote_raid_reached: "Helaas, het maximaal aantal remote raid users is bereikt. \n\n Het maximale aantal is: "
 try_again_remote_limit: "\nProbeer het met een lager aantal wellicht, klik hier op /start...."
 
