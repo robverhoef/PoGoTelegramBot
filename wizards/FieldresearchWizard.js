@@ -92,7 +92,7 @@ function FieldresearchWizard (bot) {
         [ctx.i18n.t('fres_btn_mainmenu_remove_research'), 'deleteresearch'],
         [ctx.i18n.t('cancel'), 'cancelresearch']
       ]
-      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: ctx.from, user_first_name: escapeMarkDown(ctx.from.first_name) }), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { user: ctx.from, first_name: escapeMarkDown(ctx.from.first_name) }), Markup.keyboard(ctx.session.mainreseachbtns.map(el => el[0])).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
