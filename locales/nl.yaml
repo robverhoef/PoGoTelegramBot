@@ -108,6 +108,7 @@ add_raid_0_45_min_error: "Opgegeven minuten moeten tussen de 0 en ${bosstime} li
 btn_gym_find_location: "Zoek gyms in mijn omgeving…"
 remote_raid_question: "Hoe doe jij mee?"
 remote_raid_confirm: "Op afstand! 🚀"
+remote_invite_raid_confirm: "Op afstand, ik heb een invite 📨"
 local_raid_confirm: "Lokaal, bij de gym ⬇"
 private_raid_confirm: "Private raid; remote of lokaal 🤫"
 participants_private: "Private raid 🤫"

@@ -108,6 +108,7 @@ add_raid_0_45_min_error: "Los minutos ingresados tienen que estar entre 0 y ${bo
 btn_gym_find_location: "Busca gimnasios a mis alrededores…"
 remote_raid_question: "Participarás de forma Remote?"
 remote_raid_confirm: "Sí, de distancia! 🚀"
+remote_invite_raid_confirm: "Remote, I have an invite 📨"
 local_raid_confirm: "No, cerca del gym ⬇"
 private_raid_confirm: "Private raid; remotely or locally 🤫"
 participants_private: "Private raid"

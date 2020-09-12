@@ -14,6 +14,7 @@ moment.tz.setDefault('Europe/Amsterdam')
 
 function JoinRaidWizard (bot) {
   return new WizardScene('join-raid-wizard',
+    // step 0
     async (ctx) => {
       await setLocale(ctx)
       ctx.session.joinedraid = null
@@ -52,7 +53,7 @@ function JoinRaidWizard (bot) {
       return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_select_raid'), Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
         .then(() => ctx.wizard.next())
     },
-
+    // step 1
     async (ctx) => {
       // retrieve selected candidate  from session…
       const ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
@@ -72,6 +73,7 @@ function JoinRaidWizard (bot) {
       // Extra question for remote raid
       ctx.session.remoteOptions = [
         ctx.i18n.t('remote_raid_confirm'),
+        ctx.i18n.t('remote_invite_raid_confirm'),
         ctx.i18n.t('local_raid_confirm'),
         ctx.i18n.t('private_raid_confirm')
       ]
@@ -79,12 +81,13 @@ function JoinRaidWizard (bot) {
         .resize().oneTime().extra())
         .then(() => ctx.wizard.next())
     },
-
+    // step 2
     async (ctx) => {
       // save selected answer to session
       ctx.session.raidtype = ctx.update.message.text.trim()
       if (
         ctx.session.raidtype !== ctx.i18n.t('remote_raid_confirm') &&
+        ctx.session.raidtype !== ctx.i18n.t('remote_invite_raid_confirm') &&
         ctx.session.raidtype !== ctx.i18n.t('local_raid_confirm') &&
         ctx.session.raidtype !== ctx.i18n.t('private_raid_confirm')
       ) {
@@ -98,6 +101,7 @@ function JoinRaidWizard (bot) {
           .then(() => ctx.wizard.next())
       }
     },
+    // step 3
     async (ctx) => {
       let remoteraidusers = 0
       // some people manage to enter a NaN… so: || 1
@@ -107,10 +111,10 @@ function JoinRaidWizard (bot) {
       let remotecurrentusers = 0
 
       ctx.session.private = ctx.session.raidtype === ctx.i18n.t('private_raid_confirm')
+      ctx.session.invited = ctx.session.raidtype === ctx.i18n.t('remote_invite_raid_confirm')
 
-      if (ctx.session.raidtype === ctx.i18n.t('remote_raid_confirm')) {
+      if (ctx.session.raidtype === ctx.i18n.t('remote_raid_confirm') || ctx.session.raidtype === ctx.i18n.t('remote_invite_raid_confirm')) {
         ctx.session.remote = true
-
         const rucount = await models.sequelize.query('select sum(accounts) as remotes from raidusers where raidId = ? and uid != ? and remote = 1', {
           replacements: [joinedraid.raidid, ctx.from.id],
           type: models.sequelize.QueryTypes.SELECT
@@ -143,6 +147,7 @@ function JoinRaidWizard (bot) {
             {
               accounts: accounts,
               remote: ctx.session.remote,
+              invited: ctx.session.invited,
               private: ctx.session.private
             },
             {
@@ -166,6 +171,7 @@ function JoinRaidWizard (bot) {
           uid: user.id,
           accounts: accounts,
           remote: ctx.session.remote,
+          invited: ctx.session.invited,
           private: ctx.session.private
         })
         try {

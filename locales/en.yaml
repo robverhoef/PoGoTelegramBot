@@ -108,6 +108,7 @@ add_raid_0_45_min_error: "Minutes input must be between 0 and ${bosstime}. \n*Tr
 btn_gym_find_location: "Look for gyms in my neighborhood…"
 remote_raid_question: "How are you joining this raid?"
 remote_raid_confirm: "Remotely! 🚀"
+remote_invite_raid_confirm: "Remote, I have an invite 📨"
 local_raid_confirm: "Locally, near the gym ⬇"
 private_raid_confirm: "Private raid; remotely or locally 🤫"
 participants_private: "Private raid"

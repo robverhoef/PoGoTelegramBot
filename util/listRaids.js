@@ -2,6 +2,7 @@ const moment = require('moment-timezone')
 const models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
+const escapeMarkDown = require('../util/escapeMarkDown')
 
 // The timezone
 moment.tz.setDefault('Europe/Amsterdam')
@@ -22,9 +23,9 @@ module.exports = async (reason, ctx) => {
     let invstring = ''
     if (invitable.User.pokemonname || invitable.User.friendcode) {
       const usr = encodeURI(`https://t.me/${process.env.BOT_USERNAME}?start=udetail_${invitable.User.id}`)
-      invstring = `[${invitable.User.tUsername} ${pokemon}](${usr}) `
+      invstring = `[${escapeMarkDown(invitable.User.tUsername)} ${pokemon}](${usr}) `
     } else {
-      invstring = `[${invitable.User.tUsername} ${pokemon}](tg://user?id=${invitable.User.tId}) `
+      invstring = `[${escapeMarkDown(invitable.User.tUsername)} ${pokemon}](tg://user?id=${invitable.User.tId}) `
     }
     return invstring
   }
@@ -43,7 +44,8 @@ module.exports = async (reason, ctx) => {
         }
       },
       order: [
-        ['start1', 'ASC']
+        ['start1', 'ASC'],
+        [models.Raiduser, 'id', 'asc']
       ]
     }))
   for (let a = 0; a < raids.length; a++) {
@@ -79,18 +81,19 @@ module.exports = async (reason, ctx) => {
 
       const getUserString = () => {
         if (raiduser.delayed != null) {
-          return `[<⏰ ${raiduser.delayed} ${raiduser.username}>]${tag}${accounts}`
+          return `[<⏰ ${raiduser.delayed} ${escapeMarkDown(raiduser.username)}>]${tag}${accounts}`
+        } else if (raiduser.private && privateuserlist.length === 0) {
+          return `[*${escapeMarkDown(raiduser.username)}*]${tag}${accounts}`
         } else {
-          return `[${raiduser.username}]${tag}${accounts}`
+          return `[${escapeMarkDown(raiduser.username + (raiduser.invited ? ' 📨' : ''))}]${tag}${accounts}`
         }
       }
       const userString = getUserString()
-
       raiduser.remote ? remoteuserlist += userString : raiduser.private ? privateuserlist += userString : userlist += userString
     }
     out += `${ctx.i18n.t('number')}: ${accounter}\n`
     out += userlist.length ? `${ctx.i18n.t('participants')}: ${userlist}\n` : ''
-    out += remoteuserlist.length ? `${ctx.i18n.t('participants_remotely')}: ${remoteuserlist}` : ''
+    out += remoteuserlist.length ? `${ctx.i18n.t('participants_remotely')}: ${remoteuserlist}\n` : ''
     out += privateuserlist.length ? `${ctx.i18n.t('participants_private')}: ${privateuserlist}` : ''
     out += '\n\n'
   }
