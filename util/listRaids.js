@@ -60,9 +60,9 @@ module.exports = async (reason, ctx) => {
     } else {
       out += `${raids[a].Gym.gymname}\n`
     }
-    if (raids[a].Gym.exRaidTrigger) {
-      out += '💳 ExRaid Trigger\n'
-    }
+    // if (raids[a].Gym.exRaidTrigger) {
+    //   out += '💳 ExRaid Trigger\n'
+    // }
     const strtime = moment.unix(raids[a].start1)
     out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
 

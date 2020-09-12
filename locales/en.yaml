@@ -371,7 +371,8 @@ admin_stops_my_stop_not_listed: "My Pokéstop is not listed"
 # Language wizard
 lang_set: "Your language was set to English\r\n*Click */start* to take another action.*"
 
-list_raids_fres_count: "The bot knows about ${researchcount} Field Researches and ${exraidcount} Ex Raids\r\n\r\n"
+list_raids_fres_count: "The bot knows about ${researchcount} Field Researches\r\n\r\n"
+# and ${exraidcount} Ex Raids\r\n\r\n"
 
 # Exraids
 edit_exraid_no_raids_found: "Sorry, I can't find an Ex Raid now 🤨\n\n*You can now return to the group. Or click */start* to take another action*"

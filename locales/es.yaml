@@ -372,7 +372,8 @@ admin_stops_my_stop_not_listed: "Mi parada no esta en la lista"
 # Language wizard
 lang_set: "Tu idioma ahora está configurado a Español.\r\n*Pulse en */start* para hacer algo más*"
 
-list_raids_fres_count: "El bot conoce ahora ${researchcount} Investigaciónes de Campo en ${exraidcount} Ex Raids\r\n\r\n"
+list_raids_fres_count: "El bot conoce ahora ${researchcount} Investigaciónes de Campo\r\n\r\n"
+# y ${exraidcount} Ex Raids\r\n\r\n"
 
 # Exraids
 

@@ -370,7 +370,8 @@ admin_stops_my_stop_not_listed: "Mijn stop staat er niet bij"
 # Language wizard
 lang_set: "Je taal is nu ingesteld op Nederlands.\n\n*Klik op */start* om nog een actie uit te voeren*"
 
-list_raids_fres_count: "De bot kent nu ${researchcount} Field Researches en ${exraidcount} Ex Raids\r\n\r\n"
+list_raids_fres_count: "De bot kent nu ${researchcount} Field Researches\r\n\r\n"
+# en ${exraidcount} Ex Raids\r\n\r\n"
 
 # Exraids
 
