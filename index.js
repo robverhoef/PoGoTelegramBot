@@ -34,16 +34,22 @@ bot.use(i18n.middleware())
 // ToDo: this should could come from env
 moment.tz.setDefault('Europe/Amsterdam')
 /**
-* This will stop the conversation immeditaly
-* @param context
-*/
-async function cancelConversation (ctx) {
+ * This will stop the conversation immeditaly
+ * @param context
+ */
+async function cancelConversation(ctx) {
   // Since something might be failing… reset session
   ctx.session = {}
   // session cleared; resetting locale
   await setLocale(ctx)
-  return ctx.scene.leave()
-    .then(() => ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra()))
+  return ctx.scene
+    .leave()
+    .then(() =>
+      ctx.replyWithMarkdown(
+        ctx.i18n.t('cancelmessage'),
+        Markup.removeKeyboard().extra()
+      )
+    )
 }
 
 // Setup for all wizards
@@ -146,10 +152,10 @@ const stage = new Stage([
 ])
 
 /**
-* Show help
-* @param context
-*/
-function showHelp (ctx) {
+ * Show help
+ * @param context
+ */
+function showHelp(ctx) {
   setLocale(ctx)
   ctx.reply(ctx.i18n.t('helpmessage'))
 }
@@ -159,7 +165,7 @@ bot.use(stage.middleware())
 //   ctx.session = {}
 //   ctx.scene.leave()
 // }
-async function showMainMenu (ctx, user) {
+async function showMainMenu(ctx, user) {
   ctx.session = {}
   ctx.scene.leave()
   const raids = await models.Raid.findAll({
@@ -185,6 +191,7 @@ async function showMainMenu (ctx, user) {
     // btns.push(ctx.i18n.t('btn_user_delayed'))
   }
   btns.push(ctx.i18n.t('btn_add_raid'))
+  btns.push(ctx.i18n.t('btn_eliteraids'))
   btns.push(ctx.i18n.t('btn_edit_raid'))
   btns.push(ctx.i18n.t('btn_usersettings'))
   btns.push(ctx.i18n.t('btn_remote_invites'))
@@ -228,8 +235,12 @@ async function showMainMenu (ctx, user) {
   // for testing only
   // btns.push('Trigger raidlist')
 
-  return ctx.replyWithMarkdown(ctx.i18n.t('main_menu_greeting', { first_name: escapeMarkDown(user.first_name) }), Markup.keyboard(
-    btns).oneTime().resize().extra())
+  return ctx.replyWithMarkdown(
+    ctx.i18n.t('main_menu_greeting', {
+      first_name: escapeMarkDown(user.first_name)
+    }),
+    Markup.keyboard(btns).oneTime().resize().extra()
+  )
 }
 
 // This runs after the user has started from an inline query in the group or /start in private mode
@@ -258,7 +269,13 @@ bot.command('/start', async (ctx) => {
         }
       })
       if (inv) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('telegram_name')}: ${inv.tUsername}\n${ctx.i18n.t('trainer_name')}: ${inv.pokemonname ? inv.pokemonname : '?'}\n${ctx.i18n.t('friend_code')}: ${inv.friendcode ? inv.friendcode : '?'}\n`)
+        return ctx.replyWithMarkdown(
+          `${ctx.i18n.t('telegram_name')}: ${inv.tUsername}\n${ctx.i18n.t(
+            'trainer_name'
+          )}: ${inv.pokemonname ? inv.pokemonname : '?'}\n${ctx.i18n.t(
+            'friend_code'
+          )}: ${inv.friendcode ? inv.friendcode : '?'}\n`
+        )
       }
     }
     return showMainMenu(ctx, user)
@@ -274,38 +291,94 @@ bot.command('cancel', (ctx) => cancelConversation(ctx))
 bot.command('lang', Stage.enter('locale-wizard'))
 // iterate over languages
 for (var key in i18n.repository) {
-  bot.hears(i18n.repository[key].btn_join_raid.call(), Stage.enter('join-raid-wizard'))
-  bot.hears(i18n.repository[key].btn_exit_raid.call(), Stage.enter('exit-raid-wizard'))
-  bot.hears(i18n.repository[key].btn_add_raid.call(), Stage.enter('add-raid-wizard'))
-  bot.hears(i18n.repository[key].btn_edit_raid.call(), Stage.enter('edit-raid-wizard'))
-  bot.hears(i18n.repository[key].btn_find_gym.call(), Stage.enter('find-gym-wizard'))
-  bot.hears(i18n.repository[key].btn_usersettings.call(), Stage.enter('user-settings-wizard'))
-  bot.hears(i18n.repository[key].btn_field_researches.call(), Stage.enter('fieldresearch-wizard'))
+  bot.hears(
+    i18n.repository[key].btn_join_raid.call(),
+    Stage.enter('join-raid-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_exit_raid.call(),
+    Stage.enter('exit-raid-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_add_raid.call(),
+    Stage.enter('add-raid-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_edit_raid.call(),
+    Stage.enter('edit-raid-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_find_gym.call(),
+    Stage.enter('find-gym-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_usersettings.call(),
+    Stage.enter('user-settings-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_field_researches.call(),
+    Stage.enter('fieldresearch-wizard')
+  )
   bot.hears(i18n.repository[key].btn_stats.call(), Stage.enter('stats-wizard'))
 
-  bot.hears(i18n.repository[key].btn_exraids.call(), Stage.enter('exraid-wizard'))
+  bot.hears(
+    i18n.repository[key].btn_eliteraids.call(),
+    Stage.enter('exraid-wizard')
+  )
 
-  bot.hears(i18n.repository[key].btn_notifications.call(), Stage.enter('notification-wizard'))
-  bot.hears(i18n.repository[key].btn_remote_invites.call(), Stage.enter('remote-invites-wizard'))
+  bot.hears(
+    i18n.repository[key].btn_exraids.call(),
+    Stage.enter('exraid-wizard')
+  )
+
+  bot.hears(
+    i18n.repository[key].btn_notifications.call(),
+    Stage.enter('notification-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_remote_invites.call(),
+    Stage.enter('remote-invites-wizard')
+  )
   // bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
   // Admin
-  bot.hears(i18n.repository[key].btn_manage_fieldresearches.call(), Stage.enter('admin-field-research-wizard'))
-  bot.hears(i18n.repository[key].btn_add_gym.call(), Stage.enter('add-gym-wizard'))
-  bot.hears(i18n.repository[key].btn_edit_gym.call(), Stage.enter('edit-gym-wizard'))
-  bot.hears(i18n.repository[key].btn_add_boss.call(), Stage.enter('add-raidboss-wizard'))
-  bot.hears(i18n.repository[key].btn_edit_boss.call(), Stage.enter('edit-raidboss-wizard'))
-  bot.hears(i18n.repository[key].btn_admin_stops.call(), Stage.enter('admin-stops-wizard'))
+  bot.hears(
+    i18n.repository[key].btn_manage_fieldresearches.call(),
+    Stage.enter('admin-field-research-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_add_gym.call(),
+    Stage.enter('add-gym-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_edit_gym.call(),
+    Stage.enter('edit-gym-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_add_boss.call(),
+    Stage.enter('add-raidboss-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_edit_boss.call(),
+    Stage.enter('edit-raidboss-wizard')
+  )
+  bot.hears(
+    i18n.repository[key].btn_admin_stops.call(),
+    Stage.enter('admin-stops-wizard')
+  )
 
   bot.hears('Trigger raidlist', async (ctx) => {
     const out = await listRaids('\n', ctx)
-    bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+    bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true
+    })
   })
 }
 
 /**
-* Check if valid user and show START button to switch to private mode
-*/
-bot.on('inline_query', async ctx => {
+ * Check if valid user and show START button to switch to private mode
+ */
+bot.on('inline_query', async (ctx) => {
   const user = await models.User.findOne({
     where: {
       [Op.and]: [
@@ -315,16 +388,19 @@ bot.on('inline_query', async ctx => {
     }
   })
   if (!user) {
-    console.log(`NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${escapeMarkDown(ctx.inlineQuery.from.first_name)}`)
+    console.log(
+      `NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${escapeMarkDown(
+        ctx.inlineQuery.from.first_name
+      )}`
+    )
     return
   }
 
   // if (ctx.inlineQuery.query === 'actie') {
-  return ctx.answerInlineQuery([],
-    {
-      switch_pm_text: 'STARTEN',
-      switch_pm_parameter: 'help_fromgroup'
-    })
+  return ctx.answerInlineQuery([], {
+    switch_pm_text: 'STARTEN',
+    switch_pm_parameter: 'help_fromgroup'
+  })
   // }
 })
 
@@ -338,7 +414,12 @@ bot.hears(/\/hi/i, async (ctx) => {
   if (ctx.update.message.chat === undefined) {
     return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_group_warning'))
   }
-  console.log('Somebody said hi', moment().format('YYYY-MM-DD HH:mm:ss'), ctx.update.message.from, ctx.update.message.chat)
+  console.log(
+    'Somebody said hi',
+    moment().format('YYYY-MM-DD HH:mm:ss'),
+    ctx.update.message.from,
+    ctx.update.message.chat
+  )
   const olduser = await models.User.findOne({
     where: {
       [Op.and]: [
@@ -349,7 +430,15 @@ bot.hears(/\/hi/i, async (ctx) => {
   })
   if (olduser !== null) {
     chattitle = ctx.update.message.chat.title
-    bot.telegram.sendMessage(olduser.tId, ctx.i18n.t('already_know_user', { first_name: escapeMarkDown(ctx.from.first_name), me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
+    bot.telegram.sendMessage(
+      olduser.tId,
+      ctx.i18n.t('already_know_user', {
+        first_name: escapeMarkDown(ctx.from.first_name),
+        me: me,
+        chattitle: chattitle
+      }),
+      { parse_mode: 'Markdown' }
+    )
     return
   }
   // console.log(
@@ -367,13 +456,25 @@ bot.hears(/\/hi/i, async (ctx) => {
     try {
       await newuser.save()
     } catch (error) {
-      console.error('Error saving user', ctx.update.message.from.first_name, error)
+      console.error(
+        'Error saving user',
+        ctx.update.message.from.first_name,
+        error
+      )
     }
     const chattitle = ctx.update.message.chat.title
     // Catch error in case the bot is responding for the first time to user
     // Telegram: "Bots can't initiate conversations with users." …despite having said /hi
     try {
-      await bot.telegram.sendMessage(newuser.tId, ctx.i18n.t('just_met_message', { first_name: escapeMarkDown(ctx.from.first_name), me: me, chattitle: chattitle }), { parse_mode: 'Markdown' })
+      await bot.telegram.sendMessage(
+        newuser.tId,
+        ctx.i18n.t('just_met_message', {
+          first_name: escapeMarkDown(ctx.from.first_name),
+          me: me,
+          chattitle: chattitle
+        }),
+        { parse_mode: 'Markdown' }
+      )
     } catch (error) {
       console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
     }
@@ -383,23 +484,23 @@ bot.hears(/\/hi/i, async (ctx) => {
 })
 
 /**
-* Remind the user of /cancel. Maybe more later (read pinned message?)
-*/
+ * Remind the user of /cancel. Maybe more later (read pinned message?)
+ */
 bot.hears(/\/help/i, async (ctx) => {
   showHelp(ctx)
 })
 
 /**
-*  Method to get the Telegram group Id
-*/
+ *  Method to get the Telegram group Id
+ */
 bot.hears(/\/whoisthebot/i, async (ctx) => {
   console.log('whoisthebot:', ctx.message)
   ctx.reply('Check the logs…')
 })
 
 /**
-* Register new member
-*/
+ * Register new member
+ */
 bot.on('new_chat_members', async (ctx) => {
   var newusr = ctx.message.new_chat_member
   if (newusr.is_bot === true) {
@@ -427,7 +528,11 @@ bot.on('new_chat_members', async (ctx) => {
       await newuser.save()
       console.log('new user added', newusr)
     } catch (error) {
-      console.error('Error saving user', ctx.update.message.from.first_name, error)
+      console.error(
+        'Error saving user',
+        ctx.update.message.from.first_name,
+        error
+      )
     }
   } else {
     console.log('User tried to join but group check failed', newusr)
@@ -435,8 +540,8 @@ bot.on('new_chat_members', async (ctx) => {
 })
 
 /**
-* Removing members who left the group
-*/
+ * Removing members who left the group
+ */
 bot.on('left_chat_member', async (ctx) => {
   var removed = ctx.message.left_chat_member
   try {
@@ -452,25 +557,25 @@ bot.on('left_chat_member', async (ctx) => {
 })
 
 /**
-* Convenience method, just for checking
-*/
+ * Convenience method, just for checking
+ */
 bot.hears(/\/raids/i, async (ctx) => {
   setLocale(ctx)
-  const raids = await models.sequelize.query('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));')
-    .then(() => models.Raid.findAll({
-      include: [
-        models.Gym,
-        models.Raiduser
-      ],
-      where: {
-        endtime: {
-          [Op.gt]: moment().unix()
-        }
-      },
-      order: [
-        ['start1', 'ASC']
-      ]
-    }))
+  const raids = await models.sequelize
+    .query(
+      "SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));"
+    )
+    .then(() =>
+      models.Raid.findAll({
+        include: [models.Gym, models.Raiduser],
+        where: {
+          endtime: {
+            [Op.gt]: moment().unix()
+          }
+        },
+        order: [['start1', 'ASC']]
+      })
+    )
   let out = ''
   if (raids.length === 0) {
     ctx.reply(ctx.i18n.t('no_raids_found'))
@@ -500,10 +605,9 @@ bot.hears(/\/raids/i, async (ctx) => {
 })
 
 // Let's fire up!
-bot.telegram.setWebhook(process.env.BOT_URL)
-  .then((data) => {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set')
-  })
+bot.telegram.setWebhook(process.env.BOT_URL).then((data) => {
+  console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set')
+})
 
 bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
 console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')

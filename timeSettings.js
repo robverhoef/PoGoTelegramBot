@@ -9,5 +9,6 @@ module.exports = Object.freeze({
   // default start time before the end of the raid
   RAID_START: 15,
   // time for exraidboss to stay
-  EXRAIDBOSS: 45
-})
+  EXRAIDBOSS: 45,
+  ELITERAIDBOSS: 30,
+});
