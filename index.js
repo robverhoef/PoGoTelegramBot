@@ -93,9 +93,13 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const ExraidWizard = require('./wizards/ExraidWizard')
-const exraidWizard = ExraidWizard(bot)
-exraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
+// const ExraidWizard = require('./wizards/ExraidWizard')
+// const exraidWizard = ExraidWizard(bot)
+// exraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
+
+const EliteraidWizard = require('./wizards/EliteraidWizard')
+const eliteraidWizard = EliteraidWizard(bot)
+eliteraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
 const AddNotificationWizard = require('./wizards/NotificationWizard')
 const addNotificationWizard = AddNotificationWizard(bot)
@@ -140,7 +144,8 @@ const stage = new Stage([
   addRaidbossWizard,
   editRaidbossWizard,
   statsWizard,
-  exraidWizard,
+  eliteraidWizard,
+  // exraidWizard,
   addNotificationWizard,
   localeWizard,
   userDelayedWizard,
@@ -323,7 +328,7 @@ for (var key in i18n.repository) {
 
   bot.hears(
     i18n.repository[key].btn_eliteraids.call(),
-    Stage.enter('exraid-wizard')
+    Stage.enter('eliteraid-wizard')
   )
 
   bot.hears(

@@ -41,7 +41,6 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "forever": "^4.0.3",
     "mocha": "^6.2.3",
     "nodemon": "^2.0.20",
     "sequelize-cli": "^5.5.1"

@@ -9,12 +9,12 @@ const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const listRaids = require('../util/listRaids')
 const setLocale = require('../util/setLocale')
-const inputExRaidTime = require('../util/inputExRaidTime')
+const inputRaidDaysTime = require('../util/inputRaidDaysTime')
 const resolveRaidBoss = require('../util/resolveRaidBoss')
 const TIMINGS = require('../timeSettings.js')
 const escapeMarkDown = require('../util/escapeMarkDown')
 
-async function listExraids () {
+async function listExraids() {
   const today = moment()
   today.hours(0)
   today.minutes(0)
@@ -25,10 +25,7 @@ async function listExraids () {
         [Op.gt]: today.unix()
       }
     },
-    include: [
-      models.Gym,
-      models.Exraiduser
-    ],
+    include: [models.Gym, models.Exraiduser],
     order: [
       ['start1', 'ASC'],
       [models.Exraiduser, 'hasinvite', 'DESC']
@@ -37,7 +34,7 @@ async function listExraids () {
   return exraids
 }
 
-function makeExraidShow (exraids, ctx) {
+function makeExraidShow(exraids, ctx) {
   var out = '*EX RAIDS*\n\n'
   for (const exraid of exraids) {
     const strtime = moment.unix(exraid.start1)
@@ -58,9 +55,21 @@ function makeExraidShow (exraids, ctx) {
       if (exraid.Exraidusers[b].hasinvite) {
         accounter += exraid.Exraidusers[b].accounts
         if (exraid.Exraidusers[b].delayed != null) {
-          userlist += `[<⏰ ${exraid.Exraidusers[b].delayed} ${exraid.Exraidusers[b].username}>](tg://user?id=${exraid.Exraidusers[b].uid})${exraid.Exraidusers[b].accounts > 1 ? ('+' + (exraid.Exraidusers[b].accounts - 1)) : ''} `
+          userlist += `[<⏰ ${exraid.Exraidusers[b].delayed} ${
+            exraid.Exraidusers[b].username
+          }>](tg://user?id=${exraid.Exraidusers[b].uid})${
+            exraid.Exraidusers[b].accounts > 1
+              ? '+' + (exraid.Exraidusers[b].accounts - 1)
+              : ''
+          } `
         } else {
-          userlist += `[${exraid.Exraidusers[b].username}](tg://user?id=${exraid.Exraidusers[b].uid})${exraid.Exraidusers[b].accounts > 1 ? ('+' + (exraid.Exraidusers[b].accounts - 1)) : ''} `
+          userlist += `[${exraid.Exraidusers[b].username}](tg://user?id=${
+            exraid.Exraidusers[b].uid
+          })${
+            exraid.Exraidusers[b].accounts > 1
+              ? '+' + (exraid.Exraidusers[b].accounts - 1)
+              : ''
+          } `
         }
       } else {
         wantedlist += `[${exraid.Exraidusers[b].username}](tg://user?id=${exraid.Exraidusers[b].uid}) `
@@ -75,21 +84,17 @@ function makeExraidShow (exraids, ctx) {
   }
   return out
 }
-async function findExraid (eid) {
+async function findExraid(eid) {
   var r = await models.Exraid.findOne({
     where: {
       id: eid
     },
-    include: [
-      models.Gym,
-      models.Exraiduser,
-      models.Raidboss
-    ]
+    include: [models.Gym, models.Exraiduser, models.Raidboss]
   })
   return r
 }
 
-function ExraidWizard (bot) {
+function ExraidWizard(bot) {
   // a bit annoying, but count the next "async (ctx)" to get the right jump locations
   const wizsteps = {
     mainmenu: 0,
@@ -102,7 +107,8 @@ function ExraidWizard (bot) {
     exraidmodifygymsearch: 24,
     exraiddone: 27
   }
-  return new WizardScene('exraid-wizard',
+  return new WizardScene(
+    'exraid-wizard',
     // Exraid mainmenu, step 0
     async (ctx) => {
       await setLocale(ctx)
@@ -110,14 +116,32 @@ function ExraidWizard (bot) {
       ctx.session.mainexraidbtns = []
       ctx.session.savedexraids = await listExraids()
       for (const exraid of ctx.session.savedexraids) {
-        ctx.session.mainexraidbtns.push([moment.unix(exraid.start1).format('DD-MM-YYYY HH:mm') + ' ' + exraid.Gym.gymname, exraid.id])
+        ctx.session.mainexraidbtns.push([
+          moment.unix(exraid.start1).format('DD-MM-YYYY HH:mm') +
+            ' ' +
+            exraid.Gym.gymname,
+          exraid.id
+        ])
       }
       ctx.session.mainexraidbtns.push([ctx.i18n.t('exraid_btn_add'), 0])
-      ctx.session.mainexraidbtns.push([ctx.i18n.t('exraid_btn_done'), 'exraiddone'])
+      ctx.session.mainexraidbtns.push([
+        ctx.i18n.t('exraid_btn_done'),
+        'exraiddone'
+      ])
       const showraidlist = makeExraidShow(ctx.session.savedexraids, ctx)
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_greeting', { user: ctx.from }), Markup.keyboard(ctx.session.mainexraidbtns.map(el => el[0])).oneTime().resize().extra())
-        .then(() => ctx.replyWithMarkdown(showraidlist, { disable_web_page_preview: true })
-          .then(() => ctx.wizard.next()))
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('exraid_greeting', { user: ctx.from }),
+          Markup.keyboard(ctx.session.mainexraidbtns.map((el) => el[0]))
+            .oneTime()
+            .resize()
+            .extra()
+        )
+        .then(() =>
+          ctx
+            .replyWithMarkdown(showraidlist, { disable_web_page_preview: true })
+            .then(() => ctx.wizard.next())
+        )
     },
     // handle choice, step 1
     async (ctx) => {
@@ -151,7 +175,18 @@ function ExraidWizard (bot) {
 
     // add ex raid, step 2
     async (ctx) => {
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_add_welcome'), Markup.keyboard([{ text: ctx.i18n.t('btn_gym_find_location'), request_location: true }]).resize().extra({ disable_web_page_preview: true }))
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('exraid_add_welcome'),
+          Markup.keyboard([
+            {
+              text: ctx.i18n.t('btn_gym_find_location'),
+              request_location: true
+            }
+          ])
+            .resize()
+            .extra({ disable_web_page_preview: true })
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -195,7 +230,9 @@ function ExraidWizard (bot) {
             }
           })
           if (candidates.length === 0) {
-            ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', { term: term }))
+            ctx.replyWithMarkdown(
+              ctx.i18n.t('find_gym_failed_retry', { term: term })
+            )
             return
           }
         }
@@ -208,10 +245,15 @@ function ExraidWizard (bot) {
         ])
       }
 
-      ctx.session.gymcandidates.push([
-        ctx.i18n.t('btn_gym_not_found'), 0
-      ])
-      return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymcandidates.map(el => el[0])).oneTime().resize().extra())
+      ctx.session.gymcandidates.push([ctx.i18n.t('btn_gym_not_found'), 0])
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('select_a_gym'),
+          Markup.keyboard(ctx.session.gymcandidates.map((el) => el[0]))
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -226,7 +268,11 @@ function ExraidWizard (bot) {
       }
       // Catch gym not found errors…
       if (selectedIndex === -1) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raid_wrong_while_selecting')}\n`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('add_raid_wrong_while_selecting')}\n`,
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -235,7 +281,11 @@ function ExraidWizard (bot) {
       // User can't find the gym
 
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
-        ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.removeKeyboard().extra())
+        ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('retry_or_cancel'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.wizard.selectStep(wizsteps.mainmenu)
             return ctx.wizard.steps[wizsteps.mainmenu](ctx)
@@ -248,16 +298,36 @@ function ExraidWizard (bot) {
 
         ctx.session.dateOptions = []
         for (let i = 0; i < 14; i++) {
-          const mnts = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+          const mnts = [
+            'jan',
+            'feb',
+            'mar',
+            'apr',
+            'may',
+            'jun',
+            'jul',
+            'aug',
+            'sep',
+            'oct',
+            'nov',
+            'dec'
+          ]
           var dat = moment().add(i, 'days').toArray()
           var datstr = dat[2] + ' ' + ctx.i18n.t(mnts[dat[1]]) + ' ' + dat[0]
           ctx.session.dateOptions.push([datstr, i])
         }
         const btns = []
         for (var j = 0; j < ctx.session.dateOptions.length; j += 2) {
-          btns.push([ctx.session.dateOptions[j][0], ctx.session.dateOptions[j + 1][0]])
+          btns.push([
+            ctx.session.dateOptions[j][0],
+            ctx.session.dateOptions[j + 1][0]
+          ])
         }
-        return ctx.replyWithMarkdown(ctx.i18n.t('exraid_date'), Markup.keyboard(btns).oneTime().resize().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('exraid_date'),
+            Markup.keyboard(btns).oneTime().resize().extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -273,9 +343,13 @@ function ExraidWizard (bot) {
         }
       }
       ctx.session.exraiddays = days
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_days', {
-        exraiddays: ctx.session.exraiddays
-      }), Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('exraid_days', {
+            exraiddays: ctx.session.exraiddays
+          }),
+          Markup.removeKeyboard().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -283,18 +357,26 @@ function ExraidWizard (bot) {
     async (ctx) => {
       let tmptime = false
       const answer = ctx.update.message.text
-      tmptime = inputExRaidTime(ctx.session.exraiddays, answer)
+      tmptime = inputRaidDaysTime(ctx.session.exraiddays, answer)
       // check valid time
       if (tmptime === false) {
         return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
       }
-      ctx.session.newexraid.endtime = moment.unix(tmptime).add(TIMINGS.EXRAIDBOSS, 'minutes').unix()
+      ctx.session.newexraid.endtime = moment
+        .unix(tmptime)
+        .add(TIMINGS.EXRAIDBOSS, 'minutes')
+        .unix()
       ctx.session.newexraid.start1 = tmptime
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_enter_starttime', {
-        start1: moment.unix(ctx.session.newexraid.start1).format('HH:mm'),
-        endtime: moment.unix(ctx.session.newexraid.endtime).subtract(10, 'minutes').format('HH:mm')
-      })
-      )
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('exraid_enter_starttime', {
+            start1: moment.unix(ctx.session.newexraid.start1).format('HH:mm'),
+            endtime: moment
+              .unix(ctx.session.newexraid.endtime)
+              .subtract(10, 'minutes')
+              .format('HH:mm')
+          })
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -305,17 +387,31 @@ function ExraidWizard (bot) {
       if (answer === 'x') {
         tmptime = ctx.session.newexraid.start1
       } else {
-        tmptime = inputExRaidTime(ctx.session.exraiddays, answer)
-        if (moment.unix(tmptime).isBefore(moment.unix(ctx.session.newexraid.start1)) || moment.unix(tmptime).isAfter(moment.unix(ctx.session.newexraid.endtime).subtract(10, 'minutes'))) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_invalid_starttime', {
-            start1: moment.unix(ctx.session.newexraid.start1).format('HH:mm'),
-            endtime: moment.unix(ctx.session.newexraid.endtime).subtract(10, 'minutes').format('HH:mm')
-          }
-          ))
+        tmptime = inputRaidDaysTime(ctx.session.exraiddays, answer)
+        if (
+          moment
+            .unix(tmptime)
+            .isBefore(moment.unix(ctx.session.newexraid.start1)) ||
+          moment
+            .unix(tmptime)
+            .isAfter(
+              moment.unix(ctx.session.newexraid.endtime).subtract(10, 'minutes')
+            )
+        ) {
+          return ctx.replyWithMarkdown(
+            ctx.i18n.t('exraid_invalid_starttime', {
+              start1: moment.unix(ctx.session.newexraid.start1).format('HH:mm'),
+              endtime: moment
+                .unix(ctx.session.newexraid.endtime)
+                .subtract(10, 'minutes')
+                .format('HH:mm')
+            })
+          )
         }
       }
       ctx.session.newexraid.start1 = tmptime
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_raidboss'))
+      return ctx
+        .replyWithMarkdown(ctx.i18n.t('exraid_raidboss'))
         .then(() => ctx.wizard.next())
     },
 
@@ -324,10 +420,21 @@ function ExraidWizard (bot) {
       ctx.session.newexraid.target = ctx.update.message.text
       var rboss = resolveRaidBoss(ctx.update.message.text)
       ctx.session.newexraid.raidbossId = rboss !== null ? rboss.id : null
-      const out = `*Ex Raid* ${moment.unix(ctx.session.newexraid.start1).format('YYYY-MM-DD')}\n${ctx.i18n.t('until')} ${moment.unix(ctx.session.newexraid.endtime).format('HH:mm')}: *${ctx.session.newexraid.target}*\n${ctx.session.newexraid.gymname}\n${ctx.i18n.t('start')}: ${moment.unix(ctx.session.newexraid.start1).format('HH:mm')}`
+      const out = `*Ex Raid* ${moment
+        .unix(ctx.session.newexraid.start1)
+        .format('YYYY-MM-DD')}\n${ctx.i18n.t('until')} ${moment
+        .unix(ctx.session.newexraid.endtime)
+        .format('HH:mm')}: *${ctx.session.newexraid.target}*\n${
+        ctx.session.newexraid.gymname
+      }\n${ctx.i18n.t('start')}: ${moment
+        .unix(ctx.session.newexraid.start1)
+        .format('HH:mm')}`
       ctx.session.saveOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
-      return ctx.replyWithMarkdown(`${out}\n\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard(ctx.session.saveOptions)
-        .resize().oneTime().extra())
+      return ctx
+        .replyWithMarkdown(
+          `${out}\n\n*${ctx.i18n.t('save_question')}*`,
+          Markup.keyboard(ctx.session.saveOptions).resize().oneTime().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -337,7 +444,6 @@ function ExraidWizard (bot) {
       const answer = ctx.update.message.text
       if (answer === ctx.i18n.t('no')) {
         // don't save
-
       }
       // save
       if (answer === ctx.i18n.t('yes')) {
@@ -363,7 +469,11 @@ function ExraidWizard (bot) {
           }
         })
         if (raidexists) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_exists_warning'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('exraid_exists_warning'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session.newexraid = null
               return ctx.scene.leave()
@@ -380,14 +490,17 @@ function ExraidWizard (bot) {
         })
         // save...
         try {
-          await newexraid.save()
-            .then((saved) => {
-              ctx.session.savedraid = saved
-            })
+          await newexraid.save().then((saved) => {
+            ctx.session.savedraid = saved
+          })
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
 
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session = null
               return ctx.scene.leave()
@@ -404,14 +517,28 @@ function ExraidWizard (bot) {
         // restore user locale
         ctx.i18n.locale(oldlocale)
         const out = await listRaids(reason, ctx)
-        bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+        bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true
+        })
         // saved…
         ctx.session.participateOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
-        return ctx.replyWithMarkdown(ctx.i18n.t('exraid_do_you_participate'), Markup.keyboard(ctx.session.participateOptions).resize().oneTime().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('exraid_do_you_participate'),
+            Markup.keyboard(ctx.session.participateOptions)
+              .resize()
+              .oneTime()
+              .extra()
+          )
           .then(() => ctx.wizard.next())
       } else {
         // user declined save
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('join_raid_cancel')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('join_raid_cancel')}`,
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = null
             return ctx.scene.leave()
@@ -421,15 +548,28 @@ function ExraidWizard (bot) {
 
     // step 10
     async (ctx) => {
-      const participate = ctx.session.participateOptions.indexOf(ctx.update.message.text)
+      const participate = ctx.session.participateOptions.indexOf(
+        ctx.update.message.text
+      )
       if (participate === 1) {
         // user does NOT participate, exit
-        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('finished_procedure'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => ctx.scene.leave())
       }
       // user does participate
       // Ask for invite
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_has_pass')}`, Markup.keyboard([[ctx.i18n.t('yes')], [ctx.i18n.t('no')]]).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('exraid_has_pass')}`,
+          Markup.keyboard([[ctx.i18n.t('yes')], [ctx.i18n.t('no')]])
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -456,16 +596,23 @@ function ExraidWizard (bot) {
               },
               {
                 where: {
-                  [Op.and]: [{
-                    uid: user.id
-                  }, {
-                    exraidId: ctx.session.savedraid.id
-                  }]
+                  [Op.and]: [
+                    {
+                      uid: user.id
+                    },
+                    {
+                      exraidId: ctx.session.savedraid.id
+                    }
+                  ]
                 }
               }
             )
           } catch (error) {
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
         } else {
@@ -481,7 +628,11 @@ function ExraidWizard (bot) {
             await exraiduser.save()
           } catch (error) {
             console.log('Woops… registering raiduser failed', error)
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => {
                 ctx.session = null
                 return ctx.scene.leave()
@@ -498,17 +649,30 @@ function ExraidWizard (bot) {
           // restore user locale
           ctx.i18n.locale(oldlocale)
           const out = await listRaids(reason + '\n\n', ctx)
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_registered_without_pass'), Markup.removeKeyboard().extra())
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+            parse_mode: 'Markdown',
+            disable_web_page_preview: true
+          })
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('exraid_registered_without_pass'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       }
       // User has an invite…
       // ask for number of accounts
-      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
-        gymname: ctx.session.newexraid.gymname
-      }), Markup.keyboard([['1'], ['2', '3', '4', '5']])
-        .resize().oneTime().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('join_raid_accounts_question', {
+            gymname: ctx.session.newexraid.gymname
+          }),
+          Markup.keyboard([['1'], ['2', '3', '4', '5']])
+            .resize()
+            .oneTime()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -545,7 +709,11 @@ function ExraidWizard (bot) {
             }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       } else {
@@ -561,7 +729,11 @@ function ExraidWizard (bot) {
           await exraiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session = null
               return ctx.scene.leave()
@@ -573,16 +745,25 @@ function ExraidWizard (bot) {
         const reason = ctx.i18n.t('exraid_joined_message', {
           gymname: ctx.session.newexraid.gymname,
           user: user,
-          user_first_name: user.first_name,
+          user_first_name: user.first_name
         })
         // restore user locale
         ctx.i18n.locale(oldlocale)
         const out = await listRaids(reason + '\n\n', ctx)
-        bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-        return ctx.replyWithMarkdown(ctx.i18n.t('raid_add_finish', {
-          gymname: ctx.session.newexraid.gymname,
-          starttm: moment.unix(ctx.session.newexraid.start1).format('YYYY-MM-DD HH:mm')
-        }), Markup.removeKeyboard().extra())
+        bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true
+        })
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('raid_add_finish', {
+              gymname: ctx.session.newexraid.gymname,
+              starttm: moment
+                .unix(ctx.session.newexraid.start1)
+                .format('YYYY-MM-DD HH:mm')
+            }),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = null
             return ctx.scene.leave()
@@ -608,10 +789,16 @@ function ExraidWizard (bot) {
       if (joined) {
         btns.push(ctx.i18n.t('exraid_btn_leave'))
       }
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_intro', {
-        start1: moment.unix(ctx.session.selectedRaid.start1).format('DD-MM-YYYY HH:mm'),
-        gymname: ctx.session.selectedRaid.Gym.gymname
-      }), Markup.keyboard(btns).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('exraid_intro', {
+            start1: moment
+              .unix(ctx.session.selectedRaid.start1)
+              .format('DD-MM-YYYY HH:mm'),
+            gymname: ctx.session.selectedRaid.Gym.gymname
+          }),
+          Markup.keyboard(btns).oneTime().resize().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -636,7 +823,11 @@ function ExraidWizard (bot) {
               }
             })
           } catch (error) {
-            return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('unexpected_raid_not_found'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
           const oldlocale = ctx.i18n.locale()
@@ -650,24 +841,39 @@ function ExraidWizard (bot) {
           // restore user locale
           ctx.i18n.locale(oldlocale)
           const out = await listRaids(reason + '\n\n', ctx)
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+            parse_mode: 'Markdown',
+            disable_web_page_preview: true
+          })
 
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_user_left'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('exraid_user_left'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         // change or enlist
         case ctx.i18n.t('exraid_btn_join'):
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_join', {
-            gymname: ctx.session.selectedRaid.Gym.gymname,
-            start1: moment.unix(ctx.session.selectedRaid.start1).format('DD-MM-YYYY HH:mm')
-          }), Markup.keyboard([[ctx.i18n.t('yes')], [ctx.i18n.t('no')]]).oneTime().resize().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('exraid_join', {
+                gymname: ctx.session.selectedRaid.Gym.gymname,
+                start1: moment
+                  .unix(ctx.session.selectedRaid.start1)
+                  .format('DD-MM-YYYY HH:mm')
+              }),
+              Markup.keyboard([[ctx.i18n.t('yes')], [ctx.i18n.t('no')]])
+                .oneTime()
+                .resize()
+                .extra()
+            )
             .then(() => ctx.wizard.next())
         // edit raid
         case ctx.i18n.t('exraid_btn_edit'):
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_edit'))
-            .then(() => {
-              ctx.wizard.selectStep(wizsteps.exraidmodifymore)
-              return ctx.wizard.steps[wizsteps.exraidmodifymore](ctx)
-            })
+          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_edit')).then(() => {
+            ctx.wizard.selectStep(wizsteps.exraidmodifymore)
+            return ctx.wizard.steps[wizsteps.exraidmodifymore](ctx)
+          })
       }
     },
 
@@ -684,7 +890,8 @@ function ExraidWizard (bot) {
             [Op.and]: [
               {
                 uid: user.id
-              }, {
+              },
+              {
                 exraidId: ctx.session.selectedRaid.id
               }
             ]
@@ -701,16 +908,23 @@ function ExraidWizard (bot) {
               },
               {
                 where: {
-                  [Op.and]: [{
-                    uid: user.id
-                  }, {
-                    exraidId: ctx.session.selectedRaid.id
-                  }]
+                  [Op.and]: [
+                    {
+                      uid: user.id
+                    },
+                    {
+                      exraidId: ctx.session.selectedRaid.id
+                    }
+                  ]
                 }
               }
             )
           } catch (error) {
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
         } else {
@@ -726,7 +940,11 @@ function ExraidWizard (bot) {
             await exraiduser.save()
           } catch (error) {
             console.log('Woops… registering raiduser failed', error)
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => {
                 ctx.session = null
                 return ctx.scene.leave()
@@ -747,19 +965,34 @@ function ExraidWizard (bot) {
         // restore user locale
         ctx.i18n.locale(oldlocale)
         const out = await listRaids(reason + '\n\n', ctx)
-        bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-        return ctx.replyWithMarkdown(ctx.i18n.t('exraid_registered_without_pass'), Markup.removeKeyboard().extra())
-          .then(() => ctx.replyWithMarkdown(raidlist, {
-            disable_web_page_preview: true
-          }))
+        bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true
+        })
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('exraid_registered_without_pass'),
+            Markup.removeKeyboard().extra()
+          )
+          .then(() =>
+            ctx.replyWithMarkdown(raidlist, {
+              disable_web_page_preview: true
+            })
+          )
           .then(() => ctx.scene.leave())
       }
       // User has an invite…
       // ask for number of accounts
-      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
-        gymname: ctx.session.selectedRaid.Gym.gymname
-      }), Markup.keyboard([['1'], ['2', '3', '4', '5']])
-        .resize().oneTime().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('join_raid_accounts_question', {
+            gymname: ctx.session.selectedRaid.Gym.gymname
+          }),
+          Markup.keyboard([['1'], ['2', '3', '4', '5']])
+            .resize()
+            .oneTime()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -774,7 +1007,8 @@ function ExraidWizard (bot) {
           [Op.and]: [
             {
               uid: user.id
-            }, {
+            },
+            {
               exraidId: ctx.session.selectedRaid.id
             }
           ]
@@ -793,7 +1027,8 @@ function ExraidWizard (bot) {
                 [Op.and]: [
                   {
                     uid: user.id
-                  }, {
+                  },
+                  {
                     exraidId: ctx.session.selectedRaid.id
                   }
                 ]
@@ -801,7 +1036,11 @@ function ExraidWizard (bot) {
             }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       } else {
@@ -817,7 +1056,11 @@ function ExraidWizard (bot) {
           await exraiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session = null
               return ctx.scene.leave()
@@ -835,16 +1078,25 @@ function ExraidWizard (bot) {
       const out = await listRaids(reason + '\n\n', ctx)
       // restore user locale
       ctx.i18n.locale(oldlocale)
-      bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+      bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      })
 
       const exraids = await listExraids()
       const raidlist = makeExraidShow(exraids, ctx)
-      return ctx.replyWithMarkdown(raidlist, { disable_web_page_preview: true })
+      return ctx
+        .replyWithMarkdown(raidlist, { disable_web_page_preview: true })
         .then(() => {
-          return ctx.replyWithMarkdown(ctx.i18n.t('exraid_add_finish', {
-            gymname: ctx.session.selectedRaid.Gym.gymname,
-            starttm: moment.unix(ctx.session.selectedRaid.start1).format('YYYY-MM-DD HH:mm')
-          }), Markup.removeKeyboard().extra())
+          return ctx.replyWithMarkdown(
+            ctx.i18n.t('exraid_add_finish', {
+              gymname: ctx.session.selectedRaid.Gym.gymname,
+              starttm: moment
+                .unix(ctx.session.selectedRaid.start1)
+                .format('YYYY-MM-DD HH:mm')
+            }),
+            Markup.removeKeyboard().extra()
+          )
         })
         .then(() => {
           // ctx.session = null
@@ -855,14 +1107,46 @@ function ExraidWizard (bot) {
     // step 17 exraidmodifymore
     async (ctx) => {
       ctx.session.changebtns = [
-        [`${ctx.i18n.t('edit_raid_gym')}: ${ctx.session.selectedRaid.Gym.gymname}`, 'gym'],
-        [`Datum ${moment.unix(ctx.session.selectedRaid.endtime).format('DD-MM-YYYY')}`, 'raiddate'],
-        [`${ctx.i18n.t('edit_raid_endtime')}: ${moment.unix(ctx.session.selectedRaid.endtime).format('HH:mm')}`, 'endtime'],
-        [`${ctx.i18n.t('edit_raid_starttime')}: ${moment.unix(ctx.session.selectedRaid.start1).format('HH:mm')}`, 'start1'],
-        [`${ctx.i18n.t('edit_raid_pokemon')}: ${ctx.session.selectedRaid.target}`, 'target'],
+        [
+          `${ctx.i18n.t('edit_raid_gym')}: ${
+            ctx.session.selectedRaid.Gym.gymname
+          }`,
+          'gym'
+        ],
+        [
+          `Datum ${moment
+            .unix(ctx.session.selectedRaid.endtime)
+            .format('DD-MM-YYYY')}`,
+          'raiddate'
+        ],
+        [
+          `${ctx.i18n.t('edit_raid_endtime')}: ${moment
+            .unix(ctx.session.selectedRaid.endtime)
+            .format('HH:mm')}`,
+          'endtime'
+        ],
+        [
+          `${ctx.i18n.t('edit_raid_starttime')}: ${moment
+            .unix(ctx.session.selectedRaid.start1)
+            .format('HH:mm')}`,
+          'start1'
+        ],
+        [
+          `${ctx.i18n.t('edit_raid_pokemon')}: ${
+            ctx.session.selectedRaid.target
+          }`,
+          'target'
+        ],
         [ctx.i18n.t('btn_edit_gym_cancel'), 0]
       ]
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_edit_what')}`, Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('exraid_edit_what')}`,
+          Markup.keyboard(ctx.session.changebtns.map((el) => el[0]))
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -878,7 +1162,11 @@ function ExraidWizard (bot) {
       }
       // cancelled modification
       if (editattr === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('cancelmessage'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -892,8 +1180,13 @@ function ExraidWizard (bot) {
             break
           case 'start1':
             ctx.session.editattr = 'start1'
-            const endtimestr = moment.unix(ctx.session.selectedRaid.endtime).format('HH:mm')
-            const start1str = moment.unix(ctx.session.selectedRaid.endtime).subtract(TIMINGS.EXRAIDBOSS, 'minutes').format('HH:mm')
+            const endtimestr = moment
+              .unix(ctx.session.selectedRaid.endtime)
+              .format('HH:mm')
+            const start1str = moment
+              .unix(ctx.session.selectedRaid.endtime)
+              .subtract(TIMINGS.EXRAIDBOSS, 'minutes')
+              .format('HH:mm')
             question = ctx.i18n.t('edit_raid_question_starttime_range', {
               start1str: start1str,
               endtimestr: endtimestr
@@ -913,11 +1206,9 @@ function ExraidWizard (bot) {
             return ctx.wizard.steps[wizsteps.exraidmodifydate](ctx)
           default:
             question = ctx.i18n.t('edit_raidboss_no_clue')
-            return ctx.replyWithMarkdown(question)
-              .then(() => ctx.scene.leave())
+            return ctx.replyWithMarkdown(question).then(() => ctx.scene.leave())
         }
-        return ctx.replyWithMarkdown(question)
-          .then(() => ctx.wizard.next())
+        return ctx.replyWithMarkdown(question).then(() => ctx.wizard.next())
       }
     },
 
@@ -936,13 +1227,15 @@ function ExraidWizard (bot) {
       const days = raidstart.diff(now, 'days')
       if (key === 'endtime' || key === 'start1') {
         // ToDo: handle exraid days…
-        const timevalue = inputExRaidTime(days, value)
+        const timevalue = inputRaidDaysTime(days, value)
         if (timevalue === false) {
           return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
         }
         if (key === 'start1') {
           const endtime = moment.unix(ctx.session.selectedRaid.endtime)
-          const start = moment.unix(ctx.session.selectedRaid.endtime).subtract(TIMINGS.EXRAIDBOSS, 'minutes')
+          const start = moment
+            .unix(ctx.session.selectedRaid.endtime)
+            .subtract(TIMINGS.EXRAIDBOSS, 'minutes')
           const tempstart1 = moment.unix(timevalue)
           const h = tempstart1.hours()
           const m = tempstart1.minutes()
@@ -986,16 +1279,36 @@ function ExraidWizard (bot) {
     async (ctx) => {
       ctx.session.dateOptions = []
       for (let i = 0; i < 14; i++) {
-        const mnts = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+        const mnts = [
+          'jan',
+          'feb',
+          'mar',
+          'apr',
+          'may',
+          'jun',
+          'jul',
+          'aug',
+          'sep',
+          'oct',
+          'nov',
+          'dec'
+        ]
         var dat = moment().add(i, 'days').toArray()
         var datstr = dat[2] + ' ' + ctx.i18n.t(mnts[dat[1]]) + ' ' + dat[0]
         ctx.session.dateOptions.push([datstr, i])
       }
       const btns = []
       for (var j = 0; j < ctx.session.dateOptions.length; j += 2) {
-        btns.push([ctx.session.dateOptions[j][0], ctx.session.dateOptions[j + 1][0]])
+        btns.push([
+          ctx.session.dateOptions[j][0],
+          ctx.session.dateOptions[j + 1][0]
+        ])
       }
-      return ctx.replyWithMarkdown(ctx.i18n.t('exraid_date'), Markup.keyboard(btns).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('exraid_date'),
+          Markup.keyboard(btns).oneTime().resize().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -1038,19 +1351,25 @@ function ExraidWizard (bot) {
 
     // step 22: do more or save?
     async (ctx) => {
-      const out = `${ctx.i18n.t('until')}: ${moment.unix(ctx.session.selectedRaid.endtime).format('DD-MM-YYYY HH:mm')}: *${ctx.session.selectedRaid.target}*\n${ctx.session.selectedRaid.Gym.gymname}\nStart: ${moment.unix(ctx.session.selectedRaid.start1).format('HH:mm')}\n\n`
+      const out = `${ctx.i18n.t('until')}: ${moment
+        .unix(ctx.session.selectedRaid.endtime)
+        .format('DD-MM-YYYY HH:mm')}: *${ctx.session.selectedRaid.target}*\n${
+        ctx.session.selectedRaid.Gym.gymname
+      }\nStart: ${moment
+        .unix(ctx.session.selectedRaid.start1)
+        .format('HH:mm')}\n\n`
       ctx.session.savebtns = [
         ctx.i18n.t('edit_raidboss_btn_save_close'),
         ctx.i18n.t('edit_raid_edit_more'),
         ctx.i18n.t('cancel')
       ]
-      return ctx.replyWithMarkdown(ctx.i18n.t('edit_exraid_overview_data', {
-        out: out
-      }), Markup.keyboard(ctx.session.savebtns)
-        .resize()
-        .oneTime()
-        .extra()
-      )
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('edit_exraid_overview_data', {
+            out: out
+          }),
+          Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -1083,31 +1402,45 @@ function ExraidWizard (bot) {
             const reason = ctx.i18n.t('edit_exraid_list_message', {
               gymname: ctx.session.selectedRaid.Gym.gymname,
               user: user,
-              user_first_name: escapeMarkDown(user.first_name),
+              user_first_name: escapeMarkDown(user.first_name)
             })
             // restore user locale
             ctx.i18n.locale(oldlocale)
             const out = await listRaids(reason, ctx)
-            bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-            return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
+            bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+              parse_mode: 'Markdown',
+              disable_web_page_preview: true
+            })
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('finished_procedure'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           } catch (error) {
             console.error(error)
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
         case 1:
           // more edits
           // set cursor and trigger jump to step 1
           ctx.session.more = true
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_more'))
-            .then(() => {
-              ctx.wizard.selectStep(wizsteps.exraidmodifymore)
-              return ctx.wizard.steps[wizsteps.exraidmodifymore](ctx)
-            })
+          return ctx.replyWithMarkdown(ctx.i18n.t('edit_more')).then(() => {
+            ctx.wizard.selectStep(wizsteps.exraidmodifymore)
+            return ctx.wizard.steps[wizsteps.exraidmodifymore](ctx)
+          })
         case 2:
           // Don't save and leave
-          return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('finished_procedure_without_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session.raidcandidates = null
               ctx.session.selectedRaid = null
@@ -1120,8 +1453,7 @@ function ExraidWizard (bot) {
     // step 24: handle gym search
     async (ctx) => {
       const question = ctx.i18n.t('edit_raid_question_gym')
-      return ctx.replyWithMarkdown(question)
-        .then(() => ctx.wizard.next())
+      return ctx.replyWithMarkdown(question).then(() => ctx.wizard.next())
     },
 
     // Step 25: find gyms
@@ -1146,30 +1478,31 @@ function ExraidWizard (bot) {
         })
         if (candidates.length === 0) {
           // ToDo: check dit dan...
-          return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {
-            term: term === '/start help_fromgroup' ? '' : term
-          }))
+          return ctx.replyWithMarkdown(
+            ctx.i18n.t('find_gym_failed_retry', {
+              term: term === '/start help_fromgroup' ? '' : term
+            })
+          )
           // .then(() => ctx.wizard.back())
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
-          ctx.session.gymcandidates.push(
-            {
-              gymname: candidates[i].gymname, id: candidates[i].id
-            }
-          )
+          ctx.session.gymcandidates.push({
+            gymname: candidates[i].gymname,
+            id: candidates[i].id
+          })
           ctx.session.gymbtns.push(candidates[i].gymname)
         }
-        ctx.session.gymcandidates.push(
-          {
-            name: ctx.i18n.t('btn_gym_not_found'),
-            id: 0
-          }
-        )
+        ctx.session.gymcandidates.push({
+          name: ctx.i18n.t('btn_gym_not_found'),
+          id: 0
+        })
         ctx.session.gymbtns.push(ctx.i18n.t('btn_gym_not_found'))
-        return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymbtns)
-          .oneTime()
-          .resize().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('select_a_gym'),
+            Markup.keyboard(ctx.session.gymbtns).oneTime().resize().extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -1180,7 +1513,11 @@ function ExraidWizard (bot) {
       const selectedGym = ctx.session.gymcandidates[gymIndex]
       if (selectedGym.id === 0) {
         // mmm, let's try searching for a gym again
-        return ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_search_gym_again'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('edit_raid_search_gym_again'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.wizard.selectStep(wizsteps.exraidmodifygymsearch)
             return ctx.wizard.steps[wizsteps.exraidmodifygymsearch](ctx)
@@ -1196,7 +1533,11 @@ function ExraidWizard (bot) {
     // done step 27
     async (ctx) => {
       // save users language
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('admin_fres_finished')}`, Markup.removeKeyboard())
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('admin_fres_finished')}`,
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.scene.leave())
     }
   )
