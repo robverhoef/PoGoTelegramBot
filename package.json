@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/nodemon -i ./node_modules -V index.js",
-    "dev": "./node_modules/.bin/nodemon -i ./node_modules -V index.js",
+    "dev": "./node_modules/.bin/nodemon -i ./node_modules --inspect=0.0.0.0:9229 -V index.js",
     "eslint": "node_modules/.bin/eslint ./*.js ./models ./wizards ./util; exit 0",
     "eslintfix": "node_modules/.bin/eslint --fix ./*.js ./models ./wizards ./util; exit 0",
     "dbupdate": "node_modules/.bin/sequelize db:migrate",
