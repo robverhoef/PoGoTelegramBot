@@ -299,7 +299,7 @@ packages:
       assertion-error: 1.1.0
       check-error: 1.0.2
       deep-eql: 3.0.1
-      get-func-name: 2.0.0
+      get-func-name: 2.0.2
       pathval: 1.1.1
       type-detect: 4.0.8
     dev: true
@@ -1018,8 +1018,8 @@ packages:
     engines: {node: 6.* || 8.* || >= 10.*}
     dev: true
 
-  /get-func-name@2.0.0:
-    resolution: {integrity: sha1-6td0q+5y4gQJQzoGY2YCPdaIekE=}
+  /get-func-name@2.0.2:
+    resolution: {integrity: sha512-8vXOvuE167CtIc3OyItco7N/dpRtBbYOsPsXCz7X/PMnlGjYjSGuZJgM1Y7mmew7BKf9BqvLX2tnOVy1BBUsxQ==}
     dev: true
 
   /get-intrinsic@1.1.1:
