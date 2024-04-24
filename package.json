@@ -26,7 +26,7 @@
     "metaphone": "^1.0.6",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.35",
-    "mysql2": "^1.7.0",
+    "mysql2": "^3.9.7",
     "sequelize": "^6.29.0",
     "telegraf": "^3.38.0",
     "telegraf-i18n": "^6.6.0",
