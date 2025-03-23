@@ -1,7 +1,8 @@
 // ===================
 // Field Research wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const moment = require('moment-timezone')
@@ -107,7 +108,7 @@ function ExraidWizard(bot) {
     exraidmodifygymsearch: 24,
     exraiddone: 27
   }
-  return new WizardScene(
+  return new Scenes.WizardScene(
     'exraid-wizard',
     // Exraid mainmenu, step 0
     async (ctx) => {

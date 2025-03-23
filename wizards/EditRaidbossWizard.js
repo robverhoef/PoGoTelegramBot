@@ -1,7 +1,8 @@
 // ===================
 // add raidboss wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
@@ -10,8 +11,9 @@ const metaphone = require('metaphone')
 const adminCheck = require('../util/adminCheck')
 const setLocale = require('../util/setLocale')
 
-function EditRaidbossWizard (bot) {
-  return new WizardScene('edit-raidboss-wizard',
+function EditRaidbossWizard(bot) {
+  return new Scenes.WizardScene(
+    'edit-raidboss-wizard',
     // Step 0
     // Raidboss name request
     async (ctx) => {
@@ -22,7 +24,11 @@ function EditRaidbossWizard (bot) {
       }
 
       ctx.session.editboss = {}
-      return ctx.replyWithMarkdown(ctx.i18n.t('edit_raiddboss_intro'), Markup.removeKeyboard())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('edit_raiddboss_intro'),
+          Markup.removeKeyboard()
+        )
 
         .then(() => ctx.wizard.next())
     },
@@ -37,9 +43,12 @@ function EditRaidbossWizard (bot) {
         }
       })
       if (bosses.length === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_not_found', {
-          term: term === '/start help_fromgroup' ? '' : term
-        }))
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('edit_raidboss_not_found', {
+              term: term === '/start help_fromgroup' ? '' : term
+            })
+          )
           .then(() => ctx.scene.leave())
       }
       ctx.session.bosscandidates = []
@@ -51,8 +60,18 @@ function EditRaidbossWizard (bot) {
           accounts: bosses[i].accounts
         })
       }
-      ctx.session.bosscandidates.push({ name: ctx.i18n.t('edit_raidboss_btn_cancel'), id: 0 })
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_raidboss_select')}`, Markup.keyboard(ctx.session.bosscandidates.map(el => el.name)).oneTime().resize().extra())
+      ctx.session.bosscandidates.push({
+        name: ctx.i18n.t('edit_raidboss_btn_cancel'),
+        id: 0
+      })
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('edit_raidboss_select')}`,
+          Markup.keyboard(ctx.session.bosscandidates.map((el) => el.name))
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -62,24 +81,54 @@ function EditRaidbossWizard (bot) {
       let bossindex = ctx.session.bosscandidates.length - 1
       if (ctx.session.more !== true) {
         for (let i = 0; i < ctx.session.bosscandidates.length; i++) {
-          console.log(ctx.session.bosscandidates[i].name, ' === ', ctx.update.message.text)
+          console.log(
+            ctx.session.bosscandidates[i].name,
+            ' === ',
+            ctx.update.message.text
+          )
           if (ctx.session.bosscandidates[i].name === ctx.update.message.text) {
             bossindex = i
           }
         }
         if (ctx.session.bosscandidates[bossindex].id === 0) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_not_listed_close'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('edit_raidboss_not_listed_close'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
         ctx.session.editboss = ctx.session.bosscandidates[bossindex]
       }
       ctx.session.changebtns = [
-        [`${ctx.i18n.t('edit_raidboss_btn_name')}: ${ctx.session.editboss.name}`, 'name'],
-        [`${ctx.i18n.t('edit_raidboss_btn_level')}: ${ctx.session.editboss.level}`, 'level'],
-        [`${ctx.i18n.t('edit_raidboss_btn_number_of_accounts')}: ${ctx.session.editboss.accounts}`, 'accounts'],
+        [
+          `${ctx.i18n.t('edit_raidboss_btn_name')}: ${
+            ctx.session.editboss.name
+          }`,
+          'name'
+        ],
+        [
+          `${ctx.i18n.t('edit_raidboss_btn_level')}: ${
+            ctx.session.editboss.level
+          }`,
+          'level'
+        ],
+        [
+          `${ctx.i18n.t('edit_raidboss_btn_number_of_accounts')}: ${
+            ctx.session.editboss.accounts
+          }`,
+          'accounts'
+        ],
         [ctx.i18n.t('edit_raidboss_btn_do_nothing'), '0']
       ]
-      return ctx.replyWithMarkdown('Wat wil je wijzigen?', Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          'Wat wil je wijzigen?',
+          Markup.keyboard(ctx.session.changebtns.map((el) => el[0]))
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -108,14 +157,15 @@ function EditRaidbossWizard (bot) {
         case '0':
         case 0:
           console.log(ctx.i18n.t('edit_raidboss_cancel_edit'))
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_raidboss_cancel_edit')}`)
+          return ctx
+            .replyWithMarkdown(`${ctx.i18n.t('edit_raidboss_cancel_edit')}`)
             .then(() => ctx.scene.leave())
         default:
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_no_clue'))
+          return ctx
+            .replyWithMarkdown(ctx.i18n.t('edit_raidboss_no_clue'))
             .then(() => ctx.scene.leave())
       }
-      return ctx.replyWithMarkdown(question)
-        .then(() => ctx.wizard.next())
+      return ctx.replyWithMarkdown(question).then(() => ctx.wizard.next())
     },
 
     // Step 4
@@ -123,18 +173,24 @@ function EditRaidbossWizard (bot) {
     async (ctx) => {
       const value = ctx.update.message.text.trim()
       ctx.session.editboss[ctx.session.key] = value
-      const out = `${ctx.i18n.t('edit_raidboss_overview_name')}: ${ctx.session.editboss.name}\n${ctx.i18n.t('edit_raidboss_overview_level')}: ${ctx.session.editboss.level}\n${ctx.i18n.t('edit_raidboss_overview_accounts')}: ${ctx.session.editboss.accounts}`
+      const out = `${ctx.i18n.t('edit_raidboss_overview_name')}: ${
+        ctx.session.editboss.name
+      }\n${ctx.i18n.t('edit_raidboss_overview_level')}: ${
+        ctx.session.editboss.level
+      }\n${ctx.i18n.t('edit_raidboss_overview_accounts')}: ${
+        ctx.session.editboss.accounts
+      }`
 
       ctx.session.savebtns = [
         ctx.i18n.t('edit_raidboss_btn_save_close'),
         ctx.i18n.t('edit_raidboss_btn_edit_more'),
         ctx.i18n.t('edit_raidboss_btn_cancel')
       ]
-      return ctx.replyWithMarkdown(`Dit zijn nu de raidboss gegevens:\n\n${out}\n\n*Wat wil je nu doen?*`, Markup.keyboard(ctx.session.savebtns)
-        .oneTime()
-        .resize()
-        .extra()
-      )
+      return ctx
+        .replyWithMarkdown(
+          `Dit zijn nu de raidboss gegevens:\n\n${out}\n\n*Wat wil je nu doen?*`,
+          Markup.keyboard(ctx.session.savebtns).oneTime().resize().extra()
+        )
         .then(() => ctx.wizard.next())
     },
     // Step 5
@@ -159,10 +215,17 @@ function EditRaidbossWizard (bot) {
               }
             )
             ctx.session = null
-            return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
+            return ctx.replyWithMarkdown(
+              ctx.i18n.t('finished_procedure'),
+              Markup.removeKeyboard().extra()
+            )
           } catch (error) {
             console.error('Error saving raidboss edit', error)
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => {
                 ctx.session = null
                 return ctx.scene.leave()
@@ -171,16 +234,25 @@ function EditRaidbossWizard (bot) {
         case 1:
           // Edit more
           ctx.session.more = true
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_more'))
+          return ctx
+            .replyWithMarkdown(ctx.i18n.t('edit_more'))
             .then(() => ctx.wizard.selectStep(2))
             .then(() => ctx.wizard.steps[2](ctx))
         case 2:
           // Cancel
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_cancel_edit'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('edit_raidboss_cancel_edit'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         default:
           console.log('EditRaidbossWizard: action not found', action)
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_raidboss_no_clue'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('edit_raidboss_no_clue'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
       }
     }

@@ -1,16 +1,19 @@
 // ===================
 // Edit raid wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const setLocale = require('../util/setLocale')
 
-function LocaleWizard (bot) {
-  return new WizardScene('locale-wizard',
+function LocaleWizard(bot) {
+  return new Scenes.WizardScene(
+    'locale-wizard',
     async (ctx) => {
       if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
-        return ctx.replyWithMarkdown('Not here… set your language in the bot screen')
+        return ctx
+          .replyWithMarkdown('Not here… set your language in the bot screen')
           .then(() => ctx.scene.leave())
       }
       await setLocale(ctx)
@@ -22,7 +25,11 @@ function LocaleWizard (bot) {
         locales.push({ code: loc[0].trim(), name: loc[1].trim() })
         ctx.session.localebtns.push(ctx.i18n.t(loc[1]))
       }
-      return ctx.replyWithMarkdown('*Select a language…*', Markup.keyboard(ctx.session.localebtns).resize().oneTime().extra())
+      return ctx
+        .replyWithMarkdown(
+          '*Select a language…*',
+          Markup.keyboard(ctx.session.localebtns).resize().oneTime().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -43,7 +50,8 @@ function LocaleWizard (bot) {
         await models.User.update(
           {
             locale: newloc
-          }, {
+          },
+          {
             where: {
               tId: user.id
             }
@@ -53,8 +61,10 @@ function LocaleWizard (bot) {
         console.log('ERROR while updating locale', error.message)
       }
       ctx.i18n.locale(newloc)
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('lang_set')}`)
+      return ctx
+        .replyWithMarkdown(`${ctx.i18n.t('lang_set')}`)
         .then(() => ctx.scene.leave())
-    })
+    }
+  )
 }
 module.exports = LocaleWizard

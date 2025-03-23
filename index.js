@@ -1,11 +1,12 @@
-require('dotenv').config()
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const moment = require('moment-timezone')
-const Telegraf = require('telegraf')
+const { Telegraf, session } = require('telegraf')
 const { Markup } = require('telegraf')
-const Stage = require('telegraf/stage')
+const Scenes = require('telegraf/scenes')
 const TelegrafI18n = require('telegraf-i18n')
+const localtunnel = require('localtunnel')
+
 const path = require('path')
 const models = require('./models')
 require('./locales.js')
@@ -16,12 +17,13 @@ const listRaids = require('./util/listRaids')
 // =====================
 // Let's go!
 // =====================
+console.debug('TOKEN', process.env.BOT_TOKEN)
 const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.catch((err) => {
   console.log('Ooops', err)
 })
 
-bot.use(Telegraf.session())
+bot.use(session())
 const i18n = new TelegrafI18n({
   defaultLanguage: 'nl',
   useSession: true,
@@ -93,7 +95,7 @@ const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-// const ExraidWizard = require('./wizards/ExraidWizard')
+// const ExraidWizard =require('./wizards/ExraidWizard')
 // const exraidWizard = ExraidWizard(bot)
 // exraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
@@ -130,10 +132,11 @@ const remoteInvitesWizard = RemoteInvitesWizard(bot)
 remoteInvitesWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
 const UserSettingsWizard = require('./wizards/UserSettingsWizard')
+const { start } = require('repl')
 const userSettingsWizard = UserSettingsWizard(bot)
 userSettingsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const stage = new Stage([
+const stage = new Scenes.Stage([
   addRaidWizard,
   editRaidWizard,
   exitRaidWizard,
@@ -293,82 +296,85 @@ bot.command('/start', async (ctx) => {
 
 // set cancel command here too, not only in wizards
 bot.command('cancel', (ctx) => cancelConversation(ctx))
-bot.command('lang', Stage.enter('locale-wizard'))
+bot.command('lang', Scenes.Stage.enter('locale-wizard'))
 // iterate over languages
 for (var key in i18n.repository) {
   bot.hears(
     i18n.repository[key].btn_join_raid.call(),
-    Stage.enter('join-raid-wizard')
+    Scenes.Stage.enter('join-raid-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_exit_raid.call(),
-    Stage.enter('exit-raid-wizard')
+    Scenes.Stage.enter('exit-raid-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_add_raid.call(),
-    Stage.enter('add-raid-wizard')
+    Scenes.Stage.enter('add-raid-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_edit_raid.call(),
-    Stage.enter('edit-raid-wizard')
+    Scenes.Stage.enter('edit-raid-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_find_gym.call(),
-    Stage.enter('find-gym-wizard')
+    Scenes.Stage.enter('find-gym-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_usersettings.call(),
-    Stage.enter('user-settings-wizard')
+    Scenes.Stage.enter('user-settings-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_field_researches.call(),
-    Stage.enter('fieldresearch-wizard')
+    Scenes.Stage.enter('fieldresearch-wizard')
   )
-  bot.hears(i18n.repository[key].btn_stats.call(), Stage.enter('stats-wizard'))
+  bot.hears(
+    i18n.repository[key].btn_stats.call(),
+    Scenes.Stage.enter('stats-wizard')
+  )
 
   bot.hears(
     i18n.repository[key].btn_eliteraids.call(),
-    Stage.enter('eliteraid-wizard')
+    Scenes.Stage.enter('eliteraid-wizard')
   )
 
   bot.hears(
     i18n.repository[key].btn_exraids.call(),
-    Stage.enter('exraid-wizard')
+    Scenes.Stage.enter('exraid-wizard')
   )
 
   bot.hears(
     i18n.repository[key].btn_notifications.call(),
-    Stage.enter('notification-wizard')
+    Scenes.Stage.enter('notification-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_remote_invites.call(),
-    Stage.enter('remote-invites-wizard')
+    Scenes.Stage.enter('remote-invites-wizard')
   )
-  // bot.hears(i18n.repository[key].btn_user_delayed.call(), Stage.enter('user-delayed-wizard'))
+  // bot.hears(i18n.repository[key].btn_user_delayed.call(), Scenes.Stage.enter('user-delayed-wizard'))
   // Admin
   bot.hears(
     i18n.repository[key].btn_manage_fieldresearches.call(),
-    Stage.enter('admin-field-research-wizard')
+    Scenes.Stage.enter('admin-field-research-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_add_gym.call(),
-    Stage.enter('add-gym-wizard')
+    Scenes.Stage.enter('add-gym-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_edit_gym.call(),
-    Stage.enter('edit-gym-wizard')
+    Scenes.Stage.enter('edit-gym-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_add_boss.call(),
-    Stage.enter('add-raidboss-wizard')
+    Scenes.Stage.enter('add-raidboss-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_edit_boss.call(),
-    Stage.enter('edit-raidboss-wizard')
+    Scenes.Stage.enter('edit-raidboss-wizard')
   )
   bot.hears(
     i18n.repository[key].btn_admin_stops.call(),
-    Stage.enter('admin-stops-wizard')
+    Scenes.Stage.enter('admin-stops-wizard')
   )
 
   bot.hears('Trigger raidlist', async (ctx) => {
@@ -610,9 +616,23 @@ bot.hears(/\/raids/i, async (ctx) => {
 })
 
 // Let's fire up!
-bot.telegram.setWebhook(process.env.BOT_URL).then((data) => {
-  console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set')
-})
+startBot()
 
-bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
-console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
+async function startBot() {
+  let botUrl = process.env.BOT_URL
+  if (process.env.NODE_ENV === 'development') {
+    const tunnel = await localtunnel({ port: process.env.PORT })
+    botUrl = tunnel.url
+    console.log('local tunnel started', botUrl)
+    tunnel.on('close', () => {
+      // tunnels are closed
+      console.log('local tunnel closed')
+    })
+  }
+  bot.telegram.setWebhook(botUrl).then((data) => {
+    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set')
+  })
+
+  bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
+  console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
+}

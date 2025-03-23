@@ -1,7 +1,8 @@
 // ===================
 // join raid wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const moment = require('moment-timezone')
 const { Markup } = require('telegraf')
 var models = require('../models')
@@ -12,8 +13,9 @@ const setLocale = require('../util/setLocale')
 const escapeMarkDown = require('../util/escapeMarkDown')
 moment.tz.setDefault('Europe/Amsterdam')
 
-function JoinRaidWizard (bot) {
-  return new WizardScene('join-raid-wizard',
+function JoinRaidWizard(bot) {
+  return new Scenes.WizardScene(
+    'join-raid-wizard',
     // step 0
     async (ctx) => {
       await setLocale(ctx)
@@ -28,7 +30,11 @@ function JoinRaidWizard (bot) {
         }
       })
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_no_raids_found'), Markup.removeKeyboard())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('join_raid_no_raids_found'),
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       }
       // buttons to show, with index from candidates as data (since maxlength of button data is 64 bytes…)
@@ -41,7 +47,9 @@ function JoinRaidWizard (bot) {
           raidid: raids[a].id,
           startsat: strttm
         }
-        ctx.session.raidbtns.push(`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`)
+        ctx.session.raidbtns.push(
+          `${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`
+        )
       }
       candidates.push({
         gymname: ctx.i18n.t('join_raid_dont_participate'),
@@ -50,7 +58,11 @@ function JoinRaidWizard (bot) {
       ctx.session.raidbtns.push(ctx.i18n.t('join_raid_dont_participate'))
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
-      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_select_raid'), Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('join_raid_select_raid'),
+          Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra()
+        )
         .then(() => ctx.wizard.next())
     },
     // step 1
@@ -58,11 +70,18 @@ function JoinRaidWizard (bot) {
       // retrieve selected candidate  from session…
       const ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
       if (ind === -1) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_not_found'), Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(
+          ctx.i18n.t('join_raid_not_found'),
+          Markup.removeKeyboard().extra()
+        )
       }
       ctx.session.selectedraid = ctx.session.raidcandidates[ind]
       if (ctx.session.selectedraid.raidid === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_cancel'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('join_raid_cancel'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session.raidcandidates = null
             return ctx.scene.leave()
@@ -77,8 +96,13 @@ function JoinRaidWizard (bot) {
         ctx.i18n.t('local_raid_confirm'),
         ctx.i18n.t('private_raid_confirm')
       ]
-      return ctx.replyWithMarkdown(`*${ctx.i18n.t('remote_raid_question')}*\n\n${ctx.i18n.t('covid19_disclaimer')}`, Markup.keyboard(ctx.session.remoteOptions)
-        .resize().oneTime().extra())
+      return ctx
+        .replyWithMarkdown(
+          `*${ctx.i18n.t('remote_raid_question')}*\n\n${ctx.i18n.t(
+            'covid19_disclaimer'
+          )}`,
+          Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra()
+        )
         .then(() => ctx.wizard.next())
     },
     // step 2
@@ -91,13 +115,20 @@ function JoinRaidWizard (bot) {
         ctx.session.raidtype !== ctx.i18n.t('local_raid_confirm') &&
         ctx.session.raidtype !== ctx.i18n.t('private_raid_confirm')
       ) {
-        ctx.replyWithMarkdown(ctx.i18n.t('retry_or_cancel'), Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra())
+        ctx.replyWithMarkdown(
+          ctx.i18n.t('retry_or_cancel'),
+          Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra()
+        )
       } else {
-      // ctx.session.raidtype  How many accounts question
+        // ctx.session.raidtype  How many accounts question
         ctx.session.accountbtns = [['1'], ['2', '3', '4'], ['5', '6', '7']]
-        return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_accounts_question', {
-          gymname: ctx.session.selectedraid.gymname
-        }), Markup.keyboard(ctx.session.accountbtns).oneTime().resize().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('join_raid_accounts_question', {
+              gymname: ctx.session.selectedraid.gymname
+            }),
+            Markup.keyboard(ctx.session.accountbtns).oneTime().resize().extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -110,24 +141,46 @@ function JoinRaidWizard (bot) {
       const joinedraid = ctx.session.raidcandidates[ctx.session.joinedraid]
       let remotecurrentusers = 0
 
-      ctx.session.private = ctx.session.raidtype === ctx.i18n.t('private_raid_confirm')
-      ctx.session.invited = ctx.session.raidtype === ctx.i18n.t('remote_invite_raid_confirm')
+      ctx.session.private =
+        ctx.session.raidtype === ctx.i18n.t('private_raid_confirm')
+      ctx.session.invited =
+        ctx.session.raidtype === ctx.i18n.t('remote_invite_raid_confirm')
 
-      if (ctx.session.raidtype === ctx.i18n.t('remote_raid_confirm') || ctx.session.raidtype === ctx.i18n.t('remote_invite_raid_confirm')) {
+      if (
+        ctx.session.raidtype === ctx.i18n.t('remote_raid_confirm') ||
+        ctx.session.raidtype === ctx.i18n.t('remote_invite_raid_confirm')
+      ) {
         ctx.session.remote = true
-        const rucount = await models.sequelize.query('select sum(accounts) as remotes from raidusers where raidId = ? and uid != ? and remote = 1', {
-          replacements: [joinedraid.raidid, ctx.from.id],
-          type: models.sequelize.QueryTypes.SELECT
-        })
+        const rucount = await models.sequelize.query(
+          'select sum(accounts) as remotes from raidusers where raidId = ? and uid != ? and remote = 1',
+          {
+            replacements: [joinedraid.raidid, ctx.from.id],
+            type: models.sequelize.QueryTypes.SELECT
+          }
+        )
         remotecurrentusers = 0
         if (rucount !== null) {
-          remotecurrentusers = rucount.length > 0 ? parseInt(rucount[0].remotes, 10) : 0
+          remotecurrentusers =
+            rucount.length > 0 ? parseInt(rucount[0].remotes, 10) : 0
         }
-        remoteraidusers = remotecurrentusers + parseInt(ctx.session.accounts, 10)
+        remoteraidusers =
+          remotecurrentusers + parseInt(ctx.session.accounts, 10)
       }
       if (remoteraidusers > parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)) {
-        console.info(`TOO MANY REMOTES current remotes ${remotecurrentusers}, requested to add: ${parseInt(ctx.session.accounts, 10)} limit ${parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)}`)
-        return ctx.replyWithMarkdown(`*${ctx.i18n.t('maximum_remote_raid_reached')}* ${process.env.THRESHOLD_REMOTE_USERS}\n\n${ctx.i18n.t('current_number_remote_users')} ${remotecurrentusers} ${ctx.i18n.t('try_again_remote_limit')}`)
+        console.info(
+          `TOO MANY REMOTES current remotes ${remotecurrentusers}, requested to add: ${parseInt(
+            ctx.session.accounts,
+            10
+          )} limit ${parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)}`
+        )
+        return ctx
+          .replyWithMarkdown(
+            `*${ctx.i18n.t('maximum_remote_raid_reached')}* ${
+              process.env.THRESHOLD_REMOTE_USERS
+            }\n\n${ctx.i18n.t(
+              'current_number_remote_users'
+            )} ${remotecurrentusers} ${ctx.i18n.t('try_again_remote_limit')}`
+          )
           .then(() => ctx.scene.leave())
       }
 
@@ -141,7 +194,7 @@ function JoinRaidWizard (bot) {
         }
       })
       if (raiduser) {
-      // update
+        // update
         try {
           await models.Raiduser.update(
             {
@@ -152,19 +205,20 @@ function JoinRaidWizard (bot) {
             },
             {
               where: {
-                [Op.and]: [
-                  { uid: user.id },
-                  { raidId: joinedraid.raidid }
-                ]
+                [Op.and]: [{ uid: user.id }, { raidId: joinedraid.raidid }]
               }
             }
           )
         } catch (error) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       } else {
-      // new raid user
+        // new raid user
         const raiduser = models.Raiduser.build({
           raidId: joinedraid.raidid,
           username: user.first_name,
@@ -178,7 +232,11 @@ function JoinRaidWizard (bot) {
           await raiduser.save()
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard()
+            )
             .then(() => ctx.scene.leave())
         }
       }
@@ -192,14 +250,25 @@ function JoinRaidWizard (bot) {
       ctx.i18n.locale(oldlocale)
       const out = await listRaids(`${reason}\n\n`, ctx)
       if (out === null) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('unexpected_raid_not_found'), Markup.removeKeyboard())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('unexpected_raid_not_found'),
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       }
-      return ctx.replyWithMarkdown(ctx.i18n.t('join_raid_finished', {
-        joinedraid: joinedraid
-      }), Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('join_raid_finished', {
+            joinedraid: joinedraid
+          }),
+          Markup.removeKeyboard().extra()
+        )
         .then(async () => {
-          bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+          bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+            parse_mode: 'Markdown',
+            disable_web_page_preview: true
+          })
         })
         .then(() => ctx.scene.leave())
     }

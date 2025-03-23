@@ -1,7 +1,8 @@
 // ===================
 // add gym wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const { Markup } = require('telegraf')
 var models = require('../models')
 const Sequelize = require('sequelize')
@@ -10,10 +11,15 @@ const setLocale = require('../util/setLocale')
 const escapeMarkDown = require('../util/escapeMarkDown')
 
 var FindGymWizard = function () {
-  return new WizardScene('find-gym-wizard',
+  return new Scenes.WizardScene(
+    'find-gym-wizard',
     async (ctx) => {
       await setLocale(ctx)
-      return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_intro'), Markup.removeKeyboard())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('find_gym_location_intro'),
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -42,11 +48,15 @@ var FindGymWizard = function () {
           }
           out += '\n\n'
         }
-        ctx.replyWithMarkdown(ctx.i18n.t('find_gym_location_overview', {
-          out: out,
-          term: escapeMarkDown(term),
-          l: l
-        }), { disable_web_page_preview: true })
+        ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('find_gym_location_overview', {
+              out: out,
+              term: escapeMarkDown(term),
+              l: l
+            }),
+            { disable_web_page_preview: true }
+          )
           .then(() => ctx.scene.leave())
       }
     }

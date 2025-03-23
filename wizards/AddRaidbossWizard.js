@@ -1,8 +1,9 @@
 // ===================
 // add raidboss wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
-const { Markup } = require('telegraf')
+// // const WizardScene = require('telegraf/scenes/wizard')
+
+const { Markup, Scenes } = require('telegraf')
 const models = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
@@ -10,8 +11,9 @@ const metaphone = require('metaphone')
 const adminCheck = require('../util/adminCheck')
 const setLocale = require('../util/setLocale')
 
-function AddRaidbossWizard (bot) {
-  return new WizardScene('add-raidboss-wizard',
+function AddRaidbossWizard(bot) {
+  return new Scenes.WizardScene(
+    'add-raidboss-wizard',
     // Step 0: Raidboss name request
     async (ctx) => {
       await setLocale(ctx)
@@ -20,7 +22,11 @@ function AddRaidbossWizard (bot) {
         return invalidAdmin
       }
       ctx.session.newboss = {}
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('add_raidboss_intro')}`, Markup.removeKeyboard())
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('add_raidboss_intro')}`,
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -37,17 +43,18 @@ function AddRaidbossWizard (bot) {
         }
       })
       if (oldboss !== null) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_exists'))
+        return ctx
+          .replyWithMarkdown(ctx.i18n.t('raidboss_exists'))
           .then(() => ctx.scene.leave())
       }
       const btns = ['1', '2', '3', '4', '5']
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('raidboss_level_question', {
-        bossname: bossname
-      })}`, Markup.keyboard(btns)
-        .resize()
-        .oneTime()
-        .extra()
-      )
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('raidboss_level_question', {
+            bossname: bossname
+          })}`,
+          Markup.keyboard(btns).resize().oneTime().extra()
+        )
         .then(() => {
           return ctx.wizard.next()
         })
@@ -56,9 +63,12 @@ function AddRaidbossWizard (bot) {
     // Handle level, ask for recommended number of accounts
     (ctx) => {
       ctx.session.newboss.level = parseInt(ctx.update.message.text.trim())
-      return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_recommended_accounts', {
-        bossname: ctx.session.newboss.name
-      }))
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('raidboss_recommended_accounts', {
+            bossname: ctx.session.newboss.name
+          })
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -66,15 +76,15 @@ function AddRaidbossWizard (bot) {
     async (ctx) => {
       ctx.session.newboss.accounts = parseInt(ctx.update.message.text.trim())
       ctx.session.savebtns = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
-      ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_question', {
-        bossname: ctx.session.newboss.name,
-        bosslevel: ctx.session.newboss.level,
-        numaccounts: ctx.session.newboss.accounts
-      }), Markup.keyboard(ctx.session.savebtns)
-        .oneTime()
-        .resize()
-        .extra()
-      )
+      ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('raidboss_save_question', {
+            bossname: ctx.session.newboss.name,
+            bosslevel: ctx.session.newboss.level,
+            numaccounts: ctx.session.newboss.accounts
+          }),
+          Markup.keyboard(ctx.session.savebtns).oneTime().resize().extra()
+        )
         .then(() => {
           return ctx.wizard.next()
         })
@@ -95,14 +105,26 @@ function AddRaidbossWizard (bot) {
           await newboss.save()
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
-          return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('problem_while_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       } else {
-        return ctx.replyWithMarkdown(ctx.i18n.t('raidboss_save_canceled'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('raidboss_save_canceled'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => ctx.scene.leave())
       }
-      return ctx.replyWithMarkdown(ctx.i18n.t('add_raidboss_finished'), Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('add_raidboss_finished'),
+          Markup.removeKeyboard().extra()
+        )
         .then(() => ctx.scene.leave())
     }
   )

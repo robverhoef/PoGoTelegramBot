@@ -1,7 +1,8 @@
 // ===================
 // add gym wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 var models = require('../models')
 const { Markup } = require('telegraf')
 const Sequelize = require('sequelize')
@@ -9,7 +10,8 @@ const Op = Sequelize.Op
 const setLocale = require('../util/setLocale')
 
 var NotificationWizard = function () {
-  return new WizardScene('notification-wizard',
+  return new Scenes.WizardScene(
+    'notification-wizard',
     // step 0
     async (ctx) => {
       await setLocale(ctx)
@@ -22,36 +24,55 @@ var NotificationWizard = function () {
         }
       })
       if (!dbuser) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_something_wrong_finding_user')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('noti_something_wrong_finding_user')}`,
+            Markup.removeKeyboard().extra()
+          )
           .then(() => ctx.scene.leave())
       }
 
       ctx.session.userId = dbuser.id
-      ctx.session.notificatiesbtns = [`${ctx.i18n.t('noti_gyms')}`, `${ctx.i18n.t('noti_raidbosses')}`]
+      ctx.session.notificatiesbtns = [
+        `${ctx.i18n.t('noti_gyms')}`,
+        `${ctx.i18n.t('noti_raidbosses')}`
+      ]
 
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_which_notification')}`, Markup.keyboard(ctx.session.notificatiesbtns)
-        .oneTime()
-        .resize()
-        .extra())
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('noti_which_notification')}`,
+          Markup.keyboard(ctx.session.notificatiesbtns)
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
-      ctx.session.chosenNotificatie = ctx.session.notificatiesbtns.indexOf(ctx.update.message.text)
+      ctx.session.chosenNotificatie = ctx.session.notificatiesbtns.indexOf(
+        ctx.update.message.text
+      )
       ctx.session.chosenGymNotification = ctx.session.chosenNotificatie === 0
-      ctx.session.chosenNotificationString = ctx.session.chosenGymNotification ? 'gyms' : 'raidbosses'
-      ctx.session.chosenNotificationSingleString = ctx.session.chosenGymNotification ? 'gym' : 'raidboss'
+      ctx.session.chosenNotificationString = ctx.session.chosenGymNotification
+        ? 'gyms'
+        : 'raidbosses'
+      ctx.session.chosenNotificationSingleString = ctx.session
+        .chosenGymNotification
+        ? 'gym'
+        : 'raidboss'
 
       if (ctx.session.chosenNotificatie === -1) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('something_wrong')}`, Markup.removeKeyboard().extra())
+        return ctx.replyWithMarkdown(
+          `${ctx.i18n.t('something_wrong')}`,
+          Markup.removeKeyboard().extra()
+        )
       }
 
       let existingNotifications = []
       if (ctx.session.chosenGymNotification) {
         existingNotifications = await models.GymNotification.findAll({
-          include: [
-            models.Gym
-          ],
+          include: [models.Gym],
           where: {
             userId: {
               [Op.eq]: ctx.session.userId
@@ -61,9 +82,7 @@ var NotificationWizard = function () {
         console.log(existingNotifications.length)
       } else {
         existingNotifications = await models.RaidbossNotification.findAll({
-          include: [
-            models.Raidboss
-          ],
+          include: [models.Raidboss],
           where: {
             userId: {
               [Op.eq]: ctx.session.userId
@@ -74,7 +93,11 @@ var NotificationWizard = function () {
 
       let message = ''
       for (const existingNotification of existingNotifications) {
-        message += `\n- ${ctx.session.chosenGymNotification ? existingNotification.Gym.gymname : existingNotification.Raidboss.name}`
+        message += `\n- ${
+          ctx.session.chosenGymNotification
+            ? existingNotification.Gym.gymname
+            : existingNotification.Raidboss.name
+        }`
       }
 
       if (message === '') {
@@ -82,11 +105,15 @@ var NotificationWizard = function () {
       }
       message += '\n'
 
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_current_notifications', {
-        noti_string: ctx.session.chosenNotificationString,
-        message: message,
-        noti_single_string: ctx.session.chosenNotificationSingleString
-      })}`, Markup.removeKeyboard())
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('noti_current_notifications', {
+            noti_string: ctx.session.chosenNotificationString,
+            message: message,
+            noti_single_string: ctx.session.chosenNotificationSingleString
+          })}`,
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.wizard.next())
     },
     // step 2
@@ -111,26 +138,38 @@ var NotificationWizard = function () {
           })
         }
         if (candidates.length === 0) {
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_subject_not_found', {
-            noti_string: ctx.session.chosenNotificationString,
-            term: term
-          })}`)
+          return ctx.replyWithMarkdown(
+            `${ctx.i18n.t('noti_subject_not_found', {
+              noti_string: ctx.session.chosenNotificationString,
+              term: term
+            })}`
+          )
         }
         ctx.session.candidates = []
         for (let i = 0; i < candidates.length; i++) {
           ctx.session.candidates.push([
-            ctx.session.chosenGymNotification ? candidates[i].gymname.trim() : candidates[i].name.trim(),
+            ctx.session.chosenGymNotification
+              ? candidates[i].gymname.trim()
+              : candidates[i].name.trim(),
             candidates[i].id
           ])
         }
         ctx.session.candidates.push([
           `${ctx.i18n.t('noti_subject_not_listed', {
             noti_single_string: ctx.session.chosenNotificationSingleString
-          })}`, 0
+          })}`,
+          0
         ])
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_select_subject', {
-          noti_single_string: ctx.session.chosenNotificationSingleString
-        })}.`, Markup.keyboard(ctx.session.candidates.map(el => el[0])).oneTime().resize().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('noti_select_subject', {
+              noti_single_string: ctx.session.chosenNotificationSingleString
+            })}.`,
+            Markup.keyboard(ctx.session.candidates.map((el) => el[0]))
+              .oneTime()
+              .resize()
+              .extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -145,9 +184,13 @@ var NotificationWizard = function () {
       }
       // Catch gym not found errors…
       if (selectedIndex === -1) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_select_something_wrong', {
-          noti_single_string: ctx.session.chosenNotificationSingleString
-        })}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('noti_select_something_wrong', {
+              noti_single_string: ctx.session.chosenNotificationSingleString
+            })}`,
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -155,7 +198,11 @@ var NotificationWizard = function () {
       }
       // User can't find the gym/raidboss
       if (ctx.session.candidates[selectedIndex][1] === 0) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('retry_or_cancel')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('retry_or_cancel')}`,
+            Markup.removeKeyboard().extra()
+          )
           .then(() => ctx.wizard.back())
       } else {
         // retrieve selected candidate from session
@@ -197,14 +244,25 @@ var NotificationWizard = function () {
           ctx.session.existingNotificationId = null
         }
 
-        return ctx.replyWithMarkdown(message, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())
+        return ctx
+          .replyWithMarkdown(
+            message,
+            Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')])
+              .oneTime()
+              .resize()
+              .extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
     // step 3
     async (ctx) => {
       if (ctx.update.message.text === ctx.i18n.t('no')) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_no_save')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            `${ctx.i18n.t('noti_no_save')}`,
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -225,12 +283,20 @@ var NotificationWizard = function () {
             await gymNotification.save()
           } catch (error) {
             console.log('Woops… registering gymNotification failed', error)
-            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                `${ctx.i18n.t('problem_while_saving')}`,
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_gym_finished', {
-            selected: selected[0]
-          })}`, Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              `${ctx.i18n.t('noti_gym_finished', {
+                selected: selected[0]
+              })}`,
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         } else {
           const raidbossNotification = models.RaidbossNotification.build({
@@ -241,12 +307,20 @@ var NotificationWizard = function () {
             await raidbossNotification.save()
           } catch (error) {
             console.log('Woops… registering raidbossNotification failed', error)
-            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                `${ctx.i18n.t('problem_while_saving')}`,
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_raidboss_finished', {
-            selected: selected[0]
-          })}`, Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              `${ctx.i18n.t('noti_raidboss_finished', {
+                selected: selected[0]
+              })}`,
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       } else {
@@ -262,12 +336,20 @@ var NotificationWizard = function () {
             })
           } catch (error) {
             console.log('Woops… deleting gymNotification failed', error)
-            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                `${ctx.i18n.t('problem_while_saving')}`,
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_finished_gym_removal', {
-            selected: selected[0]
-          })}`, Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              `${ctx.i18n.t('noti_finished_gym_removal', {
+                selected: selected[0]
+              })}`,
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         } else {
           try {
@@ -280,12 +362,20 @@ var NotificationWizard = function () {
             })
           } catch (error) {
             console.log('Woops… deleting raidbossNotification failed', error)
-            return ctx.replyWithMarkdown(`${ctx.i18n.t('problem_while_saving')}`, Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                `${ctx.i18n.t('problem_while_saving')}`,
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_finished_raidboss_removal', {
-            selected: selected[0]
-          })}`, Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              `${ctx.i18n.t('noti_finished_raidboss_removal', {
+                selected: selected[0]
+              })}`,
+              Markup.removeKeyboard().extra()
+            )
             .then(() => ctx.scene.leave())
         }
       }

@@ -1,7 +1,8 @@
 // ===================
 // Edit raid wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const moment = require('moment-timezone')
 const { Markup } = require('telegraf')
 var models = require('../models')
@@ -17,7 +18,7 @@ const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
-async function isAdmin (bot, user) {
+async function isAdmin(bot, user) {
   let isAdmin = false
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   for (let a = 0; a < admins.length; a++) {
@@ -45,8 +46,9 @@ async function isAdmin (bot, user) {
   }
   return isAdmin
 }
-function EditRaidWizard (bot) {
-  return new WizardScene('edit-raid-wizard',
+function EditRaidWizard(bot) {
+  return new Scenes.WizardScene(
+    'edit-raid-wizard',
 
     // step 0: choose raid
     async (ctx) => {
@@ -68,7 +70,11 @@ function EditRaidWizard (bot) {
         }
       })
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_no_raids_found'), Markup.removeKeyboard())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('edit_raid_no_raids_found'),
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       }
       ctx.session.raidbtns = []
@@ -81,7 +87,13 @@ function EditRaidWizard (bot) {
           endtime: raids[a].endtime,
           target: raids[a].target
         }
-        ctx.session.raidbtns.push(`${raids[a].Gym.gymname}, ${ctx.i18n.t('edit_raid_until')}: ${moment.unix(raids[a].endtime).format('HH:mm')}, ${ctx.i18n.t('edit_raid_start')}: ${moment.unix(raids[a].start1).format('HH:mm')}; ${raids[a].target}`)
+        ctx.session.raidbtns.push(
+          `${raids[a].Gym.gymname}, ${ctx.i18n.t('edit_raid_until')}: ${moment
+            .unix(raids[a].endtime)
+            .format('HH:mm')}, ${ctx.i18n.t('edit_raid_start')}: ${moment
+            .unix(raids[a].start1)
+            .format('HH:mm')}; ${raids[a].target}`
+        )
       }
       ctx.session.raidcandidates.push({
         gymname: ctx.i18n.t('edit_raid_not_found'),
@@ -90,12 +102,11 @@ function EditRaidWizard (bot) {
       ctx.session.raidbtns.push(ctx.i18n.t('edit_raid_not_found'))
 
       // save all candidates to session…
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('edit_raid_which_raid')}`,
-        Markup.keyboard(ctx.session.raidbtns)
-          .oneTime()
-          .resize()
-          .extra()
-      )
+      return ctx
+        .replyWithMarkdown(
+          `${ctx.i18n.t('edit_raid_which_raid')}`,
+          Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -112,7 +123,11 @@ function EditRaidWizard (bot) {
         }
         // Catch gym not found errors…
         if (selectedraid === null) {
-          return ctx.replyWithMarkdown('Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n', Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              'Er ging iets fout bij het kiezen van de gym.\n*Gebruik */start* om het nog eens te proberen…*\n',
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session = {}
               return ctx.scene.leave()
@@ -120,7 +135,11 @@ function EditRaidWizard (bot) {
         }
 
         if (selectedraid.id === 0) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('cancelmessage'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session = {}
               return ctx.scene.leave()
@@ -130,13 +149,36 @@ function EditRaidWizard (bot) {
         ctx.session.editraid = selectedraid
       }
       ctx.session.changebtns = [
-        [`${ctx.i18n.t('edit_raid_gym')}: ${ctx.session.editraid.gymname}`, 'gym'],
-        [`${ctx.i18n.t('edit_raid_endtime')}: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}`, 'endtime'],
-        [`${ctx.i18n.t('edit_raid_starttime')}: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}`, 'start1'],
-        [`${ctx.i18n.t('edit_raid_pokemon')}: ${ctx.session.editraid.target}`, 'target'],
+        [
+          `${ctx.i18n.t('edit_raid_gym')}: ${ctx.session.editraid.gymname}`,
+          'gym'
+        ],
+        [
+          `${ctx.i18n.t('edit_raid_endtime')}: ${moment
+            .unix(ctx.session.editraid.endtime)
+            .format('HH:mm')}`,
+          'endtime'
+        ],
+        [
+          `${ctx.i18n.t('edit_raid_starttime')}: ${moment
+            .unix(ctx.session.editraid.start1)
+            .format('HH:mm')}`,
+          'start1'
+        ],
+        [
+          `${ctx.i18n.t('edit_raid_pokemon')}: ${ctx.session.editraid.target}`,
+          'target'
+        ],
         [ctx.i18n.t('btn_edit_gym_cancel'), 0]
       ]
-      return ctx.replyWithMarkdown(ctx.i18n.t('edit_what'), Markup.keyboard(ctx.session.changebtns.map(el => el[0])).oneTime().resize().extra())
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('edit_what'),
+          Markup.keyboard(ctx.session.changebtns.map((el) => el[0]))
+            .oneTime()
+            .resize()
+            .extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -149,7 +191,11 @@ function EditRaidWizard (bot) {
         }
       }
       if (editattr === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('cancelmessage'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -163,8 +209,13 @@ function EditRaidWizard (bot) {
             break
           case 'start1':
             ctx.session.editattr = 'start1'
-            const endtimestr = moment.unix(ctx.session.editraid.endtime).format('HH:mm')
-            const start1str = moment.unix(ctx.session.editraid.endtime).subtract(TIMINGS.BOSS, 'minutes').format('HH:mm')
+            const endtimestr = moment
+              .unix(ctx.session.editraid.endtime)
+              .format('HH:mm')
+            const start1str = moment
+              .unix(ctx.session.editraid.endtime)
+              .subtract(TIMINGS.BOSS, 'minutes')
+              .format('HH:mm')
             question = ctx.i18n.t('edit_raid_question_starttime_range', {
               start1str: start1str,
               endtimestr: endtimestr
@@ -180,11 +231,9 @@ function EditRaidWizard (bot) {
             return ctx.wizard.steps[6](ctx)
           default:
             question = ctx.i18n.t('edit_raidboss_no_clue')
-            return ctx.replyWithMarkdown(question)
-              .then(() => ctx.scene.leave())
+            return ctx.replyWithMarkdown(question).then(() => ctx.scene.leave())
         }
-        return ctx.replyWithMarkdown(question)
-          .then(() => ctx.wizard.next())
+        return ctx.replyWithMarkdown(question).then(() => ctx.wizard.next())
       }
     },
     // step 3: enter new value or jump to 6 for entering a new gym
@@ -204,7 +253,9 @@ function EditRaidWizard (bot) {
         }
         if (key === 'start1') {
           const endtime = moment.unix(ctx.session.editraid.endtime)
-          const start = moment.unix(ctx.session.editraid.endtime).subtract(TIMINGS.BOSS, 'minutes')
+          const start = moment
+            .unix(ctx.session.editraid.endtime)
+            .subtract(TIMINGS.BOSS, 'minutes')
           const start1 = moment.unix(timevalue)
           if (start.diff(moment(start1)) > 0 || endtime.diff(start1) < 0) {
             return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
@@ -235,19 +286,32 @@ function EditRaidWizard (bot) {
 
     // step 4: do more or save?
     async (ctx) => {
-      const out = `${ctx.i18n.t('until')}: ${moment.unix(ctx.session.editraid.endtime).format('HH:mm')}: *${ctx.session.editraid.target}*\n${ctx.session.editraid.bossid !== null ? ctx.i18n.t('edit_raidboss_overview_accounts') + ': ' + (ctx.session.editraid.accounts !== undefined ? ctx.session.editraid.accounts : '') + '\n' : ''}${ctx.session.editraid.gymname}\nStart: ${moment.unix(ctx.session.editraid.start1).format('HH:mm')}\n\n`
+      const out = `${ctx.i18n.t('until')}: ${moment
+        .unix(ctx.session.editraid.endtime)
+        .format('HH:mm')}: *${ctx.session.editraid.target}*\n${
+        ctx.session.editraid.bossid !== null
+          ? ctx.i18n.t('edit_raidboss_overview_accounts') +
+            ': ' +
+            (ctx.session.editraid.accounts !== undefined
+              ? ctx.session.editraid.accounts
+              : '') +
+            '\n'
+          : ''
+      }${ctx.session.editraid.gymname}\nStart: ${moment
+        .unix(ctx.session.editraid.start1)
+        .format('HH:mm')}\n\n`
       ctx.session.savebtns = [
         ctx.i18n.t('edit_raidboss_btn_save_close'),
         ctx.i18n.t('edit_raid_edit_more'),
         ctx.i18n.t('cancel')
       ]
-      return ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_overview_data', {
-        out: out
-      }), Markup.keyboard(ctx.session.savebtns)
-        .resize()
-        .oneTime()
-        .extra()
-      )
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('edit_raid_overview_data', {
+            out: out
+          }),
+          Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -286,25 +350,41 @@ function EditRaidWizard (bot) {
             ctx.i18n.locale(oldlocale)
             const out = await listRaids(reason, ctx)
             console.log('ctx.session.oldlang', ctx.session.oldlang)
-            bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+            bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+              parse_mode: 'Markdown',
+              disable_web_page_preview: true
+            })
             await sendRaidbosses(ctx, bot)
-            return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('finished_procedure'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           } catch (error) {
             console.error(error)
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithMarkdown(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard().extra()
+              )
               .then(() => ctx.scene.leave())
           }
         case 1:
           // more edits
           // set cursor to step 1 and trigger jump to step 1
           ctx.session.more = true
-          return ctx.replyWithMarkdown(ctx.i18n.t('edit_more'))
+          return ctx
+            .replyWithMarkdown(ctx.i18n.t('edit_more'))
             .then(() => ctx.wizard.selectStep(1))
             .then(() => ctx.wizard.steps[1](ctx))
         case 2:
           // Don't save and leave
-          return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
+          return ctx
+            .replyWithMarkdown(
+              ctx.i18n.t('finished_procedure_without_saving'),
+              Markup.removeKeyboard().extra()
+            )
             .then(() => {
               ctx.session.raidcandidates = null
               ctx.session.editraid = null
@@ -317,8 +397,7 @@ function EditRaidWizard (bot) {
     // step 6: handle gym search
     async (ctx) => {
       const question = ctx.i18n.t('edit_raid_question_gym')
-      return ctx.replyWithMarkdown(question)
-        .then(() => ctx.wizard.next())
+      return ctx.replyWithMarkdown(question).then(() => ctx.wizard.next())
     },
     // Step 7: find gyms
     async (ctx) => {
@@ -340,30 +419,31 @@ function EditRaidWizard (bot) {
         })
         if (candidates.length === 0) {
           // ToDo: check dit dan...
-          return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_failed_retry', {
-            term: term === '/start help_fromgroup' ? '' : term
-          }))
+          return ctx.replyWithMarkdown(
+            ctx.i18n.t('find_gym_failed_retry', {
+              term: term === '/start help_fromgroup' ? '' : term
+            })
+          )
           // .then(() => ctx.wizard.back())
         }
         ctx.session.gymcandidates = []
         for (let i = 0; i < candidates.length; i++) {
-          ctx.session.gymcandidates.push(
-            {
-              gymname: candidates[i].gymname, id: candidates[i].id
-            }
-          )
+          ctx.session.gymcandidates.push({
+            gymname: candidates[i].gymname,
+            id: candidates[i].id
+          })
           ctx.session.gymbtns.push(candidates[i].gymname)
         }
-        ctx.session.gymcandidates.push(
-          {
-            name: ctx.i18n.t('btn_gym_not_found'),
-            id: 0
-          }
-        )
+        ctx.session.gymcandidates.push({
+          name: ctx.i18n.t('btn_gym_not_found'),
+          id: 0
+        })
         ctx.session.gymbtns.push(ctx.i18n.t('btn_gym_not_found'))
-        return ctx.replyWithMarkdown(ctx.i18n.t('select_a_gym'), Markup.keyboard(ctx.session.gymbtns)
-          .oneTime()
-          .resize().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('select_a_gym'),
+            Markup.keyboard(ctx.session.gymbtns).oneTime().resize().extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -374,7 +454,11 @@ function EditRaidWizard (bot) {
       const selectedGym = ctx.session.gymcandidates[gymIndex]
       if (selectedGym.id === 0) {
         // mmm, let's try searching for a gym again
-        return ctx.replyWithMarkdown(ctx.i18n.t('edit_raid_search_gym_again'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('edit_raid_search_gym_again'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             ctx.wizard.selectStep(6)
             return ctx.wizard.steps[6](ctx)
@@ -389,7 +473,7 @@ function EditRaidWizard (bot) {
     }
   )
 }
-async function sendRaidbosses (ctx, bot) {
+async function sendRaidbosses(ctx, bot) {
   const raidbossId = ctx.session.editraid.bossid
   if (!raidbossId) {
     return
@@ -398,7 +482,14 @@ async function sendRaidbosses (ctx, bot) {
   const target = ctx.session.editraid.target
   const starttime = ctx.session.editraid.start1
 
-  await sendRaidbossNotifications(ctx, bot, raidbossId, gymname, target, starttime)
+  await sendRaidbossNotifications(
+    ctx,
+    bot,
+    raidbossId,
+    gymname,
+    target,
+    starttime
+  )
 }
 
 module.exports = EditRaidWizard

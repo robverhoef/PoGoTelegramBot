@@ -1,7 +1,8 @@
 // ===================
 // Exit raid wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
+// const WizardScene = require('telegraf/scenes/wizard')
+const { Scenes } = require('telegraf')
 const moment = require('moment-timezone')
 const { Markup } = require('telegraf')
 var models = require('../models')
@@ -13,8 +14,9 @@ const escapeMarkDown = require('../util/escapeMarkDown')
 
 moment.tz.setDefault('Europe/Amsterdam')
 
-function ExitRaidWizard (bot) {
-  return new WizardScene('exit-raid-wizard',
+function ExitRaidWizard(bot) {
+  return new Scenes.WizardScene(
+    'exit-raid-wizard',
     async (ctx) => {
       await setLocale(ctx)
       const user = ctx.from
@@ -36,7 +38,11 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_not_participating'), Markup.removeKeyboard())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('exit_raid_not_participating'),
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       } else {
         ctx.session.raidbtns = []
@@ -46,11 +52,21 @@ function ExitRaidWizard (bot) {
 
           const strttm = moment.unix(raids[a].start1).format('H:mm')
           // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
-          ctx.session.raidbtns.push([`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id])
+          ctx.session.raidbtns.push([
+            `${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`,
+            raids[a].id
+          ])
         }
         ctx.session.raidbtns.push([ctx.i18n.t('exit_raid_not_listed'), 0])
-        console.log(ctx.session.raidbtns.map(el => el[0]))
-        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_select_raid'), Markup.keyboard(ctx.session.raidbtns.map(el => el[0])).oneTime().resize().extra())
+        console.log(ctx.session.raidbtns.map((el) => el[0]))
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('exit_raid_select_raid'),
+            Markup.keyboard(ctx.session.raidbtns.map((el) => el[0]))
+              .oneTime()
+              .resize()
+              .extra()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -65,7 +81,11 @@ function ExitRaidWizard (bot) {
       }
 
       if (selectedraid === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('finished_procedure_without_saving'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => {
             return ctx.scene.leave()
           })
@@ -99,11 +119,22 @@ function ExitRaidWizard (bot) {
       ctx.i18n.locale(oldlocale)
       const out = await listRaids(reason, ctx)
       if (out === null) {
-        ctx.replyWithMarkdown(ctx.i18n.t('no_raids_found'), Markup.removeKeyboard().extra())
+        ctx
+          .replyWithMarkdown(
+            ctx.i18n.t('no_raids_found'),
+            Markup.removeKeyboard().extra()
+          )
           .then(() => ctx.scene.leave())
       }
-      bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-      return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
+      bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      })
+      return ctx
+        .replyWithMarkdown(
+          ctx.i18n.t('finished_procedure'),
+          Markup.removeKeyboard().extra()
+        )
         .then(() => ctx.scene.leave())
     }
   )
