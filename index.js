@@ -17,7 +17,6 @@ const listRaids = require('./util/listRaids')
 // =====================
 // Let's go!
 // =====================
-console.debug('TOKEN', process.env.BOT_TOKEN)
 const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.catch((err) => {
   console.log('Ooops', err)
@@ -621,18 +620,13 @@ startBot()
 async function startBot() {
   let botUrl = process.env.BOT_URL
   if (process.env.NODE_ENV === 'development') {
-    const tunnel = await localtunnel({ port: process.env.PORT })
-    botUrl = tunnel.url
-    console.log('local tunnel started', botUrl)
-    tunnel.on('close', () => {
-      // tunnels are closed
-      console.log('local tunnel closed')
+    bot.start()
+  } else {
+    bot.telegram.setWebhook(botUrl).then((data) => {
+      console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set', botUrl)
     })
-  }
-  bot.telegram.setWebhook(botUrl).then((data) => {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set')
-  })
 
-  bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
-  console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
+    bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
+    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
+  }
 }

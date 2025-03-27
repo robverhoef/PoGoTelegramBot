@@ -1,6 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  var Eliteraiduser = sequelize.define(
+  const Eliteraiduser = sequelize.define(
     'Eliteraiduser',
     {
       id: {

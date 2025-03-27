@@ -1,39 +1,43 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  var User = sequelize.define('User', {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      autoIncrement: true,
-      primaryKey: true
+  const User = sequelize.define(
+    'User',
+    {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      tId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      tUsername: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      tGroupID: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN
+      },
+      locale: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      friendcode: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      pokemonname: {
+        type: DataTypes.STRING,
+        allowNull: true
+      }
     },
-    tId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    tUsername: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    tGroupID: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    isAdmin: {
-      type: DataTypes.BOOLEAN
-    },
-    locale: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    friendcode: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    pokemonname: {
-      type: DataTypes.STRING,
-      allowNull: true
-    }
-  }, { tableName: 'users' })
+    { tableName: 'users' }
+  )
   User.associate = function (models) {
     // associations can be defined here
   }

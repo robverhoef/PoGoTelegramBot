@@ -1,35 +1,39 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  var Raiduser = sequelize.define('Raiduser', {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      autoIncrement: true,
-      primaryKey: true
+  const Raiduser = sequelize.define(
+    'Raiduser',
+    {
+      id: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      username: DataTypes.STRING(191),
+      uid: DataTypes.STRING(191),
+      accounts: {
+        type: DataTypes.INTEGER,
+        defaultValue: 1
+      },
+      raidId: DataTypes.INTEGER.UNSIGNED,
+      delayed: {
+        type: DataTypes.STRING(32),
+        allowNull: true
+      },
+      remote: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
+      invited: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
+      private: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      }
     },
-    username: DataTypes.STRING(191),
-    uid: DataTypes.STRING(191),
-    accounts: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1
-    },
-    raidId: DataTypes.INTEGER.UNSIGNED,
-    delayed: {
-      type: DataTypes.STRING(32),
-      allowNull: true
-    },
-    remote: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    invited: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    private: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
-  }, { tableName: 'raidusers' })
+    { tableName: 'raidusers' }
+  )
 
   Raiduser.associate = function (models) {
     models.Raiduser.belongsTo(models.Raid, {

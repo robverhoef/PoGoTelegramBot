@@ -24,15 +24,6 @@ if (config.use_env_variable) {
   )
 }
 
-// sequelize = new Sequelize({
-//   database: 'pogokanaleneiland',
-//   username: 'dbuser1',
-//   password: 'db_passwd',
-//   dialect: 'mysql',
-//   timezone: 'Europe/Amsterdam',
-//   useUTC: false
-// });
-
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
@@ -40,10 +31,12 @@ fs.readdirSync(__dirname)
     )
   })
   .forEach((file) => {
-    var model = require(path.join(__dirname, file))
+    var model = require(path.join(__dirname, file))(
+      sequelize,
+      Sequelize.DataTypes
+    )
     db[model.name] = model
   })
-
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db)
