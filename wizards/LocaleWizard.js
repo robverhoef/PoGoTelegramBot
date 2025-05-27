@@ -1,19 +1,19 @@
 // ===================
 // Edit raid wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const setLocale = require('../util/setLocale')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes } from 'telegraf'
+import { Markup } from 'telegraf'
+import models from '../models/index.js'
+import setLocale from '../util/setLocale.js'
 
-function LocaleWizard(bot) {
+function LocaleWizard() {
   return new Scenes.WizardScene(
     'locale-wizard',
     async (ctx) => {
       if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
         return ctx
-          .replyWithMarkdown('Not here… set your language in the bot screen')
+          .replyWithHTML('Not here… set your language in the bot screen')
           .then(() => ctx.scene.leave())
       }
       await setLocale(ctx)
@@ -26,9 +26,9 @@ function LocaleWizard(bot) {
         ctx.session.localebtns.push(ctx.i18n.t(loc[1]))
       }
       return ctx
-        .replyWithMarkdown(
-          '*Select a language…*',
-          Markup.keyboard(ctx.session.localebtns).resize().oneTime().extra()
+        .replyWithHTML(
+          '<b>Select a language…</b>',
+          Markup.keyboard(ctx.session.localebtns).resize().oneTime()
         )
         .then(() => ctx.wizard.next())
     },
@@ -62,9 +62,9 @@ function LocaleWizard(bot) {
       }
       ctx.i18n.locale(newloc)
       return ctx
-        .replyWithMarkdown(`${ctx.i18n.t('lang_set')}`)
+        .replyWithHTML(`${ctx.i18n.t('lang_set')}`)
         .then(() => ctx.scene.leave())
     }
   )
 }
-module.exports = LocaleWizard
+export default LocaleWizard

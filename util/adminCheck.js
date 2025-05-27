@@ -1,13 +1,13 @@
-// const models = require('../models')
-const models = require('../models')
-const Sequelize = require('sequelize')
+// import models from '../models/index.js'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const { Markup } = require('telegraf')
+import { Markup } from 'telegraf'
 /**
-* Returns false when everything is OK
-* Otherwise returns response
-*/
-module.exports = async (ctx, bot) => {
+ * Returns false when everything is OK
+ * Otherwise returns response
+ */
+export default async (ctx, bot) => {
   const user = ctx.from
   let isAdmin = false
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
@@ -37,7 +37,11 @@ module.exports = async (ctx, bot) => {
 
   if (!isAdmin) {
     console.log('Illegal admin attempt', user)
-    return ctx.replyWithMarkdown('Really nice try. And smart too! \r\nBut only admins are allowed here…', Markup.removeKeyboard())
+    return ctx
+      .replyWithHTML(
+        'Really nice try. And smart too! \r\nBut only admins are allowed here…',
+        Markup.removeKeyboard()
+      )
       .then(() => ctx.scene.leave())
   }
   return false

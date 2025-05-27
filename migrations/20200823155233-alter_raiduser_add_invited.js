@@ -1,14 +1,10 @@
 'use strict'
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'raidusers',
-      'invited',
-      {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-      }
-    )
+    return queryInterface.addColumn('raidusers', 'invited', {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    })
   },
 
   down: (queryInterface, Sequelize) => {

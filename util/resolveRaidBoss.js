@@ -1,13 +1,13 @@
-const models = require('../models')
-const Sequelize = require('sequelize')
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
+import { metaphone } from 'metaphone'
 const Op = Sequelize.Op
-const metaphone = require('metaphone')
 
 /**
  * @param {string}
  * @returns {raidboss: models.Raidboss} or (egg) {raidboss: null, level: int} or null
  */
-module.exports = async (bossname) => {
+export default async (bossname) => {
   // first start by checking for eggs -might save us a DB query-
   // match 'level 5', 'lvl 5', 'level5', 'lvl5'
   if (

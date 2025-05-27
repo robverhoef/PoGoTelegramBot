@@ -2,18 +2,16 @@
 // add gym wizard
 // Note: when adding steps, update the jump to Shiny reports, currently it is the 3rd step
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-var models = require('../models')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-const Sequelize = require('sequelize')
-const lastExRaidPassDate = require('../util/lastExRaidPassDate')
-const Op = Sequelize.Op
-const setLocale = require('../util/setLocale')
-const adminCheck = require('../util/adminCheck')
-const escapeMarkDown = require('../util/escapeMarkDown')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import models from '../models/index.js'
+import moment from 'moment-timezone'
+import Sequelize from 'sequelize'
+import lastExRaidPassDate from '../util/lastExRaidPassDate.js'
+import setLocale from '../util/setLocale.js'
+import adminCheck from '../util/adminCheck.js'
 
+const Op = Sequelize.Op
 const personalTop = 10
 const globalTop = 10
 
@@ -68,12 +66,12 @@ async function processPersonalOwnRaids(user, time, ctx) {
     })} \n`
     const ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
     if (ownedRaids.length > 0) {
-      statMessage += `_${ctx.i18n.t('stats_your_most_reported_gyms')}:_\n`
+      statMessage += `<i>${ctx.i18n.t('stats_your_most_reported_gyms')}:</i>\n`
     }
     for (let i = 0; i < ownedRaids.length; i++) {
-      statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}${ctx.i18n.t(
-        'stats_times_reported'
-      )}*\n`
+      statMessage += ` - ${ownedRaids[i][0]}: <b>${
+        ownedRaids[i][1]
+      }${ctx.i18n.t('stats_times_reported')}</b>\n`
     }
     statMessage += '\n'
   }
@@ -84,17 +82,20 @@ function processPersonalRaids(raids, splice, ctx) {
   let statMessage = ''
   if (raids.length > 0) {
     statMessage += `${
-      ctx.i18n.t('stats_total_times_joined') + ': *' + raids.length + '* \n'
+      ctx.i18n.t('stats_total_times_joined') +
+      ': <b>' +
+      raids.length +
+      '</b> \n'
     }`
     const gymcount = sortRaidsOnGymcount(raids)
     const joinedRaids = splice ? gymcount.splice(0, personalTop) : gymcount
     if (joinedRaids.length > 0) {
-      statMessage += `_${ctx.i18n.t('stats_your_most_visited_gyms')}:_\n`
+      statMessage += `<i>${ctx.i18n.t('stats_your_most_visited_gyms')}:</i>\n`
     }
     for (var i = 0; i < joinedRaids.length; i++) {
-      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}${ctx.i18n.t(
-        'stats_times_visited'
-      )}*\n`
+      statMessage += ` - ${joinedRaids[i][0]}: <b>${
+        joinedRaids[i][1]
+      }${ctx.i18n.t('stats_times_visited')}</b>\n`
     }
   }
   return statMessage
@@ -169,14 +170,14 @@ function processRaidcount(raids, ctx) {
   let statMessage = ''
   const gymcount = sortRaidsOnGymcount(raids).slice(0, globalTop)
   if (gymcount.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: *${
+    statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: <b>${
       raids.length
-    }* \n`
-    statMessage += `_${ctx.i18n.t('stats_most_reported_gyms')}:_\n`
+    }</b> \n`
+    statMessage += `<i>${ctx.i18n.t('stats_most_reported_gyms')}:</i>\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t(
+      statMessage += ` - ${gymcount[i][0]}: <b>${gymcount[i][1]}${ctx.i18n.t(
         'stats_times_visited'
-      )}*\n`
+      )}</b>\n`
     }
     statMessage += '\n'
   }
@@ -205,7 +206,7 @@ function getGymcounts(raids, countMethod) {
 function processRaidVsRaidusers(raids, countAccounts, splice, ctx) {
   const filteredRaids = filterRaidsOnViability(raids)
 
-  const raidTotals = getGymcounts(filteredRaids, (raid) => 1)
+  const raidTotals = getGymcounts(filteredRaids, () => 1)
   const countMethod = !countAccounts
     ? (raid) => raid.Raidusers.length
     : (raid) => {
@@ -225,19 +226,19 @@ function processRaidVsRaidusers(raids, countAccounts, splice, ctx) {
     if (countAccounts) {
       statMessage += `${ctx.i18n.t(
         'stats_total_accounts_for_these_raids'
-      )}: *${total}* \n`
+      )}: <b>${total}</b> \n`
     } else {
       statMessage += `${ctx.i18n.t(
         'stats_total_joins_for_these_raids'
-      )}: *${total}* \n`
+      )}:<b>${total}</b> \n`
     }
-    statMessage += `_${ctx.i18n.t('stats_busiest_gyms_in_period')}:_\n`
+    statMessage += `<i>${ctx.i18n.t('stats_busiest_gyms_in_period')}:</i>\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]} ${
+      statMessage += ` - ${gymcount[i][0]}: <b>${gymcount[i][1]} ${
         countAccounts ? ctx.i18n.t('stats_accounts') : ctx.i18n.t('stats_joins')
       } ${`${ctx.i18n.t('stats_in')} ${
         raidTotals.gyms[gymcount[i][0]]
-      } raids`}*\n`
+      } raids`}</b>\n`
     }
     statMessage += '\n'
   }
@@ -269,9 +270,10 @@ function filterRaidsOnViability(raids) {
       // count the raid if it has one less than the required minimum
       if (minAccounts - 1 <= totals) {
         viableRaids.push(raid)
-      } else {
-        // console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
       }
+      // else {
+      // console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
+      //}
     }
   }
   return viableRaids
@@ -303,12 +305,12 @@ function processRaidusers(raids, ctx) {
 
   const userCount = sortDictionaryOnValue(users).splice(0, globalTop)
   if (userCount.length > 0) {
-    statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
+    statMessage += `<i>${ctx.i18n.t('stats_top_raiders_period')}:</i>\n`
     for (let i = 0; i < userCount.length; i++) {
       const userId = userCount[i][0]
-      statMessage += `- ${escapeMarkDown(userNames[userId])}: *${
+      statMessage += `- ${userNames[userId]}: <b>${
         userCount[i][1]
-      } ${ctx.i18n.t('stats_times_raided')}*\n`
+      } ${ctx.i18n.t('stats_times_raided')}</b>\n`
     }
     statMessage += '\n'
   }
@@ -331,7 +333,7 @@ async function processRaidreporters(raids, ctx) {
   }
   const reporterCount = sortDictionaryOnValue(reporters).splice(0, globalTop)
   if (reporterCount.length > 0) {
-    statMessage += `_${ctx.i18n.t('stats_heroes_most_reported')}:_\n`
+    statMessage += `<i>${ctx.i18n.t('stats_heroes_most_reported')}:</i>\n`
     for (let i = 0; i < reporterCount.length; i++) {
       const reporterId = reporterCount[i][0]
       const user = await models.User.findOne({
@@ -342,9 +344,9 @@ async function processRaidreporters(raids, ctx) {
         }
       })
       if (user !== null) {
-        statMessage += `- ${escapeMarkDown(user.tUsername)}: *${
+        statMessage += `- ${user.tUsername}: <b>${
           reporterCount[i][1]
-        }${ctx.i18n.t('stats_times_reported')}*\n`
+        }${ctx.i18n.t('stats_times_reported')}</b>\n`
       }
     }
   }
@@ -451,9 +453,9 @@ var StatsWizard = function (bot) {
         ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_show'))
       }
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('stats_see_which_stats_question'),
-          Markup.keyboard(ctx.session.statbtns).oneTime().resize().extra()
+          Markup.keyboard(ctx.session.statbtns).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -473,9 +475,9 @@ var StatsWizard = function (bot) {
         return ctx.wizard.steps[7](ctx)
       }
       if (ctx.session.chosenStat === -1) {
-        return ctx.replyWithMarkdown(
+        return ctx.replyWithHTML(
           ctx.i18n.t('something_wrong'),
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
       }
 
@@ -491,9 +493,9 @@ var StatsWizard = function (bot) {
       ]
 
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('stats_see_which_period_question'),
-          Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra()
+          Markup.keyboard(ctx.session.periodbtns).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -511,9 +513,13 @@ var StatsWizard = function (bot) {
           statMessage = await determineGlobalStats(time, ctx)
         }
         statMessage =
-          `*${ctx.i18n.t('stats_since', {
-            timestr: moment.unix(time).format('DD-MM-YYYY')
-          })}*\n\n` + statMessage
+          `<b>${
+            (ctx,
+            'stats_since',
+            {
+              timestr: moment.unix(time).format('DD-MM-YYYY')
+            })
+          }</b>\n\n` + statMessage
       } else {
         // ex raid stats
         let start
@@ -540,10 +546,10 @@ var StatsWizard = function (bot) {
         }
 
         statMessage =
-          `*${ctx.i18n.t('stats_exraid_since', {
+          `<b>${ctx.i18n.t('stats_exraid_since', {
             timestr: start.format('DD-MM-YYYY HH:mm'),
             endtimestr: end.format('DD-MM-YYYY HH:mm')
-          })}:*\n\n` + statMessage
+          })}:</b>\n\n` + statMessage
       }
 
       if (statMessage === '') {
@@ -552,7 +558,7 @@ var StatsWizard = function (bot) {
 
       const message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
       return ctx
-        .replyWithMarkdown(message, Markup.removeKeyboard().extra())
+        .replyWithHTML(message, Markup.removeKeyboard())
         .then(() => ctx.scene.leave())
     },
     // Report Shiny
@@ -571,12 +577,11 @@ var StatsWizard = function (bot) {
           }
         }
       })
-      // console.log(raids.length, `${ctx.i18n.t('sh_stats_no_raids')}`)
       if (raids.length === 0) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('sh_stats_no_raids')}`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
@@ -592,12 +597,11 @@ var StatsWizard = function (bot) {
         }
       })
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('sh_stats_report_intro')}`,
           Markup.keyboard(ctx.session.sraids.map((el) => el.label))
             .resize()
             .oneTime()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -610,9 +614,9 @@ var StatsWizard = function (bot) {
         }
       }
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('sh_stats_input_question')}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
     },
@@ -636,20 +640,19 @@ var StatsWizard = function (bot) {
         ctx.session.shinies = shinies
         ctx.session.newAccounts = newAccounts
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('sh_stats_input', {
               shinies,
               accounts,
               newAccounts
-            })}\n*${ctx.i18n.t('save_question')}*`,
+            })}\n<b>${ctx.i18n.t('save_question')}</b>`,
             Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')])
               .oneTime()
               .resize()
-              .extra()
           )
           .then(() => ctx.wizard.next())
       }
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input_wrong')}`)
+      return ctx.replyWithHTML(`${ctx.i18n.t('sh_stats_input_wrong')}`)
     },
     async (ctx) => {
       const confirm = ctx.update.message.text
@@ -671,21 +674,21 @@ var StatsWizard = function (bot) {
         } catch (error) {
           console.log('ERROR WHILE SAVING SHINY STATS', error.message)
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_failed')}`)
+            .replyWithHTML(`${ctx.i18n.t('sh_stats_save_failed')}`)
             .then(() => ctx.scene.leave())
         }
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('sh_stats_save_success')}`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
       // don't save
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('sh_stats_save_canceled')}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.scene.leave())
     },
@@ -699,7 +702,7 @@ var StatsWizard = function (bot) {
       if (results.length > 0) {
         let out = `${ctx.i18n.t('sh_stats_head')}\n\n`
         for (const result of results) {
-          out += `*${result.target}:* ${result.shiny} shiny, ${
+          out += `<b>${result.target}:</b> ${result.shiny} shiny, ${
             result.players
           } accounts (${result.newplayers} new); Total ${Math.round(
             (result.shiny * 100) / result.players
@@ -707,14 +710,14 @@ var StatsWizard = function (bot) {
         }
         out += `${ctx.i18n.t('sh_stats_done')}`
         return ctx
-          .replyWithMarkdown(out, Markup.removeKeyboard().extra())
+          .replyWithHTML(out, Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
       return ctx
-        .replyWithMarkdown('Mmm.. /start', Markup.removeKeyboard().extra())
+        .replyWithHTML('Mmm.. /start', Markup.removeKeyboard())
         .then(() => ctx.scene.leave())
     }
   )
 }
 
-module.exports = StatsWizard
+export default StatsWizard

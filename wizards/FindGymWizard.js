@@ -1,14 +1,13 @@
 // ===================
 // add gym wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes } from 'telegraf'
+import { Markup } from 'telegraf'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const setLocale = require('../util/setLocale')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import setLocale from '../util/setLocale.js'
 
 var FindGymWizard = function () {
   return new Scenes.WizardScene(
@@ -16,7 +15,7 @@ var FindGymWizard = function () {
     async (ctx) => {
       await setLocale(ctx)
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('find_gym_location_intro'),
           Markup.removeKeyboard()
         )
@@ -25,7 +24,7 @@ var FindGymWizard = function () {
     async (ctx) => {
       const term = ctx.update.message.text.trim()
       if (term.length < 2) {
-        ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
+        ctx.replyWithHTML(ctx.i18n.t('find_gym_two_chars_minimum'))
       } else {
         const candidates = await models.Gym.findAll({
           where: {
@@ -37,22 +36,24 @@ var FindGymWizard = function () {
         let out = ''
         const l = candidates.length
         for (let i = 0; i < l; i++) {
-          out += `*${candidates[i].gymname}\n*`
+          out += `<b>${candidates[i].gymname}\n</b>`
           if (candidates[i].exRaidTrigger) {
             out += `${ctx.i18n.t('exraid_candidate')}\n`
           }
           if (candidates[i].googleMapsLink) {
-            out += `[${ctx.i18n.t('map')}](${candidates[i].googleMapsLink})`
+            out += `<a href="${candidates[i].googleMapsLink}">${ctx.i18n.t(
+              'map'
+            )}</a>`
           } else {
             out += `[${ctx.i18n.t('no_input')}]`
           }
           out += '\n\n'
         }
         ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('find_gym_location_overview', {
               out: out,
-              term: escapeMarkDown(term),
+              term: term,
               l: l
             }),
             { disable_web_page_preview: true }
@@ -63,4 +64,4 @@ var FindGymWizard = function () {
   )
 }
 
-module.exports = FindGymWizard
+export default FindGymWizard

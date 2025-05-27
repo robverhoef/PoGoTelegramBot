@@ -1,16 +1,22 @@
 'use strict'
-
-var fs = require('fs')
-var path = require('path')
-var Sequelize = require('sequelize')
-var basename = path.basename(__filename)
+/** eslint no-unused-vars: "none"*/
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { createRequire } from 'node:module'
+import Sequelize from 'sequelize'
+const require = createRequire(import.meta.url)
+var basename = path.basename(fileURLToPath(import.meta.url))
 var env = process.env.NODE_ENV || 'development'
-var config = require(path.join(__dirname, '/../config/config.json'))[env]
-let logfunc = console.log
+var configs = JSON.parse(
+  fs.readFileSync(require.resolve('../config/config.json', 'utf8'))
+)
+var config = configs[env]
+var logfunc = console.log
 if (env === 'production') {
   logfunc = function () {}
 }
-config.logging = false //logfunc
+config.logging = env === 'development' ? false : logfunc
 var db = {}
 var sequelize = {}
 if (config.use_env_variable) {
@@ -24,26 +30,27 @@ if (config.use_env_variable) {
   )
 }
 
-fs.readdirSync(__dirname)
-  .filter((file) => {
-    return (
-      file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'
-    )
-  })
-  .forEach((file) => {
-    var model = require(path.join(__dirname, file))(
-      sequelize,
-      Sequelize.DataTypes
-    )
-    db[model.name] = model
-  })
+const files = fs.readdirSync(import.meta.dirname).filter((file) => {
+  return (
+    file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'
+  )
+})
+
+for (const file of files) {
+  const model = await import(
+    pathToFileURL(path.resolve('models', `${file}`)).href
+  )
+  if (model.default) {
+    const namedModel = model.default(sequelize, Sequelize.DataTypes)
+    db[namedModel.name] = namedModel
+  }
+}
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db)
   }
 })
-
 db.sequelize = sequelize
 db.Sequelize = Sequelize
 
-module.exports = db
+export default db

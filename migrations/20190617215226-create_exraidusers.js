@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('exraidusers', {
       id: {
@@ -21,7 +21,8 @@ module.exports = {
         allowNull: true
       },
       accounts: {
-        type: Sequelize.INTEGER, defaultValue: 1
+        type: Sequelize.INTEGER,
+        defaultValue: 1
       },
       exraidId: {
         type: Sequelize.INTEGER.UNSIGNED,

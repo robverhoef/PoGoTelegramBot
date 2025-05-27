@@ -1,14 +1,14 @@
 // ===================
 // admin field research  wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const { Markup } = require('telegraf')
-const models = require('../models')
-// const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes } from 'telegraf'
+import { Markup } from 'telegraf'
+import models from '../models/index.js'
+// import Sequelize from 'sequelize'
 // const Op = Sequelize.Op
-const adminCheck = require('../util/adminCheck')
-const setLocale = require('../util/setLocale')
+import adminCheck from '../util/adminCheck.js'
+import setLocale from '../util/setLocale.js'
 
 function AdminFieldResearchWizard(bot) {
   const wizsteps = {
@@ -43,12 +43,9 @@ function AdminFieldResearchWizard(bot) {
       ctx.session.frbtns.push({ id: -1, label: ctx.i18n.t('done') })
       const btnlabels = ctx.session.frbtns.map((el) => el.label)
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_modify')}`,
-          Markup.keyboard(btnlabels)
-            .oneTime()
-            .resize()
-            .extra({ disable_web_page_preview: true })
+          Markup.keyboard(btnlabels).oneTime().resize()
         )
         .then(() => {
           return ctx.wizard.next()
@@ -72,7 +69,7 @@ function AdminFieldResearchWizard(bot) {
         return ctx.wizard.steps[wizsteps.doneresearch](ctx)
       }
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('admin_fres_do_what', {
             label: ctx.session.selectedbtn.label
           }),
@@ -82,7 +79,6 @@ function AdminFieldResearchWizard(bot) {
           ])
             .oneTime()
             .resize()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -99,25 +95,24 @@ function AdminFieldResearchWizard(bot) {
     // edit research
     async (ctx) => {
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_new_label', {
             label: ctx.session.selectedbtn.label
           })}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       ctx.session.newtext = ctx.update.message.text
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_save_edit', {
             newtext: ctx.session.newtext
           })}`,
           Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')])
             .oneTime()
             .resize()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -141,7 +136,7 @@ function AdminFieldResearchWizard(bot) {
             )
           } catch (error) {
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 `${ctx.i18n.t('admin_fres_save_failed', {
                   message: error.message
                 })}`
@@ -152,14 +147,14 @@ function AdminFieldResearchWizard(bot) {
               })
           }
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('admin_fres_saved_success')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_saved_success')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
             })
         case ctx.i18n.t('no'):
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('admin_fres_save_canceled')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_save_canceled')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
@@ -169,23 +164,22 @@ function AdminFieldResearchWizard(bot) {
     // add research
     async (ctx) => {
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_add_new_label')}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
       ctx.session.newbtn = ctx.update.message.text
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_save_new', {
             newbtn: ctx.session.newbtn
           })}`,
           Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')])
             .oneTime()
             .resize()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -202,9 +196,9 @@ function AdminFieldResearchWizard(bot) {
             newKey.save()
           } catch (error) {
             console.log('Error adding field rearch key', error)
-            ctx.replyWithMarkdown(ctx.i18n.t('admin_fres_not_saved'))
+            ctx.replyWithHTML(ctx.i18n.t('admin_fres_not_saved'))
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 `${ctx.i18n.t('admin_fres_save_failed', {
                   message: error.message
                 })}`
@@ -215,14 +209,14 @@ function AdminFieldResearchWizard(bot) {
               })
           }
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('admin_fres_saved_new')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_saved_new')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
             })
         case ctx.i18n.t('no'):
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('admin_fres_save_canceled')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_save_canceled')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
@@ -239,14 +233,13 @@ function AdminFieldResearchWizard(bot) {
         })
       )
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_confirm_delete', {
             label: ctx.session.selectedbtn.label
           })}`,
           Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')])
             .oneTime()
             .resize()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -265,7 +258,7 @@ function AdminFieldResearchWizard(bot) {
             })
           } catch (error) {
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 `${ctx.i18n.t('admin_fres_delete_failed', {
                   message: error.message
                 })}`
@@ -276,14 +269,14 @@ function AdminFieldResearchWizard(bot) {
               })
           }
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('admin_fres_delete_success')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_delete_success')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
             })
         case ctx.i18n.t('no'):
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('admin_fres_delete_canceled')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_delete_canceled')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
@@ -293,9 +286,9 @@ function AdminFieldResearchWizard(bot) {
     // done
     async (ctx) => {
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('admin_fres_finished')}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => {
           return ctx.scene.leave()
@@ -303,4 +296,4 @@ function AdminFieldResearchWizard(bot) {
     }
   )
 }
-module.exports = AdminFieldResearchWizard
+export default AdminFieldResearchWizard

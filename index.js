@@ -1,25 +1,53 @@
-const Sequelize = require('sequelize')
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const moment = require('moment-timezone')
-const { Telegraf, session } = require('telegraf')
-const { Markup } = require('telegraf')
-const Scenes = require('telegraf/scenes')
-const TelegrafI18n = require('telegraf-i18n')
-const localtunnel = require('localtunnel')
+import moment from 'moment-timezone'
+import { Telegraf, Markup, session } from 'telegraf'
 
-const path = require('path')
-const models = require('./models')
-require('./locales.js')
-const escapeMarkDown = require('./util/escapeMarkDown.js')
-const setLocale = require('./util/setLocale')
+import Scenes from 'telegraf/scenes'
+import TelegrafI18n from 'telegraf-i18n'
 
-const listRaids = require('./util/listRaids')
+import path from 'path'
+import models from './models/index.js'
+
+import './locales.js'
+
+import setLocale from './util/setLocale.js'
+
+import listRaids from './util/listRaids.js'
+import AddRaidWizard from './wizards/AddRaidWizard.js'
+import ExitRaidWizard from './wizards/ExitRaidWizard.js'
+import JoinRaidWizard from './wizards/JoinRaidWizard.js'
+import EditRaidWizard from './wizards/EditRaidWizard.js'
+import FindGymWizard from './wizards/FindGymWizard.js'
+import AddGymWizard from './wizards/AddGymWizard.js'
+import EditGymWizard from './wizards/EditGymWizard.js'
+import AddRaidbossWizard from './wizards/AddRaidbossWizard.js'
+import EditRaidbossWizard from './wizards/EditRaidbossWizard.js'
+import StatsWizard from './wizards/StatsWizard.js'
+import EliteraidWizard from './wizards/EliteraidWizard.js'
+import AddNotificationWizard from './wizards/NotificationWizard.js'
+import LocaleWizard from './wizards/LocaleWizard.js'
+import UserDelayedWizard from './wizards/UserDelayedWizard.js'
+import FieldresearchWizard from './wizards/FieldresearchWizard.js'
+import AdminFieldResearchWizard from './wizards/AdminFieldResearchWizard.js'
+import AdminStopsWizard from './wizards/AdminStopsWizard.js'
+import RemoteInvitesWizard from './wizards/RemoteInvitesWizard.js'
+import UserSettingsWizard from './wizards/UserSettingsWizard.js'
 // =====================
 // Let's go!
 // =====================
+
+/**
+ * @type {import('telegraf').Context}
+ */
+
+if(!process.env.BOT_TOKEN){
+  console.error('A bot token is required. Check your .env config…')
+  process.exit(1);
+}
 const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.catch((err) => {
-  console.log('Ooops', err)
+  console.log('\nOoops! Unhandled error:', err)
 })
 
 bot.use(session())
@@ -28,15 +56,15 @@ const i18n = new TelegrafI18n({
   useSession: true,
   sessionName: 'session',
   allowMissing: true,
-  directory: path.resolve(__dirname, 'locales')
+  directory: path.resolve(import.meta.dirname, 'locales')
 })
 bot.use(i18n.middleware())
 // Set the default timezone.
 // ToDo: this should could come from env
 moment.tz.setDefault('Europe/Amsterdam')
-/**
+/*
  * This will stop the conversation immeditaly
- * @param context
+ * @param {Context} ctx
  */
 async function cancelConversation(ctx) {
   // Since something might be failing… reset session
@@ -46,51 +74,38 @@ async function cancelConversation(ctx) {
   return ctx.scene
     .leave()
     .then(() =>
-      ctx.replyWithMarkdown(
-        ctx.i18n.t('cancelmessage'),
-        Markup.removeKeyboard().extra()
-      )
+      ctx.replyWithHTML(ctx.i18n.t('cancelmessage'), Markup.removeKeyboard())
     )
 }
 
 // Setup for all wizards
-const AddRaidWizard = require('./wizards/AddRaidWizard')
 const addRaidWizard = AddRaidWizard(bot)
 addRaidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const ExitRaidWizard = require('./wizards/ExitRaidWizard')
 const exitRaidWizard = ExitRaidWizard(bot)
 exitRaidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const JoinRaidWizard = require('./wizards/JoinRaidWizard')
 const joinRaidWizard = JoinRaidWizard(bot)
 joinRaidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const EditRaidWizard = require('./wizards/EditRaidWizard')
 const editRaidWizard = EditRaidWizard(bot)
 editRaidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const FindGymWizard = require('./wizards/FindGymWizard')
 const findGymWizard = FindGymWizard(bot)
 findGymWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const AddGymWizard = require('./wizards/AddGymWizard')
 const addGymWizard = AddGymWizard(bot)
 addGymWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const EditGymWizard = require('./wizards/EditGymWizard')
 const editGymWizard = EditGymWizard(bot)
 editGymWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const AddRaidbossWizard = require('./wizards/AddRaidbossWizard')
 const addRaidbossWizard = AddRaidbossWizard(bot)
 addRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const EditRaidbossWizard = require('./wizards/EditRaidbossWizard')
 const editRaidbossWizard = EditRaidbossWizard(bot)
 editRaidbossWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const StatsWizard = require('./wizards/StatsWizard')
 const statsWizard = StatsWizard(bot)
 statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
@@ -98,40 +113,30 @@ statsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 // const exraidWizard = ExraidWizard(bot)
 // exraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const EliteraidWizard = require('./wizards/EliteraidWizard')
 const eliteraidWizard = EliteraidWizard(bot)
 eliteraidWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const AddNotificationWizard = require('./wizards/NotificationWizard')
 const addNotificationWizard = AddNotificationWizard(bot)
 addNotificationWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const LocaleWizard = require('./wizards/LocaleWizard')
 const localeWizard = LocaleWizard(bot)
 localeWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const UserDelayedWizard = require('./wizards/UserDelayedWizard')
 const userDelayedWizard = UserDelayedWizard(bot)
 userDelayedWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const FieldresearchWizard = require('./wizards/FieldresearchWizard')
 const fieldresearchWizard = FieldresearchWizard(bot)
 fieldresearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const AdminFieldResearchWizard = require('./wizards/AdminFieldResearchWizard')
 const adminFieldResearchWizard = AdminFieldResearchWizard(bot)
 adminFieldResearchWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const AdminStopsWizard = require('./wizards/AdminStopsWizard')
 const adminStopsWizard = AdminStopsWizard(bot)
 adminStopsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const RemoteInvitesWizard = require('./wizards/RemoteInvitesWizard')
 const remoteInvitesWizard = RemoteInvitesWizard(bot)
 remoteInvitesWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
-const UserSettingsWizard = require('./wizards/UserSettingsWizard')
-const { start } = require('repl')
 const userSettingsWizard = UserSettingsWizard(bot)
 userSettingsWizard.command('cancel', (ctx) => cancelConversation(ctx))
 
@@ -160,7 +165,7 @@ const stage = new Scenes.Stage([
 
 /**
  * Show help
- * @param context
+ * @param {Context} ctx
  */
 function showHelp(ctx) {
   setLocale(ctx)
@@ -172,6 +177,9 @@ bot.use(stage.middleware())
 //   ctx.session = {}
 //   ctx.scene.leave()
 // }
+/**
+ * @param {Context} ctx
+ */
 async function showMainMenu(ctx, user) {
   ctx.session = {}
   ctx.scene.leave()
@@ -241,18 +249,18 @@ async function showMainMenu(ctx, user) {
 
   // for testing only
   // btns.push('Trigger raidlist')
-
-  return ctx.replyWithMarkdown(
+  return ctx.replyWithHTML(
     ctx.i18n.t('main_menu_greeting', {
-      first_name: escapeMarkDown(user.first_name)
+      first_name: user.first_name
     }),
-    Markup.keyboard(btns).oneTime().resize().extra()
+    Markup.keyboard(btns).oneTime().resize()
   )
 }
 
 // This runs after the user has started from an inline query in the group or /start in private mode
-bot.command('/start', async (ctx) => {
+bot.command('start', async (ctx) => {
   // check if start is not directly coming from the group
+  console.debug('Start command')
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
     return
   }
@@ -276,7 +284,7 @@ bot.command('/start', async (ctx) => {
         }
       })
       if (inv) {
-        return ctx.replyWithMarkdown(
+        return ctx.replyWithHTML(
           `${ctx.i18n.t('telegram_name')}: ${inv.tUsername}\n${ctx.i18n.t(
             'trainer_name'
           )}: ${inv.pokemonname ? inv.pokemonname : '?'}\n${ctx.i18n.t(
@@ -289,7 +297,7 @@ bot.command('/start', async (ctx) => {
   } else {
     // ToDo: check if user language is available
     ctx.i18n.locale(ctx.from.language_code)
-    return ctx.replyWithMarkdown(ctx.i18n.t('help_from_group'))
+    return ctx.replyWithHTML(ctx.i18n.t('help_from_group'))
   }
 })
 
@@ -379,7 +387,7 @@ for (var key in i18n.repository) {
   bot.hears('Trigger raidlist', async (ctx) => {
     const out = await listRaids('\n', ctx)
     bot.telegram.sendMessage(process.env.GROUP_ID, out, {
-      parse_mode: 'Markdown',
+      parse_mode: 'HTML',
       disable_web_page_preview: true
     })
   })
@@ -399,9 +407,7 @@ bot.on('inline_query', async (ctx) => {
   })
   if (!user) {
     console.log(
-      `NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${escapeMarkDown(
-        ctx.inlineQuery.from.first_name
-      )}`
+      `NOT OK, I don't know ${ctx.inlineQuery.from.id}, ${ctx.inlineQuery.from.first_name}`
     )
     return
   }
@@ -417,12 +423,13 @@ bot.on('inline_query', async (ctx) => {
 // ================
 // authorize new group user
 // ================
+
 bot.hears(/\/hi/i, async (ctx) => {
   let chattitle = ''
   const me = await ctx.telegram.getMe()
   setLocale(ctx)
   if (ctx.update.message.chat === undefined) {
-    return ctx.replyWithMarkdown(ctx.i18n.t('hi_from_group_warning'))
+    return ctx.replyWithHTML(ctx.i18n.t('hi_from_group_warning'))
   }
   console.log(
     'Somebody said hi',
@@ -443,11 +450,11 @@ bot.hears(/\/hi/i, async (ctx) => {
     bot.telegram.sendMessage(
       olduser.tId,
       ctx.i18n.t('already_know_user', {
-        first_name: escapeMarkDown(ctx.from.first_name),
+        first_name: ctx.from.first_name,
         me: me,
         chattitle: chattitle
       }),
-      { parse_mode: 'Markdown' }
+      { parse_mode: 'HTML' }
     )
     return
   }
@@ -465,6 +472,7 @@ bot.hears(/\/hi/i, async (ctx) => {
     })
     try {
       await newuser.save()
+      // eslint no-unused-vars: "none"
     } catch (error) {
       console.error(
         'Error saving user',
@@ -479,31 +487,33 @@ bot.hears(/\/hi/i, async (ctx) => {
       await bot.telegram.sendMessage(
         newuser.tId,
         ctx.i18n.t('just_met_message', {
-          first_name: escapeMarkDown(ctx.from.first_name),
+          first_name: ctx.from.first_name,
           me: me,
           chattitle: chattitle
         }),
-        { parse_mode: 'Markdown' }
+        { parse_mode: 'HTML' }
       )
     } catch (error) {
-      console.log(`First time /hi for ${ctx.from.first_name}, ${ctx.from.id}`)
+      console.log(
+        `First time /hi for ${ctx.from.first_name}, ${ctx.from.id}, ${error}`
+      )
     }
   } else {
-    return ctx.replyWithMarkdown(ctx.i18n.t('user_unknown_warning', { me: me }))
+    return ctx.replyWithHTML(ctx.i18n.t('user_unknown_warning', { me: me }))
   }
 })
 
 /**
  * Remind the user of /cancel. Maybe more later (read pinned message?)
  */
-bot.hears(/\/help/i, async (ctx) => {
+bot.command(/help/i, async (ctx) => {
   showHelp(ctx)
 })
 
 /**
  *  Method to get the Telegram group Id
  */
-bot.hears(/\/whoisthebot/i, async (ctx) => {
+bot.command(/whoisthebot/i, async (ctx) => {
   console.log('whoisthebot:', ctx.message)
   ctx.reply('Check the logs…')
 })
@@ -562,7 +572,7 @@ bot.on('left_chat_member', async (ctx) => {
     })
     console.log('user removed:', removed)
   } catch (error) {
-    console.log('caught error removing user', removed)
+    console.log('caught error removing user', removed, error)
   }
 })
 
@@ -594,10 +604,12 @@ bot.hears(/\/raids/i, async (ctx) => {
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment(new Date(raids[a].endtime))
     out += `${ctx.i18n.t('until')}: ${endtime.format('H:mm')} `
-    out += `* ${raids[a].target}*\n`
+    out += `<b> ${raids[a].target}</b>\n`
     out += `${raids[a].Gym.gymname}\n`
     if (raids[a].Gym.googleMapsLink) {
-      out += `[${ctx.i18n.t('map')}](${raids[a].Gym.googleMapsLink})\n`
+      out += `<a href="${raids[a].Gym.googleMapsLink}">${ctx.i18n.t(
+        'map'
+      )}</a>\n`
     }
     const strtime = moment(raids[a].start1)
     out += `${ctx.i18n.t('start')}: ${strtime.format('H:mm')} `
@@ -611,22 +623,23 @@ bot.hears(/\/raids/i, async (ctx) => {
     out += `${ctx.i18n.t('participants')}: ${userlist}`
     out += '\n\n'
   }
-  return ctx.replyWithMarkdown(out, { disable_web_page_preview: true })
+  return ctx.replyWithHTML(out, { disable_web_page_preview: true })
 })
-
-// Let's fire up!
-startBot()
 
 async function startBot() {
   let botUrl = process.env.BOT_URL
-  if (process.env.NODE_ENV === 'development') {
-    bot.start()
-  } else {
-    bot.telegram.setWebhook(botUrl).then((data) => {
-      console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set', botUrl)
-    })
+  // if (process.env.NODE_ENV === 'development') {
+    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'start polling bot')
+    bot.launch()
+  // } else {
+  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'starting bot')
+  //   bot.telegram.setWebhook(botUrl, {certificate: process.env.CERTIFICATE}).then(() => {
+  //     console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set', botUrl)
+  //   })
 
-    bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
-  }
+  //   bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
+  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
+  // }
 }
+// Let's fire up!
+startBot()

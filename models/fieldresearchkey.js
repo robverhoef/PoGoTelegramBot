@@ -1,5 +1,5 @@
 'use strict'
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Fieldresearchkey = sequelize.define(
     'Fieldresearchkey',
     {

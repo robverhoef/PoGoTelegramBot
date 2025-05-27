@@ -1,14 +1,14 @@
 // ===================
 // Edit raid wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes } from 'telegraf'
+import { Markup } from 'telegraf'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const adminCheck = require('../util/adminCheck')
-const setLocale = require('../util/setLocale')
+import adminCheck from '../util/adminCheck.js'
+import setLocale from '../util/setLocale.js'
 
 function EditGymWizard(bot) {
   return new Scenes.WizardScene(
@@ -21,12 +21,7 @@ function EditGymWizard(bot) {
         return invalidAdmin
       }
       return ctx
-        .replyWithMarkdown(
-          ctx.i18n.t(
-            ctx.i18n.t('edit_gym_intro'),
-            Markup.removeKeyboard().extra()
-          )
-        )
+        .replyWithHTML(ctx.i18n.t('edit_gym_intro'), Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 1
@@ -35,7 +30,7 @@ function EditGymWizard(bot) {
       ctx.session.gymbtns = []
       if (term.length < 2) {
         return ctx
-          .replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
+          .replyWithHTML(ctx.i18n.t('find_gym_two_chars_minimum'))
           .then(() => ctx.wizard.back())
       } else {
         const candidates = await models.Gym.findAll({
@@ -44,9 +39,7 @@ function EditGymWizard(bot) {
           }
         })
         if (candidates.length === 0) {
-          ctx.replyWithMarkdown(
-            ctx.i18n.t('find_gym_failed_retry', { term: term })
-          )
+          ctx.replyWithHTML(ctx.i18n.t('find_gym_failed_retry', { term: term }))
           return
         }
         ctx.session.gymcandidates = []
@@ -68,9 +61,9 @@ function EditGymWizard(bot) {
           id: 0
         })
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('select_a_gym'),
-            Markup.keyboard(ctx.session.gymbtns).resize().oneTime().extra()
+            Markup.keyboard(ctx.session.gymbtns).resize().oneTime()
           )
           .then(() => ctx.wizard.next())
       }
@@ -91,9 +84,9 @@ function EditGymWizard(bot) {
 
         if (ctx.session.gymcandidates[selectedIndex].id === 0) {
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('join_raid_cancel'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => {
               ctx.session.gymcandidates = null
@@ -151,12 +144,11 @@ function EditGymWizard(bot) {
         [ctx.i18n.t('btn_edit_gym_cancel'), '0']
       ]
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('edit_what')}*`,
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('edit_what')}</b>`,
           Markup.keyboard(ctx.session.changebtns.map((el) => el[0]))
             .resize()
             .oneTime()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -170,7 +162,7 @@ function EditGymWizard(bot) {
       }
       if (editattr === '0') {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('finished_procedure_without_saving'),
             Markup.removeKeyboard()
           )
@@ -214,7 +206,7 @@ function EditGymWizard(bot) {
             break
         }
         return ctx
-          .replyWithMarkdown(question, Markup.removeKeyboard())
+          .replyWithHTML(question, Markup.removeKeyboard())
           .then(() => ctx.wizard.next())
       }
     },
@@ -238,12 +230,12 @@ function EditGymWizard(bot) {
             }
           )
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('edit_gym_delete_success')}`)
+            .replyWithHTML(`${ctx.i18n.t('edit_gym_delete_success')}`)
             .then(() => ctx.scene.leave())
         } else {
           // no, close
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('edit_gym_delete_canceled')}`)
+            .replyWithHTML(`${ctx.i18n.t('edit_gym_delete_canceled')}`)
             .then(() => ctx.scene.leave())
         }
       } else if (key === 'coordinates') {
@@ -291,14 +283,12 @@ function EditGymWizard(bot) {
         ctx.i18n.t('edit_gym_btn_cancel')
       ]
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('edit_gym_overview', {
             out: out
           }),
-          Markup.keyboard(ctx.session.savebtns)
-            .resize()
-            .oneTime()
-            .extra({ disable_web_page_preview: true })
+          Markup.keyboard(ctx.session.savebtns).resize().oneTime(),
+          { disable_web_page_preview: true }
         )
         .then(() => ctx.wizard.next())
     },
@@ -325,17 +315,17 @@ function EditGymWizard(bot) {
               }
             )
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 ctx.i18n.t('finished_procedure'),
-                Markup.removeKeyboard().extra()
+                Markup.removeKeyboard()
               )
               .then(() => ctx.scene.leave())
           } catch (error) {
             console.error(error)
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 ctx.i18n.t('problem_while_saving'),
-                Markup.removeKeyboard().extra()
+                Markup.removeKeyboard()
               )
               .then(() => ctx.scene.leave())
           }
@@ -344,7 +334,7 @@ function EditGymWizard(bot) {
           // set cursor to step 1 and trigger jump to step 1
           ctx.session.more = true
           return ctx
-            .replyWithMarkdown(ctx.i18n.t('edit_more'))
+            .replyWithHTML(ctx.i18n.t('edit_more'))
             .then(() => ctx.wizard.selectStep(2))
             .then(() => ctx.wizard.steps[2](ctx))
         case 2:
@@ -353,16 +343,16 @@ function EditGymWizard(bot) {
           ctx.session.editgym = null
           ctx.session.savebtns = null
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('finished_procedure_without_saving'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
       }
       return ctx
-        .replyWithMarkdown(ctx.i18n.t('ok'), Markup.removeKeyboard().extra())
+        .replyWithHTML(ctx.i18n.t('ok'), Markup.removeKeyboard())
         .then(() => ctx.scene.leave())
     }
   )
 }
-module.exports = EditGymWizard
+export default EditGymWizard

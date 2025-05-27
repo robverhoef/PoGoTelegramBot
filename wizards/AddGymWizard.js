@@ -1,12 +1,12 @@
 // ===================
 // add gym wizard
 // ===================
-// // const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const adminCheck = require('../util/adminCheck')
-const setLocale = require('../util/setLocale')
+// // import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes } from 'telegraf'
+import { Markup } from 'telegraf'
+import models from '../models/index.js'
+import adminCheck from '../util/adminCheck.js'
+import setLocale from '../util/setLocale.js'
 
 function AddGymWizard(bot) {
   return new Scenes.WizardScene(
@@ -22,7 +22,7 @@ function AddGymWizard(bot) {
 
       ctx.session.newgym = {}
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('add_gym_welcome')}`,
           Markup.removeKeyboard()
         )
@@ -41,9 +41,9 @@ function AddGymWizard(bot) {
       })
       if (oldgyms.length > 0) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('gym_exists_warning')}`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
@@ -51,9 +51,9 @@ function AddGymWizard(bot) {
       ctx.session.newgym.reporterId = user.id
       ctx.session.newgym.gymname = gymname
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('address_question')}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
     },
@@ -65,14 +65,17 @@ function AddGymWizard(bot) {
       ctx.session.newgym.address =
         gymadres.toLowerCase() === 'x' ? null : gymadres
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('add_gym_loc_question')}`,
           Markup.keyboard([
-            { text: ctx.i18n.t('send_my_gps_location'), request_location: true }
+            {
+              text: ctx.i18n.t('send_my_gps_location'),
+              request_location: true
+            }
           ])
             .oneTime()
-            .resize()
-            .extra({ disable_web_page_preview: true })
+            .resize(),
+          { disable_web_page_preview: true }
         )
         .then(() => ctx.wizard.next())
     },
@@ -92,9 +95,9 @@ function AddGymWizard(bot) {
 
         ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('exraid_question')}`,
-            Markup.keyboard(ctx.session.exraidbtns).resize().oneTime().extra()
+            Markup.keyboard(ctx.session.exraidbtns).resize().oneTime()
           )
           .then(() => {
             ctx.wizard.selectStep(4)
@@ -115,8 +118,8 @@ function AddGymWizard(bot) {
             ctx.i18n.t('yes'),
             ctx.i18n.t('no_dont_know')
           ]
-          // return ctx.replyWithMarkdown(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
-          //   .resize().oneTime().extra())
+          // return ctx.replyWithHTML(`${ctx.i18n.t('exraid_question')}`, Markup.keyboard(ctx.session.exraidbtns)
+          //   .resize().oneTime())
           //   .then(() => {
           ctx.wizard.selectStep(4)
           return ctx.wizard.steps[4](ctx)
@@ -127,9 +130,9 @@ function AddGymWizard(bot) {
         }
       }
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('gmlink_question')}`,
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
     },
@@ -143,15 +146,15 @@ function AddGymWizard(bot) {
         ctx.session.newgym.googleMapsLink = gmlink
         if (gmlink !== null && gmlink.substr(0, 4) !== 'http') {
           return ctx
-            .replyWithMarkdown(`${ctx.i18n.t('invalid_link')}`)
+            .replyWithHTML(`${ctx.i18n.t('invalid_link')}`)
             .then(() => {})
         }
       }
       ctx.session.exraidbtns = [ctx.i18n.t('yes'), ctx.i18n.t('no_dont_know')]
       ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('exraid_question')}`,
-          Markup.keyboard(ctx.session.exraidbtns).resize().oneTime().extra()
+          Markup.keyboard(ctx.session.exraidbtns).resize().oneTime()
         )
         .then(() => ctx.wizard.next())
     },
@@ -164,10 +167,10 @@ function AddGymWizard(bot) {
       ctx.session.newgym.exRaidTrigger = exraid
       ctx.session.savebtns = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
       return ctx
-        .replyWithMarkdown(
-          `${ctx.i18n.t('new_gym_almost_done_confirm')}: *${
+        .replyWithHTML(
+          `${ctx.i18n.t('new_gym_almost_done_confirm')}: <b>${
             ctx.session.newgym.gymname
-          }*\n${ctx.i18n.t('address')}: ${
+          }</b>\n${ctx.i18n.t('address')}: ${
             ctx.session.newgym.address === null
               ? ctx.i18n.t('no_input')
               : ctx.session.newgym.address
@@ -183,8 +186,8 @@ function AddGymWizard(bot) {
             ctx.session.newgym.exRaidTrigger === true
               ? ctx.i18n.t('yes')
               : ctx.i18n.t('no_dont_know')
-          }\n\n*${ctx.i18n.t('save_question')}*`,
-          Markup.keyboard(ctx.session.savebtns).resize().oneTime().extra()
+          }\n\n<b>${ctx.i18n.t('save_question')}</b>`,
+          Markup.keyboard(ctx.session.savebtns).resize().oneTime()
         )
         .then(() => ctx.wizard.next())
     },
@@ -200,27 +203,27 @@ function AddGymWizard(bot) {
         } catch (error) {
           console.log('Whoops… saving new gym failed', error)
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('problem_while_saving'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
         }
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('finished_procedure'),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       } else {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('finished_procedure_without_saving'),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
     }
   )
 }
-module.exports = AddGymWizard
+export default AddGymWizard

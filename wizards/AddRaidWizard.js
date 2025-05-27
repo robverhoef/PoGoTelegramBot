@@ -1,21 +1,19 @@
 // ===================
 // add raid wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const inputTime = require('../util/inputTime')
-const listRaids = require('../util/listRaids')
-const sendGymNotifications = require('../util/sendGymNotifications')
-const sendRaidbossNotifications = require('../util/sendRaidbossNotifications')
-const resolveRaidBoss = require('../util/resolveRaidBoss')
-const setLocale = require('../util/setLocale')
-const TIMINGS = require('../timeSettings.js')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import inputTime from '../util/inputTime.js'
+import listRaids from '../util/listRaids.js'
+import sendGymNotifications from '../util/sendGymNotifications.js'
+import sendRaidbossNotifications from '../util/sendRaidbossNotifications.js'
+import resolveRaidBoss from '../util/resolveRaidBoss.js'
+import setLocale from '../util/setLocale.js'
+import TIMINGS from '../timeSettings.js'
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -25,26 +23,23 @@ function AddRaidWizard(bot) {
     // step 0
     async (ctx) => {
       await setLocale(ctx)
-      // console.log('HELLO ADD RAID WIZARD')
       ctx.session.newraid = {}
       ctx.session.gymcandidates = []
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('add_raid_welcome')}\r\n`,
           Markup.keyboard([
             {
               text: ctx.i18n.t('btn_gym_find_location'),
               request_location: true
             }
-          ])
-            .resize()
-            .extra({ disable_web_page_preview: true })
+          ]).resize(),
+          { disable_web_page_preview: true }
         )
         .then(() => ctx.wizard.next())
     },
     // step 1
     async (ctx) => {
-      // console.log('step 1', ctx.update.message.text)
       let candidates = []
       if (ctx.update.message.location) {
         const lat = ctx.update.message.location.latitude
@@ -63,7 +58,7 @@ function AddRaidWizard(bot) {
         // User was typing
         const term = ctx.update.message.text.trim()
         if (term.length < 2) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('find_gym_two_chars_minimum'))
+          return ctx.replyWithHTML(ctx.i18n.t('find_gym_two_chars_minimum'))
           // .then(() => ctx.wizard.back())
         } else {
           candidates = await models.Gym.findAll({
@@ -83,9 +78,9 @@ function AddRaidWizard(bot) {
             }
           })
           if (candidates.length === 0) {
-            ctx.replyWithMarkdown(
+            ctx.replyWithHTML(
               ctx.i18n.t('find_gym_failed_retry', {
-                term: escapeMarkDown(term)
+                term: term
               })
             )
             return
@@ -102,12 +97,11 @@ function AddRaidWizard(bot) {
 
       ctx.session.gymcandidates.push([ctx.i18n.t('btn_gym_not_found'), 0])
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('select_a_gym'),
           Markup.keyboard(ctx.session.gymcandidates.map((el) => el[0]))
             .oneTime()
             .resize()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -123,9 +117,9 @@ function AddRaidWizard(bot) {
       // Catch gym not found errors…
       if (selectedIndex === -1) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('add_raid_wrong_while_selecting')}\n`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => {
             ctx.session = {}
@@ -136,10 +130,7 @@ function AddRaidWizard(bot) {
 
       if (ctx.session.gymcandidates[selectedIndex][1] === 0) {
         ctx
-          .replyWithMarkdown(
-            ctx.i18n.t('retry_or_cancel'),
-            Markup.removeKeyboard().extra()
-          )
+          .replyWithHTML(ctx.i18n.t('retry_or_cancel'), Markup.removeKeyboard())
           .then(() => {
             ctx.wizard.selectStep(0)
             return ctx.wizard.steps[0](ctx)
@@ -158,9 +149,9 @@ function AddRaidWizard(bot) {
         const btns = ctx.session.timeOptions.map((el) => el[0])
 
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('enter_end_time_mode_question'),
-            Markup.keyboard(btns).oneTime().resize().extra()
+            Markup.keyboard(btns).oneTime().resize()
           )
           .then(() => ctx.wizard.next())
       }
@@ -179,7 +170,9 @@ function AddRaidWizard(bot) {
       if (timemode === 'startmodetime') {
         question = ctx.i18n.t('enter_starttime_time')
       } else if (timemode === 'endmodetime') {
-        question = ctx.i18n.t('enter_endtime_time', { bosstime: TIMINGS.BOSS })
+        question = ctx.i18n.t('enter_endtime_time', {
+          bosstime: TIMINGS.BOSS
+        })
       } else if (timemode === 'startmodemin') {
         question = ctx.i18n.t('enter_starttime_minutes', {
           bosstime: TIMINGS.BOSS
@@ -188,7 +181,7 @@ function AddRaidWizard(bot) {
         question = ctx.i18n.t('enter_endtime_minutes')
       }
       return ctx
-        .replyWithMarkdown(question, Markup.removeKeyboard().extra())
+        .replyWithHTML(question, Markup.removeKeyboard())
         .then(() => ctx.wizard.next())
     },
     // step 4
@@ -203,7 +196,7 @@ function AddRaidWizard(bot) {
         tmptime = inputTime(message)
         // check valid time
         if (tmptime === false) {
-          return ctx.replyWithMarkdown(ctx.i18n.t('invalid_time_retry'))
+          return ctx.replyWithHTML(ctx.i18n.t('invalid_time_retry'))
         }
       } else {
         const minutes = parseInt(message)
@@ -211,7 +204,7 @@ function AddRaidWizard(bot) {
           (!minutes || minutes < 0 || minutes > TIMINGS.HATCH) &&
           ctx.session.timemode === 'startmodemin'
         ) {
-          return ctx.replyWithMarkdown(
+          return ctx.replyWithHTML(
             ctx.i18n.t('invalid_time_minutes_retry', {
               hatchtime: TIMINGS.HATCH
             })
@@ -221,7 +214,7 @@ function AddRaidWizard(bot) {
           (!minutes || minutes < 0 || minutes > TIMINGS.BOSS) &&
           ctx.session.timemode === 'endmodemin'
         ) {
-          return ctx.replyWithMarkdown(
+          return ctx.replyWithHTML(
             `${ctx.i18n.t('add_raid_0_45_min_error', {
               bosstime: TIMINGS.BOSS
             })}`
@@ -229,7 +222,7 @@ function AddRaidWizard(bot) {
         }
         if (minutes < 5 && ctx.session.timemode === 'endmodemin') {
           return ctx
-            .replyWithMarkdown(ctx.i18n.t('time_to_tight'))
+            .replyWithHTML(ctx.i18n.t('time_to_tight'))
             .then(() => ctx.scene.leave())
         }
         tmptime = moment().add(minutes, 'minutes').unix()
@@ -256,7 +249,7 @@ function AddRaidWizard(bot) {
         starttime = moment()
       }
       ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('starttime_proposal', {
             starttm: starttime.format('HH:mm'),
             endtm: moment.unix(endtime).format('HH:mm')
@@ -284,7 +277,7 @@ function AddRaidWizard(bot) {
       } else {
         start1 = inputTime(message)
         if (start1 === false) {
-          return ctx.replyWithMarkdown(
+          return ctx.replyWithHTML(
             ctx.i18n.t('invalid_time_range', {
               range_start: starttime.format('HH:mm'),
               range_end: moment.unix(endtime).format('HH:mm')
@@ -295,7 +288,7 @@ function AddRaidWizard(bot) {
           starttime.diff(moment.unix(start1)) > 0 ||
           moment.unix(endtime).diff(moment.unix(start1)) < 0
         ) {
-          return ctx.replyWithMarkdown(
+          return ctx.replyWithHTML(
             ctx.i18n.t('invalid_time_range', {
               range_start: starttime.format('HH:mm'),
               range_end: moment.unix(endtime).format('HH:mm')
@@ -303,14 +296,14 @@ function AddRaidWizard(bot) {
           )
         }
         if (moment.unix(endtime).diff(moment.unix(start1)) < 5) {
-          return ctx.replyWithMarkdown(
-            `${ctx.i18n.t('invalid_time_range_too_early')}${ctx.i18n.t(
-              'invalid_time_range',
+          return ctx.replyWithHTML(
+            `${ctx.i18n.t('invalid_time_range_too_early')}${
+              (ctx.i18n.t('invalid_time_range'),
               {
                 range_start: starttime.format('HH:mm'),
                 range_end: moment.unix(endtime).format('HH:mm')
-              }
-            )}`
+              })
+            }`
           )
         }
       }
@@ -339,11 +332,12 @@ function AddRaidWizard(bot) {
       }, [])
 
       ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('raidboss_question'),
-          Markup.keyboard(buttons)
-            .resize()
-            .extra({ disable_web_page_preview: true })
+          Markup.keyboard(buttons).resize(),
+          {
+            disable_web_page_preview: true
+          }
         )
         .then(() => ctx.wizard.next())
     },
@@ -364,7 +358,7 @@ function AddRaidWizard(bot) {
       const start1 = ctx.session.newraid.start1
       const out = `${ctx.i18n.t('until')} ${moment
         .unix(endtime)
-        .format('HH:mm')}: *${ctx.session.newraid.target}*\n${
+        .format('HH:mm')}: <b>${ctx.session.newraid.target}</b>\n${
         ctx.session.newraid.bossid !== null
           ? ctx.i18n.t('recommended') +
             ': ' +
@@ -376,9 +370,9 @@ function AddRaidWizard(bot) {
         .format('HH:mm')}`
       ctx.session.saveOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
       return ctx
-        .replyWithMarkdown(
-          `${out}\n\n*${ctx.i18n.t('save_question')}*`,
-          Markup.keyboard(ctx.session.saveOptions).resize().oneTime().extra()
+        .replyWithHTML(
+          `${out}\n\n<b>${ctx.i18n.t('save_question')}</b>`,
+          Markup.keyboard(ctx.session.saveOptions).resize().oneTime()
         )
         .then(() => ctx.wizard.next())
     },
@@ -421,9 +415,9 @@ function AddRaidWizard(bot) {
             `New raid exists… Ignoring id: ${ctx.session.newraid.gymId} target: ${ctx.session.newraid.target} endtime: ${ctx.session.newraid.endtime}`
           )
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('raid_exists_warning'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => {
               ctx.session.newraid = null
@@ -448,9 +442,9 @@ function AddRaidWizard(bot) {
           console.log('Woops… registering new raid failed', error)
 
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('problem_while_saving'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => {
               ctx.session = null
@@ -461,7 +455,7 @@ function AddRaidWizard(bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('raid_added_list', {
           gymname: ctx.session.newraid.gymname,
-          user_first_name: escapeMarkDown(user.first_name),
+          user_first_name: user.first_name,
           user: user
         })
         ctx.i18n.locale(oldlang)
@@ -469,9 +463,9 @@ function AddRaidWizard(bot) {
         const out = await listRaids(reason, ctx)
         if (out === null) {
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('unexpected_raid_not_found'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
         }
@@ -482,24 +476,21 @@ function AddRaidWizard(bot) {
         ctx.session.participateOptions = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
         return bot.telegram
           .sendMessage(process.env.GROUP_ID, out, {
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             disable_web_page_preview: true
           })
           .then(() => {
-            ctx.replyWithMarkdown(
+            ctx.replyWithHTML(
               ctx.i18n.t('do_you_participate'),
-              Markup.keyboard(ctx.session.participateOptions)
-                .resize()
-                .oneTime()
-                .extra()
+              Markup.keyboard(ctx.session.participateOptions).resize().oneTime()
             )
           })
           .then(() => ctx.wizard.next())
       } else {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('join_raid_cancel')}`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
@@ -512,22 +503,21 @@ function AddRaidWizard(bot) {
       if (participate === 1) {
         // user does NOT participate, exit
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('finished_procedure'),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
       // user does participate
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('join_raid_accounts_question', {
             gymname: ctx.session.newraid.gymname
           }),
           Markup.keyboard([['1'], ['2', '3', '4'], ['5', '6', '7']])
             .resize()
             .oneTime()
-            .extra()
         )
         .then(() => ctx.wizard.next())
     },
@@ -541,18 +531,17 @@ function AddRaidWizard(bot) {
         ctx.i18n.t('private_raid_confirm')
       ]
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('remote_raid_question')}*\n\n*${ctx.i18n.t(
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('remote_raid_question')}</b>\n\n<b>${ctx.i18n.t(
             'covid19_disclaimer'
-          )}*`,
-          Markup.keyboard(ctx.session.raidOptions).resize().oneTime().extra()
+          )}</b>`,
+          Markup.keyboard(ctx.session.raidOptions).resize().oneTime()
         )
         .then(() => ctx.wizard.next())
     },
     // step 11
     async (ctx) => {
       const raidtypeanswer = ctx.update.message.text
-      // console.log(raidtypeanswer)
       ctx.session.newraid.remote =
         raidtypeanswer === ctx.i18n.t('remote_raid_confirm')
       ctx.session.newraid.private =
@@ -565,8 +554,8 @@ function AddRaidWizard(bot) {
         ) {
           // console.info('To many remotes, current:',  )
           return ctx
-            .replyWithMarkdown(
-              `*${ctx.i18n.t('maximum_remote_raid_reached')}* ${
+            .replyWithHTML(
+              `<b>${ctx.i18n.t('maximum_remote_raid_reached')}</b> ${
                 process.env.THRESHOLD_REMOTE_USERS
               }. ${ctx.i18n.t('try_again_remote_limit')}`
             )
@@ -578,11 +567,10 @@ function AddRaidWizard(bot) {
         raidtypeanswer !== ctx.i18n.t('local_raid_confirm') &&
         raidtypeanswer !== ctx.i18n.t('private_raid_confirm')
       ) {
-        // console.log('test nrw', ctx.i18n.t('remote_raid_confirm'))
         ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('retry_or_cancel'),
-            Markup.keyboard(ctx.session.raidOptions).resize().oneTime().extra()
+            Markup.keyboard(ctx.session.raidOptions).resize().oneTime()
           )
           .then(() => {})
       } else {
@@ -610,9 +598,9 @@ function AddRaidWizard(bot) {
             )
           } catch (error) {
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 ctx.i18n.t('problem_while_saving'),
-                Markup.removeKeyboard().extra()
+                Markup.removeKeyboard()
               )
               .then(() => ctx.scene.leave())
           }
@@ -631,9 +619,9 @@ function AddRaidWizard(bot) {
           } catch (error) {
             console.log('Woops… registering raiduser failed', error)
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 ctx.i18n.t('problem_while_saving'),
-                Markup.removeKeyboard().extra()
+                Markup.removeKeyboard()
               )
               .then(() => ctx.scene.leave())
           }
@@ -642,31 +630,31 @@ function AddRaidWizard(bot) {
         ctx.i18n.locale(process.env.DEFAULT_LOCALE)
         const reason = ctx.i18n.t('raid_user_added_list', {
           user: user,
-          user_first_name: escapeMarkDown(user.first_name),
+          user_first_name: user.first_name,
           gymname: ctx.session.newraid.gymname
         })
         ctx.i18n.locale(oldlang)
         const out = await listRaids(reason, ctx)
         if (out === null) {
           ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('unexpected_raid_not_found'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
         }
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('raid_add_finish', {
               gymname: ctx.session.newraid.gymname,
               starttm: moment.unix(ctx.session.newraid.start1).format('HH:mm')
             }),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
 
           .then(async () => {
             bot.telegram.sendMessage(process.env.GROUP_ID, out, {
-              parse_mode: 'Markdown',
+              parse_mode: 'HTML',
               disable_web_page_preview: true
             })
           })
@@ -703,4 +691,4 @@ async function sendRaidbosses(ctx, bot) {
   )
 }
 
-module.exports = AddRaidWizard
+export default AddRaidWizard

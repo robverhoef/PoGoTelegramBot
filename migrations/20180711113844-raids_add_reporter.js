@@ -1,29 +1,16 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'raids',
-      'reporterName',
-      Sequelize.STRING
-    )
-    .then(() => {
-      queryInterface.addColumn(
-        'raids',
-        'reporterId',
-        Sequelize.INTEGER
-      )}
-    )
+    return queryInterface
+      .addColumn('raids', 'reporterName', Sequelize.STRING)
+      .then(() => {
+        queryInterface.addColumn('raids', 'reporterId', Sequelize.INTEGER)
+      })
   },
 
   down: (queryInterface, Sequelize) => {
-    queryInterface.removeColumn(
-      'raids',
-      'reporterId'
-    )
-    queryInterface.removeColumn(
-      'raids',
-      'reporterName'
-    )
+    queryInterface.removeColumn('raids', 'reporterId')
+    queryInterface.removeColumn('raids', 'reporterName')
   }
 }

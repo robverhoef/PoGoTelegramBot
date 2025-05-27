@@ -1,18 +1,16 @@
 // ===================
 // join raid wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const setLocale = require('../util/setLocale')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import setLocale from '../util/setLocale.js'
 
 moment.tz.setDefault('Europe/Amsterdam')
-var UserSettingsWizard = function (bot) {
+var UserSettingsWizard = function () {
   const steps = {
     start: 0,
     language: 2,
@@ -35,9 +33,9 @@ var UserSettingsWizard = function (bot) {
       })
       if (!dbuser) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('noti_something_wrong_finding_user')}`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => {
             ctx.session = {}
@@ -58,8 +56,8 @@ var UserSettingsWizard = function (bot) {
             friendcode: dbuser.friendcode
           }
         } else {
-          ctx.replyWithMarkdown(
-            `*${'Ik kan je niet vinden* 🤷🏼‍♂️\nGebruik /start om iets anders te doen.'}`
+          ctx.replyWithHTML(
+            `<b>${'Ik kan je niet vinden</b> 🤷🏼‍♂️\nGebruik /start om iets anders te doen.'}`
           )
         }
       }
@@ -69,11 +67,11 @@ var UserSettingsWizard = function (bot) {
         `${ctx.i18n.t('btn_usersettings_language')}`
       ]
       ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('usersettings_welcome', {
-            first_name: escapeMarkDown(user.first_name)
-          })}*`,
-          Markup.keyboard(ctx.session.settingbtns).oneTime().resize().extra()
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('usersettings_welcome', {
+            first_name: user.first_name
+          })}</b>`,
+          Markup.keyboard(ctx.session.settingbtns).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -98,11 +96,10 @@ var UserSettingsWizard = function (bot) {
     async (ctx) => {
       const locales = JSON.parse(process.env.LOCALES)
       ctx.session.localebuttons = locales.map((locale) => locale[1])
-      console.log('LOCALES', ctx.session.localebuttons)
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('usersettings_language_question')}*`,
-          Markup.keyboard(ctx.session.localebuttons).oneTime().resize().extra()
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('usersettings_language_question')}</b>`,
+          Markup.keyboard(ctx.session.localebuttons).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -123,8 +120,8 @@ var UserSettingsWizard = function (bot) {
     // step 4
     async (ctx) => {
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('usersettings_friendcode_question')}*`,
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('usersettings_friendcode_question')}</b>`,
           Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
@@ -136,7 +133,7 @@ var UserSettingsWizard = function (bot) {
       let code = ctx.update.message.text.trim()
       if (code.length < 12 && code.toLowerCase() !== 'x') {
         return ctx
-          .replyWithMarkdown(`${ctx.i18n.t('usersettings_wrong_friendcode')}`)
+          .replyWithHTML(`${ctx.i18n.t('usersettings_wrong_friendcode')}`)
           .then(() => {
             ctx.wizard.selectStep(steps.friendcode)
             return ctx.wizard.steps[steps.friendcode](ctx)
@@ -157,8 +154,8 @@ var UserSettingsWizard = function (bot) {
     // step 6
     async (ctx) => {
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('usersetings_pokemon_name_question')}*`,
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('usersetings_pokemon_name_question')}</b>`,
           Markup.removeKeyboard()
         )
         .then(() => ctx.wizard.next())
@@ -182,9 +179,9 @@ var UserSettingsWizard = function (bot) {
         ctx.i18n.t('btn_usersettings_edit_more')
       ]
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('btn_edit_more_or_finish')}*`,
-          Markup.keyboard(ctx.session.finishbuttons).oneTime().resize().extra()
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('btn_edit_more_or_finish')}</b>`,
+          Markup.keyboard(ctx.session.finishbuttons).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -196,7 +193,6 @@ var UserSettingsWizard = function (bot) {
       switch (msg) {
         // save and quit
         case ctx.i18n.t('edit_gym_btn_save_close'):
-          console.log('STORE', ctx.session.usersettings)
           try {
             await models.User.update(
               {
@@ -210,15 +206,15 @@ var UserSettingsWizard = function (bot) {
             )
           } catch (error) {
             return ctx
-              .replyWithMarkdown(
+              .replyWithHTML(
                 ctx.i18n.t('problem_while_saving'),
-                Markup.removeKeyboard().extra()
+                Markup.removeKeyboard()
               )
               .then(() => ctx.scene.leave())
           }
           return ctx
-            .replyWithMarkdown(
-              `*${ctx.i18n.t('finished_procedure')}*`,
+            .replyWithHTML(
+              `<b>${ctx.i18n.t('finished_procedure')}</b>`,
               Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
@@ -231,4 +227,4 @@ var UserSettingsWizard = function (bot) {
   )
 }
 
-module.exports = UserSettingsWizard
+export default UserSettingsWizard

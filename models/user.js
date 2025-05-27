@@ -1,5 +1,6 @@
 'use strict'
-module.exports = (sequelize, DataTypes) => {
+/** eslint no-unused-vars: "none"*/
+export default (sequelize, DataTypes) => {
   const User = sequelize.define(
     'User',
     {
@@ -38,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     { tableName: 'users' }
   )
-  User.associate = function (models) {
+  User.associate = function () {
     // associations can be defined here
   }
   return User

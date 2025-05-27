@@ -1,5 +1,5 @@
 'use strict'
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Eliteraid = sequelize.define(
     'Eliteraid',
     {

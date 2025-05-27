@@ -1,16 +1,14 @@
 // ===================
 // add gym wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const listRaids = require('../util/listRaids')
-const setLocale = require('../util/setLocale')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import listRaids from '../util/listRaids.js'
+import setLocale from '../util/setLocale.js'
 
 moment.tz.setDefault('Europe/Amsterdam')
 
@@ -39,7 +37,7 @@ var UserDelayedGymWizard = function (bot) {
       })
       if (raids.length === 0) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('join_raid_no_raids_found'),
             Markup.removeKeyboard()
           )
@@ -67,9 +65,9 @@ var UserDelayedGymWizard = function (bot) {
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('user_delayed_select_raid'),
-          Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra()
+          Markup.keyboard(ctx.session.raidbtns).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -78,17 +76,17 @@ var UserDelayedGymWizard = function (bot) {
       // retrieve selected candidate  from session…
       const ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
       if (ind === -1) {
-        return ctx.replyWithMarkdown(
+        return ctx.replyWithHTML(
           ctx.i18n.t('join_raid_not_found'),
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
       }
       const selectedraid = ctx.session.raidcandidates[ind]
       if (selectedraid.raidid === 0) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('join_raid_cancel'),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => {
             ctx.session.raidcandidates = null
@@ -102,11 +100,11 @@ var UserDelayedGymWizard = function (bot) {
         [ctx.i18n.t('user_delayed_is_on_time')]
       ]
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('user_delayed_how_much_later', {
             gymname: selectedraid.gymname
           })}`,
-          Markup.keyboard(ctx.session.accountbtns).extra()
+          Markup.keyboard(ctx.session.accountbtns)
         )
         .then(() => ctx.wizard.next())
     },
@@ -130,7 +128,7 @@ var UserDelayedGymWizard = function (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_2min', {
-              first_name: escapeMarkDown(user.first_name),
+              first_name: user.first_name,
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
@@ -142,7 +140,7 @@ var UserDelayedGymWizard = function (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_by_5min', {
-              first_name: escapeMarkDown(user.first_name),
+              first_name: user.first_name,
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
@@ -154,7 +152,7 @@ var UserDelayedGymWizard = function (bot) {
             // reason should always be in default locale
             ctx.i18n.locale(process.env.DEFAULT_LOCALE)
             reason = `${ctx.i18n.t('user_delayed_on_time', {
-              first_name: escapeMarkDown(user.first_name),
+              first_name: user.first_name,
               uid: user.id,
               gymname: delayedraid.gymname
             })}`
@@ -174,23 +172,23 @@ var UserDelayedGymWizard = function (bot) {
           )
         } catch (error) {
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               `${ctx.i18n.t('user_delayed_selection_wrong')})`,
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
         }
         const out = await listRaids(`${reason}\n\n`, ctx)
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             `${ctx.i18n.t('user_delayed_status_changed', {
               gymname: delayedraid.gymname
             })}`,
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(async () => {
             bot.telegram.sendMessage(process.env.GROUP_ID, out, {
-              parse_mode: 'Markdown',
+              parse_mode: 'HTML',
               disable_web_page_preview: true
             })
           })
@@ -199,4 +197,4 @@ var UserDelayedGymWizard = function (bot) {
     }
   )
 }
-module.exports = UserDelayedGymWizard
+export default UserDelayedGymWizard

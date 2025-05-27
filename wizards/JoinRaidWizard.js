@@ -1,16 +1,17 @@
+/*eslint no-unused-vars: "error"*/
+
 // ===================
 // join raid wizard
 // ===================
-// const WizardScene = require('telegraf/scenes/wizard')
-const { Scenes } = require('telegraf')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const listRaids = require('../util/listRaids')
-const setLocale = require('../util/setLocale')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import listRaids from '../util/listRaids.js'
+import setLocale from '../util/setLocale.js'
+
 moment.tz.setDefault('Europe/Amsterdam')
 
 function JoinRaidWizard(bot) {
@@ -31,7 +32,7 @@ function JoinRaidWizard(bot) {
       })
       if (raids.length === 0) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('join_raid_no_raids_found'),
             Markup.removeKeyboard()
           )
@@ -59,9 +60,9 @@ function JoinRaidWizard(bot) {
       // save all candidates to session…
       ctx.session.raidcandidates = candidates
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('join_raid_select_raid'),
-          Markup.keyboard(ctx.session.raidbtns).oneTime().resize().extra()
+          Markup.keyboard(ctx.session.raidbtns).oneTime().resize()
         )
         .then(() => ctx.wizard.next())
     },
@@ -70,17 +71,17 @@ function JoinRaidWizard(bot) {
       // retrieve selected candidate  from session…
       const ind = ctx.session.raidbtns.indexOf(ctx.update.message.text)
       if (ind === -1) {
-        return ctx.replyWithMarkdown(
+        return ctx.replyWithHTML(
           ctx.i18n.t('join_raid_not_found'),
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
       }
       ctx.session.selectedraid = ctx.session.raidcandidates[ind]
       if (ctx.session.selectedraid.raidid === 0) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('join_raid_cancel'),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => {
             ctx.session.raidcandidates = null
@@ -97,11 +98,11 @@ function JoinRaidWizard(bot) {
         ctx.i18n.t('private_raid_confirm')
       ]
       return ctx
-        .replyWithMarkdown(
-          `*${ctx.i18n.t('remote_raid_question')}*\n\n${ctx.i18n.t(
+        .replyWithHTML(
+          `<b>${ctx.i18n.t('remote_raid_question')}</b>\n\n${ctx.i18n.t(
             'covid19_disclaimer'
           )}`,
-          Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra()
+          Markup.keyboard(ctx.session.remoteOptions).resize().oneTime()
         )
         .then(() => ctx.wizard.next())
     },
@@ -115,19 +116,19 @@ function JoinRaidWizard(bot) {
         ctx.session.raidtype !== ctx.i18n.t('local_raid_confirm') &&
         ctx.session.raidtype !== ctx.i18n.t('private_raid_confirm')
       ) {
-        ctx.replyWithMarkdown(
+        ctx.replyWithHTML(
           ctx.i18n.t('retry_or_cancel'),
-          Markup.keyboard(ctx.session.remoteOptions).resize().oneTime().extra()
+          Markup.keyboard(ctx.session.remoteOptions).resize().oneTime()
         )
       } else {
         // ctx.session.raidtype  How many accounts question
         ctx.session.accountbtns = [['1'], ['2', '3', '4'], ['5', '6', '7']]
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('join_raid_accounts_question', {
               gymname: ctx.session.selectedraid.gymname
             }),
-            Markup.keyboard(ctx.session.accountbtns).oneTime().resize().extra()
+            Markup.keyboard(ctx.session.accountbtns).oneTime().resize()
           )
           .then(() => ctx.wizard.next())
       }
@@ -174,8 +175,8 @@ function JoinRaidWizard(bot) {
           )} limit ${parseInt(process.env.THRESHOLD_REMOTE_USERS, 10)}`
         )
         return ctx
-          .replyWithMarkdown(
-            `*${ctx.i18n.t('maximum_remote_raid_reached')}* ${
+          .replyWithHTML(
+            `<b>${ctx.i18n.t('maximum_remote_raid_reached')}</b> ${
               process.env.THRESHOLD_REMOTE_USERS
             }\n\n${ctx.i18n.t(
               'current_number_remote_users'
@@ -210,10 +211,11 @@ function JoinRaidWizard(bot) {
             }
           )
         } catch (error) {
+          console.log('Woops… updating raiduser failed', error)
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('problem_while_saving'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
         }
@@ -233,7 +235,7 @@ function JoinRaidWizard(bot) {
         } catch (error) {
           console.log('Woops… registering raiduser failed', error)
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('problem_while_saving'),
               Markup.removeKeyboard()
             )
@@ -244,29 +246,29 @@ function JoinRaidWizard(bot) {
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('join_raid_list_reason', {
         user: user,
-        user_first_name: escapeMarkDown(user.first_name),
+        user_first_name: user.first_name,
         gymname: joinedraid.gymname
       })
       ctx.i18n.locale(oldlocale)
       const out = await listRaids(`${reason}\n\n`, ctx)
       if (out === null) {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('unexpected_raid_not_found'),
             Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('join_raid_finished', {
             joinedraid: joinedraid
           }),
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(async () => {
           bot.telegram.sendMessage(process.env.GROUP_ID, out, {
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             disable_web_page_preview: true
           })
         })
@@ -274,4 +276,4 @@ function JoinRaidWizard(bot) {
     }
   )
 }
-module.exports = JoinRaidWizard
+export default JoinRaidWizard

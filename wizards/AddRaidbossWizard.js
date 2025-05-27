@@ -1,15 +1,15 @@
 // ===================
 // add raidboss wizard
 // ===================
-// // const WizardScene = require('telegraf/scenes/wizard')
+// // import WizardScene from 'telegraf/scenes/wizard'
 
-const { Markup, Scenes } = require('telegraf')
-const models = require('../models')
-const Sequelize = require('sequelize')
+import { Markup, Scenes } from 'telegraf'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const metaphone = require('metaphone')
-const adminCheck = require('../util/adminCheck')
-const setLocale = require('../util/setLocale')
+import { metaphone } from 'metaphone'
+import adminCheck from '../util/adminCheck.js'
+import setLocale from '../util/setLocale.js'
 
 function AddRaidbossWizard(bot) {
   return new Scenes.WizardScene(
@@ -23,7 +23,7 @@ function AddRaidbossWizard(bot) {
       }
       ctx.session.newboss = {}
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('add_raidboss_intro')}`,
           Markup.removeKeyboard()
         )
@@ -44,16 +44,16 @@ function AddRaidbossWizard(bot) {
       })
       if (oldboss !== null) {
         return ctx
-          .replyWithMarkdown(ctx.i18n.t('raidboss_exists'))
+          .replyWithHTML(ctx.i18n.t('raidboss_exists'))
           .then(() => ctx.scene.leave())
       }
       const btns = ['1', '2', '3', '4', '5']
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           `${ctx.i18n.t('raidboss_level_question', {
             bossname: bossname
           })}`,
-          Markup.keyboard(btns).resize().oneTime().extra()
+          Markup.keyboard(btns).resize().oneTime()
         )
         .then(() => {
           return ctx.wizard.next()
@@ -64,7 +64,7 @@ function AddRaidbossWizard(bot) {
     (ctx) => {
       ctx.session.newboss.level = parseInt(ctx.update.message.text.trim())
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('raidboss_recommended_accounts', {
             bossname: ctx.session.newboss.name
           })
@@ -77,13 +77,13 @@ function AddRaidbossWizard(bot) {
       ctx.session.newboss.accounts = parseInt(ctx.update.message.text.trim())
       ctx.session.savebtns = [ctx.i18n.t('yes'), ctx.i18n.t('no')]
       ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('raidboss_save_question', {
             bossname: ctx.session.newboss.name,
             bosslevel: ctx.session.newboss.level,
             numaccounts: ctx.session.newboss.accounts
           }),
-          Markup.keyboard(ctx.session.savebtns).oneTime().resize().extra()
+          Markup.keyboard(ctx.session.savebtns).oneTime().resize()
         )
         .then(() => {
           return ctx.wizard.next()
@@ -100,34 +100,34 @@ function AddRaidbossWizard(bot) {
           accounts: ctx.session.newboss.accounts,
           metaphone: metaphone(ctx.session.newboss.name)
         })
-        console.log('new boss', newboss)
+        console.log('Added new boss', newboss)
         try {
           await newboss.save()
         } catch (error) {
           console.log('Woops… registering new raid failed', error)
           return ctx
-            .replyWithMarkdown(
+            .replyWithHTML(
               ctx.i18n.t('problem_while_saving'),
-              Markup.removeKeyboard().extra()
+              Markup.removeKeyboard()
             )
             .then(() => ctx.scene.leave())
         }
       } else {
         return ctx
-          .replyWithMarkdown(
+          .replyWithHTML(
             ctx.i18n.t('raidboss_save_canceled'),
-            Markup.removeKeyboard().extra()
+            Markup.removeKeyboard()
           )
           .then(() => ctx.scene.leave())
       }
       return ctx
-        .replyWithMarkdown(
+        .replyWithHTML(
           ctx.i18n.t('add_raidboss_finished'),
-          Markup.removeKeyboard().extra()
+          Markup.removeKeyboard()
         )
         .then(() => ctx.scene.leave())
     }
   )
 }
 
-module.exports = AddRaidbossWizard
+export default AddRaidbossWizard

@@ -1,19 +1,15 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.changeColumn(
-      'users', 'tId', {
-        type: Sequelize.BIGINT.UNSIGNED
-      }
-    )
+    return queryInterface.changeColumn('users', 'tId', {
+      type: Sequelize.BIGINT.UNSIGNED
+    })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.changeColumn(
-      'users', 'tId', {
-        type: Sequelize.INTEGER
-      }
-    )
+    return queryInterface.changeColumn('users', 'tId', {
+      type: Sequelize.INTEGER
+    })
   }
 }

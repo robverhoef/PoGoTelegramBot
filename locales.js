@@ -1,2 +1,3 @@
 process.env.DEFAULT_LOCALE = 'nl'
-process.env.LOCALES = '[["nl","Nederlands"], ["en","English"], ["es", "Español"]]'
+process.env.LOCALES =
+  '[["nl","Nederlands"], ["en","English"], ["es", "Español"]]'

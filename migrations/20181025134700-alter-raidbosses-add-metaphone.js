@@ -1,14 +1,11 @@
 'use strict'
 
-module.exports = {
-
+export default {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'raidbosses', 'metaphone', {
-        type: Sequelize.STRING(64),
-        defaultValue: ''
-      }
-    )
+    return queryInterface.addColumn('raidbosses', 'metaphone', {
+      type: Sequelize.STRING(64),
+      defaultValue: ''
+    })
   },
 
   down: (queryInterface, Sequelize) => {

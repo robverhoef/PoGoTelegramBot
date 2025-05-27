@@ -1,22 +1,15 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'raidusers',
-      'delayed',
-      {
-        type: Sequelize.STRING(32),
-        defaultValue: null,
-        allowNull: true
-      }
-    )
+    return queryInterface.addColumn('raidusers', 'delayed', {
+      type: Sequelize.STRING(32),
+      defaultValue: null,
+      allowNull: true
+    })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.removeColumn(
-      'raidusers',
-      'delayed'
-    )
+    return queryInterface.removeColumn('raidusers', 'delayed')
   }
 }

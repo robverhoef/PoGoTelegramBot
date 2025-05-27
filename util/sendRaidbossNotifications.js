@@ -1,17 +1,15 @@
-const Sequelize = require('sequelize')
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const moment = require('moment-timezone')
-const models = require('../models')
+import moment from 'moment-timezone'
+import models from '../models/index.js'
 
 /**
  * Sends all applicable raidboss notifications
  * TODO: send in batches
  */
-module.exports = async (ctx, bot, raidbossId, gymname, target, starttime) => {
+export default async (ctx, bot, raidbossId, gymname, target, starttime) => {
   const notifications = await models.RaidbossNotification.findAll({
-    include: [
-      models.User
-    ],
+    include: [models.User],
     where: {
       raidbossId: {
         [Op.eq]: raidbossId
@@ -19,17 +17,33 @@ module.exports = async (ctx, bot, raidbossId, gymname, target, starttime) => {
     }
   })
   const oldlocale = ctx.i18n.locale()
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      'WOULD SEND RAIDBOSS NOTIFICATION',
+      notifications.length,
+      target
+    )
+    return
+  }
   console.log('SENDING RAIDBOSS NOTIFICATION', notifications.length, target)
   for (const notification of notifications) {
     ctx.i18n.locale(notification.User.locale)
     try {
-      await bot.telegram.sendMessage(notification.User.tId, ctx.i18n.t('noti_raidboss_notification', {
-        target: target,
-        gymname: gymname,
-        starttime: moment.unix(starttime).format('H:mm')
-      }), { parse_mode: 'Markdown', disable_web_page_preview: true })
+      await bot.telegram.sendMessage(
+        notification.User.tId,
+        ctx.i18n.t('noti_raidboss_notification', {
+          target: target,
+          gymname: gymname,
+          starttime: moment.unix(starttime).format('H:mm')
+        }),
+        { parse_mode: 'HTML' }
+      )
     } catch (error) {
-      console.log('Error while sending raidboss notification to ', notification.User.tId, error.message)
+      console.log(
+        'Error while sending raidboss notification to ',
+        notification.User.tId,
+        error.message
+      )
     }
   }
   ctx.i18n.locale(oldlocale)
