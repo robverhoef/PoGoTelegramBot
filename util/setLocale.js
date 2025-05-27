@@ -1,8 +1,8 @@
-var models = require('../models')
-const Sequelize = require('sequelize')
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
 
-module.exports = async (ctx) => {
+export default async function (ctx) {
   const user = await models.User.findOne({
     where: {
       tId: {

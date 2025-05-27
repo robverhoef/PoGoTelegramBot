@@ -1,12 +1,11 @@
-
-const moment = require('moment-timezone')
+import moment from 'moment-timezone'
 moment.tz.setDefault('Europe/Amsterdam')
 
 /**
-* Converts a given time, i.e. 20:30 or 09:45, to a timestamp
-* @param timein {string}
-*/
-module.exports = (days, timein) => {
+ * Converts a given time, i.e. 20:30 or 09:45, to a timestamp
+ * @param timein {string}
+ */
+export default (days, timein) => {
   const thetime = timein.split(':')
   if (thetime[0] === undefined || thetime[1] === undefined) {
     return false

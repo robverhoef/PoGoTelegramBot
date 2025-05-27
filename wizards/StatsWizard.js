@@ -2,21 +2,20 @@
 // add gym wizard
 // Note: when adding steps, update the jump to Shiny reports, currently it is the 3rd step
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
-var models = require('../models')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-const Sequelize = require('sequelize')
-const lastExRaidPassDate = require('../util/lastExRaidPassDate')
-const Op = Sequelize.Op
-const setLocale = require('../util/setLocale')
-const adminCheck = require('../util/adminCheck')
-const escapeMarkDown = require('../util/escapeMarkDown')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import models from '../models/index.js'
+import moment from 'moment-timezone'
+import Sequelize from 'sequelize'
+import lastExRaidPassDate from '../util/lastExRaidPassDate.js'
+import setLocale from '../util/setLocale.js'
+import adminCheck from '../util/adminCheck.js'
 
+const Op = Sequelize.Op
 const personalTop = 10
 const globalTop = 10
 
-function sortDictionaryOnValue (dictionary) {
+function sortDictionaryOnValue(dictionary) {
   const items = Object.keys(dictionary).map(function (key) {
     return [key, dictionary[key]]
   })
@@ -28,7 +27,7 @@ function sortDictionaryOnValue (dictionary) {
   return items
 }
 
-function sortRaidsOnGymcount (raids) {
+function sortRaidsOnGymcount(raids) {
   const gyms = {}
   for (var a = 0; a < raids.length; a++) {
     let key = raids[a].Gym.gymname
@@ -47,7 +46,7 @@ function sortRaidsOnGymcount (raids) {
   return sortDictionaryOnValue(gyms)
 }
 
-async function processPersonalOwnRaids (user, time, ctx) {
+async function processPersonalOwnRaids(user, time, ctx) {
   const ownraids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -62,36 +61,47 @@ async function processPersonalOwnRaids (user, time, ctx) {
 
   let statMessage = ''
   if (ownraids.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_your_total_raids_reported', { ownraids: ownraids })} \n`
+    statMessage += `${ctx.i18n.t('stats_your_total_raids_reported', {
+      ownraids: ownraids
+    })} \n`
     const ownedRaids = sortRaidsOnGymcount(ownraids).slice(0, personalTop)
     if (ownedRaids.length > 0) {
-      statMessage += `_${ctx.i18n.t('stats_your_most_reported_gyms')}:_\n`
+      statMessage += `<i>${ctx.i18n.t('stats_your_most_reported_gyms')}:</i>\n`
     }
     for (let i = 0; i < ownedRaids.length; i++) {
-      statMessage += `- ${ownedRaids[i][0]}: *${ownedRaids[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
+      statMessage += ` - ${ownedRaids[i][0]}: <b>${
+        ownedRaids[i][1]
+      }${ctx.i18n.t('stats_times_reported')}</b>\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-function processPersonalRaids (raids, splice, ctx) {
+function processPersonalRaids(raids, splice, ctx) {
   let statMessage = ''
   if (raids.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_total_times_joined') + ': *' + raids.length + '* \n'}`
+    statMessage += `${
+      ctx.i18n.t('stats_total_times_joined') +
+      ': <b>' +
+      raids.length +
+      '</b> \n'
+    }`
     const gymcount = sortRaidsOnGymcount(raids)
     const joinedRaids = splice ? gymcount.splice(0, personalTop) : gymcount
     if (joinedRaids.length > 0) {
-      statMessage += `_${ctx.i18n.t('stats_your_most_visited_gyms')}:_\n`
+      statMessage += `<i>${ctx.i18n.t('stats_your_most_visited_gyms')}:</i>\n`
     }
     for (var i = 0; i < joinedRaids.length; i++) {
-      statMessage += `- ${joinedRaids[i][0]}: *${joinedRaids[i][1]}${ctx.i18n.t('stats_times_visited')}*\n`
+      statMessage += ` - ${joinedRaids[i][0]}: <b>${
+        joinedRaids[i][1]
+      }${ctx.i18n.t('stats_times_visited')}</b>\n`
     }
   }
   return statMessage
 }
 
-async function processPersonalJoinedRaids (user, time, ctx) {
+async function processPersonalJoinedRaids(user, time, ctx) {
   const raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -111,7 +121,7 @@ async function processPersonalJoinedRaids (user, time, ctx) {
   return processPersonalRaids(raids, true, ctx)
 }
 
-async function processPersonalExRaidGyms (user, start, end, ctx) {
+async function processPersonalExRaidGyms(user, start, end, ctx) {
   const raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -143,34 +153,38 @@ async function processPersonalExRaidGyms (user, start, end, ctx) {
   return processPersonalRaids(raids, false, ctx)
 }
 
-async function determinePersonalStats (user, time, ctx) {
+async function determinePersonalStats(user, time, ctx) {
   let statMessage = ''
   statMessage += await processPersonalOwnRaids(user, time, ctx)
   statMessage += await processPersonalJoinedRaids(user, time, ctx)
   return statMessage
 }
 
-async function determinePersonalExRaids (user, start, end, ctx) {
+async function determinePersonalExRaids(user, start, end, ctx) {
   let statMessage = ''
   statMessage += await processPersonalExRaidGyms(user, start, end, ctx)
   return statMessage
 }
 
-function processRaidcount (raids, ctx) {
+function processRaidcount(raids, ctx) {
   let statMessage = ''
   const gymcount = sortRaidsOnGymcount(raids).slice(0, globalTop)
   if (gymcount.length > 0) {
-    statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: *${raids.length}* \n`
-    statMessage += `_${ctx.i18n.t('stats_most_reported_gyms')}:_\n`
+    statMessage += `${ctx.i18n.t('stats_total_reported_raids_everybody')}: <b>${
+      raids.length
+    }</b> \n`
+    statMessage += `<i>${ctx.i18n.t('stats_most_reported_gyms')}:</i>\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]}${ctx.i18n.t('stats_times_visited')}*\n`
+      statMessage += ` - ${gymcount[i][0]}: <b>${gymcount[i][1]}${ctx.i18n.t(
+        'stats_times_visited'
+      )}</b>\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-function getGymcounts (raids, countMethod) {
+function getGymcounts(raids, countMethod) {
   const gyms = {}
   let total = 0
   for (var a = 0; a < raids.length; a++) {
@@ -189,17 +203,19 @@ function getGymcounts (raids, countMethod) {
   return { gyms, total }
 }
 
-function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
+function processRaidVsRaidusers(raids, countAccounts, splice, ctx) {
   const filteredRaids = filterRaidsOnViability(raids)
 
-  const raidTotals = getGymcounts(filteredRaids, raid => 1)
-  const countMethod = !countAccounts ? raid => raid.Raidusers.length : raid => {
-    let totals = 0
-    for (const raiduser of raid.Raidusers) {
-      totals += raiduser.accounts
-    }
-    return totals
-  }
+  const raidTotals = getGymcounts(filteredRaids, () => 1)
+  const countMethod = !countAccounts
+    ? (raid) => raid.Raidusers.length
+    : (raid) => {
+        let totals = 0
+        for (const raiduser of raid.Raidusers) {
+          totals += raiduser.accounts
+        }
+        return totals
+      }
 
   const { gyms, total } = getGymcounts(filteredRaids, countMethod)
 
@@ -208,20 +224,28 @@ function processRaidVsRaidusers (raids, countAccounts, splice, ctx) {
   const gymcount = splice ? value.splice(0, globalTop) : value
   if (gymcount.length > 0) {
     if (countAccounts) {
-      statMessage += `${ctx.i18n.t('stats_total_accounts_for_these_raids')}: *${total}* \n`
+      statMessage += `${ctx.i18n.t(
+        'stats_total_accounts_for_these_raids'
+      )}: <b>${total}</b> \n`
     } else {
-      statMessage += `${ctx.i18n.t('stats_total_joins_for_these_raids')}: *${total}* \n`
+      statMessage += `${ctx.i18n.t(
+        'stats_total_joins_for_these_raids'
+      )}:<b>${total}</b> \n`
     }
-    statMessage += `_${ctx.i18n.t('stats_busiest_gyms_in_period')}:_\n`
+    statMessage += `<i>${ctx.i18n.t('stats_busiest_gyms_in_period')}:</i>\n`
     for (let i = 0; i < gymcount.length; i++) {
-      statMessage += `- ${gymcount[i][0]}: *${gymcount[i][1]} ${countAccounts ? ctx.i18n.t('stats_accounts') : ctx.i18n.t('stats_joins')} ${`${ctx.i18n.t('stats_in')} ${raidTotals.gyms[gymcount[i][0]]} raids`}*\n`
+      statMessage += ` - ${gymcount[i][0]}: <b>${gymcount[i][1]} ${
+        countAccounts ? ctx.i18n.t('stats_accounts') : ctx.i18n.t('stats_joins')
+      } ${`${ctx.i18n.t('stats_in')} ${
+        raidTotals.gyms[gymcount[i][0]]
+      } raids`}</b>\n`
     }
     statMessage += '\n'
   }
   return statMessage
 }
 
-function filterRaidsOnViability (raids) {
+function filterRaidsOnViability(raids) {
   const viableRaids = []
   for (const raid of raids) {
     // No raidusers? dont count
@@ -244,23 +268,24 @@ function filterRaidsOnViability (raids) {
       }
 
       // count the raid if it has one less than the required minimum
-      if ((minAccounts - 1) <= totals) {
+      if (minAccounts - 1 <= totals) {
         viableRaids.push(raid)
-      } else {
-        // console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
       }
+      // else {
+      // console.log(`Ignoring following raid on ${raid.target} on ${raid.Gym.gymname} because ${totals} < ${minAccounts - 1} needed for ${raid.Raidboss.name}`)
+      //}
     }
   }
   return viableRaids
 }
 
-function processAllRaids (raids, ctx) {
+function processAllRaids(raids, ctx) {
   let statMessage = processRaidcount(raids, ctx)
   statMessage += processRaidVsRaidusers(raids, false, true, ctx)
   return statMessage
 }
 
-function processRaidusers (raids, ctx) {
+function processRaidusers(raids, ctx) {
   let statMessage = ''
   const users = {}
   const userNames = {}
@@ -280,10 +305,12 @@ function processRaidusers (raids, ctx) {
 
   const userCount = sortDictionaryOnValue(users).splice(0, globalTop)
   if (userCount.length > 0) {
-    statMessage += `_${ctx.i18n.t('stats_top_raiders_period')}:_\n`
+    statMessage += `<i>${ctx.i18n.t('stats_top_raiders_period')}:</i>\n`
     for (let i = 0; i < userCount.length; i++) {
       const userId = userCount[i][0]
-      statMessage += `- ${escapeMarkDown(userNames[userId])}: *${userCount[i][1]} ${ctx.i18n.t('stats_times_raided')}*\n`
+      statMessage += `- ${userNames[userId]}: <b>${
+        userCount[i][1]
+      } ${ctx.i18n.t('stats_times_raided')}</b>\n`
     }
     statMessage += '\n'
   }
@@ -291,7 +318,7 @@ function processRaidusers (raids, ctx) {
   return statMessage
 }
 
-async function processRaidreporters (raids, ctx) {
+async function processRaidreporters(raids, ctx) {
   let statMessage = ''
   const reporters = {}
   for (let a = 0; a < raids.length; a++) {
@@ -306,7 +333,7 @@ async function processRaidreporters (raids, ctx) {
   }
   const reporterCount = sortDictionaryOnValue(reporters).splice(0, globalTop)
   if (reporterCount.length > 0) {
-    statMessage += `_${ctx.i18n.t('stats_heroes_most_reported')}:_\n`
+    statMessage += `<i>${ctx.i18n.t('stats_heroes_most_reported')}:</i>\n`
     for (let i = 0; i < reporterCount.length; i++) {
       const reporterId = reporterCount[i][0]
       const user = await models.User.findOne({
@@ -317,14 +344,16 @@ async function processRaidreporters (raids, ctx) {
         }
       })
       if (user !== null) {
-        statMessage += `- ${escapeMarkDown(user.tUsername)}: *${reporterCount[i][1]}${ctx.i18n.t('stats_times_reported')}*\n`
+        statMessage += `- ${user.tUsername}: <b>${
+          reporterCount[i][1]
+        }${ctx.i18n.t('stats_times_reported')}</b>\n`
       }
     }
   }
   return statMessage
 }
 
-async function determineGlobalStats (time, ctx) {
+async function determineGlobalStats(time, ctx) {
   const raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -340,7 +369,7 @@ async function determineGlobalStats (time, ctx) {
   return statMessage
 }
 
-async function determineGlobalExRaids (start, end, ctx) {
+async function determineGlobalExRaids(start, end, ctx) {
   const raids = await models.Raid.findAll({
     where: {
       endtime: {
@@ -360,14 +389,17 @@ async function determineGlobalExRaids (start, end, ctx) {
             [Op.eq]: true
           }
         }
-      }, models.Raiduser, models.Raidboss]
+      },
+      models.Raiduser,
+      models.Raidboss
+    ]
   })
   const statMessage = processRaidVsRaidusers(raids, true, false, ctx)
 
   return statMessage
 }
 
-function determineChosenTime (chosenTime) {
+function determineChosenTime(chosenTime) {
   const starttime = moment()
   let time
   if (chosenTime === 0) {
@@ -382,7 +414,7 @@ function determineChosenTime (chosenTime) {
   return time
 }
 
-async function isAdmin (ctx, bot) {
+async function isAdmin(ctx, bot) {
   const user = ctx.from
   const admins = await bot.telegram.getChatAdministrators(process.env.GROUP_ID)
   // or marked admin from database
@@ -407,7 +439,8 @@ async function isAdmin (ctx, bot) {
 }
 
 var StatsWizard = function (bot) {
-  return new WizardScene('stats-wizard',
+  return new Scenes.WizardScene(
+    'stats-wizard',
     // Step 0: Get the info requested
     async (ctx) => {
       await setLocale(ctx)
@@ -419,16 +452,18 @@ var StatsWizard = function (bot) {
         ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_report'))
         ctx.session.statbtns.push(ctx.i18n.t('sh_stats_btn_show'))
       }
-      return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_stats_question'), Markup.keyboard(ctx.session.statbtns)
-        .oneTime()
-        .resize()
-        .extra()
-      )
+      return ctx
+        .replyWithHTML(
+          ctx.i18n.t('stats_see_which_stats_question'),
+          Markup.keyboard(ctx.session.statbtns).oneTime().resize()
+        )
         .then(() => ctx.wizard.next())
     },
 
     async (ctx) => {
-      ctx.session.chosenStat = ctx.session.statbtns.indexOf(ctx.update.message.text)
+      ctx.session.chosenStat = ctx.session.statbtns.indexOf(
+        ctx.update.message.text
+      )
       if (ctx.session.chosenStat === 2) {
         // 4rd function
         ctx.wizard.selectStep(3)
@@ -440,7 +475,10 @@ var StatsWizard = function (bot) {
         return ctx.wizard.steps[7](ctx)
       }
       if (ctx.session.chosenStat === -1) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('something_wrong'), Markup.removeKeyboard().extra())
+        return ctx.replyWithHTML(
+          ctx.i18n.t('something_wrong'),
+          Markup.removeKeyboard()
+        )
       }
 
       const dates = await lastExRaidPassDate()
@@ -454,7 +492,11 @@ var StatsWizard = function (bot) {
         ctx.i18n.t('stats_expass_prev_period', { dates: dates })
       ]
 
-      return ctx.replyWithMarkdown(ctx.i18n.t('stats_see_which_period_question'), Markup.keyboard(ctx.session.periodbtns).oneTime().resize().extra())
+      return ctx
+        .replyWithHTML(
+          ctx.i18n.t('stats_see_which_period_question'),
+          Markup.keyboard(ctx.session.periodbtns).oneTime().resize()
+        )
         .then(() => ctx.wizard.next())
     },
 
@@ -470,10 +512,16 @@ var StatsWizard = function (bot) {
         if (chosenStat === 1) {
           statMessage = await determineGlobalStats(time, ctx)
         }
-        statMessage = `*${ctx.i18n.t('stats_since', {
-          timestr: moment.unix(time).format('DD-MM-YYYY')
-        })}*\n\n` + statMessage
-      } else { // ex raid stats
+        statMessage =
+          `<b>${
+            (ctx,
+            'stats_since',
+            {
+              timestr: moment.unix(time).format('DD-MM-YYYY')
+            })
+          }</b>\n\n` + statMessage
+      } else {
+        // ex raid stats
         let start
         let end
         const dates = await lastExRaidPassDate()
@@ -486,13 +534,22 @@ var StatsWizard = function (bot) {
           end = dates.lastExwaveDate
         }
         if (chosenStat === 0) {
-          statMessage = await determinePersonalExRaids(ctx.from, start, end, ctx)
+          statMessage = await determinePersonalExRaids(
+            ctx.from,
+            start,
+            end,
+            ctx
+          )
         }
         if (chosenStat === 1) {
           statMessage = await determineGlobalExRaids(start, end, ctx)
         }
 
-        statMessage = `*${ctx.i18n.t('stats_exraid_since', { timestr: start.format('DD-MM-YYYY HH:mm'), endtimestr: end.format('DD-MM-YYYY HH:mm') })}:*\n\n` + statMessage
+        statMessage =
+          `<b>${ctx.i18n.t('stats_exraid_since', {
+            timestr: start.format('DD-MM-YYYY HH:mm'),
+            endtimestr: end.format('DD-MM-YYYY HH:mm')
+          })}:</b>\n\n` + statMessage
       }
 
       if (statMessage === '') {
@@ -500,7 +557,8 @@ var StatsWizard = function (bot) {
       }
 
       const message = `${statMessage}\n${ctx.i18n.t('stats_finished')}`
-      return ctx.replyWithMarkdown(message, Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithHTML(message, Markup.removeKeyboard())
         .then(() => ctx.scene.leave())
     },
     // Report Shiny
@@ -519,18 +577,32 @@ var StatsWizard = function (bot) {
           }
         }
       })
-      // console.log(raids.length, `${ctx.i18n.t('sh_stats_no_raids')}`)
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_no_raids')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithHTML(
+            `${ctx.i18n.t('sh_stats_no_raids')}`,
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       }
       ctx.session.sraids = raids.map((el) => {
         return {
           id: el.id,
-          label: moment(el.start1 * 1000).format('HH:mm') + ' ' + el.Gym.gymname + ' ' + el.target
+          label:
+            moment(el.start1 * 1000).format('HH:mm') +
+            ' ' +
+            el.Gym.gymname +
+            ' ' +
+            el.target
         }
       })
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_report_intro')}`, Markup.keyboard(ctx.session.sraids.map(el => el.label)).resize().oneTime().extra())
+      return ctx
+        .replyWithHTML(
+          `${ctx.i18n.t('sh_stats_report_intro')}`,
+          Markup.keyboard(ctx.session.sraids.map((el) => el.label))
+            .resize()
+            .oneTime()
+        )
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -541,7 +613,11 @@ var StatsWizard = function (bot) {
           ctx.session.raidId = raid.id
         }
       }
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input_question')}`, Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithHTML(
+          `${ctx.i18n.t('sh_stats_input_question')}`,
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.wizard.next())
     },
     async (ctx) => {
@@ -551,67 +627,97 @@ var StatsWizard = function (bot) {
       const newAccounts = input.length > 2 ? parseInt(input[2]) : 0
 
       let validated = true
-      if (accounts.toString() !== input[0] ||
-          shinies.toString() !== input[1] ||
-          accounts < shinies || shinies < newAccounts) {
+      if (
+        accounts.toString() !== input[0] ||
+        shinies.toString() !== input[1] ||
+        accounts < shinies ||
+        shinies < newAccounts
+      ) {
         validated = false
       }
       if (validated) {
         ctx.session.accounts = accounts
         ctx.session.shinies = shinies
         ctx.session.newAccounts = newAccounts
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input', {
-          shinies,
-          accounts,
-          newAccounts
-        })}\n*${ctx.i18n.t('save_question')}*`, Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')]).oneTime().resize().extra())
+        return ctx
+          .replyWithHTML(
+            `${ctx.i18n.t('sh_stats_input', {
+              shinies,
+              accounts,
+              newAccounts
+            })}\n<b>${ctx.i18n.t('save_question')}</b>`,
+            Markup.keyboard([ctx.i18n.t('yes'), ctx.i18n.t('no')])
+              .oneTime()
+              .resize()
+          )
           .then(() => ctx.wizard.next())
       }
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_input_wrong')}`)
+      return ctx.replyWithHTML(`${ctx.i18n.t('sh_stats_input_wrong')}`)
     },
     async (ctx) => {
       const confirm = ctx.update.message.text
       if (confirm === ctx.i18n.t('yes')) {
         // save…
         try {
-          models.Raid.update({
-            shiny: ctx.session.shinies,
-            accountsplayed: ctx.session.accounts,
-            newaccounts: ctx.session.newAccounts
-          }, {
-            where: {
-              id: ctx.session.raidId
+          models.Raid.update(
+            {
+              shiny: ctx.session.shinies,
+              accountsplayed: ctx.session.accounts,
+              newaccounts: ctx.session.newAccounts
+            },
+            {
+              where: {
+                id: ctx.session.raidId
+              }
             }
-          })
+          )
         } catch (error) {
           console.log('ERROR WHILE SAVING SHINY STATS', error.message)
-          return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_failed')}`)
+          return ctx
+            .replyWithHTML(`${ctx.i18n.t('sh_stats_save_failed')}`)
             .then(() => ctx.scene.leave())
         }
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_success')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithHTML(
+            `${ctx.i18n.t('sh_stats_save_success')}`,
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       }
       // don't save
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('sh_stats_save_canceled')}`, Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithHTML(
+          `${ctx.i18n.t('sh_stats_save_canceled')}`,
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.scene.leave())
     },
     // Show Shiny stats
     async (ctx) => {
-      const results = await models.sequelize.query('select target, sum(shiny) as shiny, sum(accountsplayed) as players, sum(newaccounts) as newplayers from raids where shiny is not null and accountsplayed is not null group by target', { type: models.sequelize.QueryTypes.SELECT })
+      const results = await models.sequelize.query(
+        'select target, sum(shiny) as shiny, sum(accountsplayed) as players, sum(newaccounts) as newplayers from raids where shiny is not null and accountsplayed is not null group by target',
+        { type: models.sequelize.QueryTypes.SELECT }
+      )
       // console.log(results)
       if (results.length > 0) {
         let out = `${ctx.i18n.t('sh_stats_head')}\n\n`
         for (const result of results) {
-          out += `*${result.target}:* ${result.shiny} shiny, ${result.players} accounts (${result.newplayers} new); Total ${Math.round(result.shiny * 100 / result.players)}% (${Math.round(result.newplayers * 100 / result.shiny)}% new) \n`
+          out += `<b>${result.target}:</b> ${result.shiny} shiny, ${
+            result.players
+          } accounts (${result.newplayers} new); Total ${Math.round(
+            (result.shiny * 100) / result.players
+          )}% (${Math.round((result.newplayers * 100) / result.shiny)}% new) \n`
         }
         out += `${ctx.i18n.t('sh_stats_done')}`
-        return ctx.replyWithMarkdown(out, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithHTML(out, Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
-      return ctx.replyWithMarkdown('Mmm.. /start', Markup.removeKeyboard().extra())
+      return ctx
+        .replyWithHTML('Mmm.. /start', Markup.removeKeyboard())
         .then(() => ctx.scene.leave())
     }
   )
 }
 
-module.exports = StatsWizard
+export default StatsWizard

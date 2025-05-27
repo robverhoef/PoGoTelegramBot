@@ -1,15 +1,19 @@
-const models = require('../models')
-const Sequelize = require('sequelize')
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
+import { metaphone } from 'metaphone'
 const Op = Sequelize.Op
-const metaphone = require('metaphone')
+
 /**
-* @param {string}
-* @returns {raidboss: models.Raidboss} or (egg) {raidboss: null, level: int} or null
-*/
-module.exports = async (bossname) => {
+ * @param {string}
+ * @returns {raidboss: models.Raidboss} or (egg) {raidboss: null, level: int} or null
+ */
+export default async (bossname) => {
   // first start by checking for eggs -might save us a DB query-
   // match 'level 5', 'lvl 5', 'level5', 'lvl5'
-  if (bossname.toLowerCase().indexOf('lvl') > -1 || bossname.toLowerCase().indexOf('level') > -1) {
+  if (
+    bossname.toLowerCase().indexOf('lvl') > -1 ||
+    bossname.toLowerCase().indexOf('level') > -1
+  ) {
     const egg = bossname.match(/(?:^lvl|^level)\s*(\d)/i)
     if (egg !== null && egg.length > 1 && parseInt(egg[1]) > 0) {
       // Let's see if the egg is defined…

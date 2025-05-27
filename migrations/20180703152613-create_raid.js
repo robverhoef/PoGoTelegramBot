@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('raids', {
       id: {
@@ -25,8 +25,7 @@ module.exports = {
       // Timestamps
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE
-    }
-    )
+    })
   },
 
   down: (queryInterface, Sequelize) => {

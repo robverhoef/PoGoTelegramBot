@@ -1,22 +1,15 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'users',
-      'isAdmin',
-      {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-        allowNull: false
-      }
-    )
+    return queryInterface.addColumn('users', 'isAdmin', {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.removeColumn(
-      'users',
-      'isAdmin'
-    )
+    return queryInterface.removeColumn('users', 'isAdmin')
   }
 }

@@ -1,7 +1,7 @@
 /**
  * All values here are in minutes
  */
-module.exports = Object.freeze({
+export default Object.freeze({
   // time to hatch an egg
   HATCH: 60, // was 15 on a raid hour day
   // time for raidboss to stay

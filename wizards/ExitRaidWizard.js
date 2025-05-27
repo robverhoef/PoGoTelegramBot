@@ -1,20 +1,20 @@
 // ===================
 // Exit raid wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const listRaids = require('../util/listRaids')
-const setLocale = require('../util/setLocale')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import listRaids from '../util/listRaids.js'
+import setLocale from '../util/setLocale.js'
 
 moment.tz.setDefault('Europe/Amsterdam')
 
-function ExitRaidWizard (bot) {
-  return new WizardScene('exit-raid-wizard',
+function ExitRaidWizard(bot) {
+  return new Scenes.WizardScene(
+    'exit-raid-wizard',
     async (ctx) => {
       await setLocale(ctx)
       const user = ctx.from
@@ -36,7 +36,11 @@ function ExitRaidWizard (bot) {
         ]
       })
       if (raids.length === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_not_participating'), Markup.removeKeyboard())
+        return ctx
+          .replyWithHTML(
+            ctx.i18n.t('exit_raid_not_participating'),
+            Markup.removeKeyboard()
+          )
           .then(() => ctx.scene.leave())
       } else {
         ctx.session.raidbtns = []
@@ -45,12 +49,19 @@ function ExitRaidWizard (bot) {
           ctx.session.gymnames[raids[a].id] = raids[a].Gym.gymname
 
           const strttm = moment.unix(raids[a].start1).format('H:mm')
-          // console.log(raids[a].start1, moment(raids[a].start1).tz(process.env.TZ))
-          ctx.session.raidbtns.push([`${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`, raids[a].id])
+          ctx.session.raidbtns.push([
+            `${raids[a].Gym.gymname} ${strttm}; ${raids[a].target}`,
+            raids[a].id
+          ])
         }
         ctx.session.raidbtns.push([ctx.i18n.t('exit_raid_not_listed'), 0])
-        console.log(ctx.session.raidbtns.map(el => el[0]))
-        return ctx.replyWithMarkdown(ctx.i18n.t('exit_raid_select_raid'), Markup.keyboard(ctx.session.raidbtns.map(el => el[0])).oneTime().resize().extra())
+        return ctx
+          .replyWithHTML(
+            ctx.i18n.t('exit_raid_select_raid'),
+            Markup.keyboard(ctx.session.raidbtns.map((el) => el[0]))
+              .oneTime()
+              .resize()
+          )
           .then(() => ctx.wizard.next())
       }
     },
@@ -65,7 +76,11 @@ function ExitRaidWizard (bot) {
       }
 
       if (selectedraid === 0) {
-        return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure_without_saving'), Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithHTML(
+            ctx.i18n.t('finished_procedure_without_saving'),
+            Markup.removeKeyboard()
+          )
           .then(() => {
             return ctx.scene.leave()
           })
@@ -92,20 +107,28 @@ function ExitRaidWizard (bot) {
       ctx.i18n.locale(process.env.DEFAULT_LOCALE)
       const reason = ctx.i18n.t('exit_raid_list_message', {
         user: user,
-        user_first_name: escapeMarkDown(user.first_name),
+        user_first_name: user.first_name,
         gymname: ctx.session.gymnames[selectedraid]
       })
       // restore user locale
       ctx.i18n.locale(oldlocale)
       const out = await listRaids(reason, ctx)
       if (out === null) {
-        ctx.replyWithMarkdown(ctx.i18n.t('no_raids_found'), Markup.removeKeyboard().extra())
+        ctx
+          .replyWithHTML(ctx.i18n.t('no_raids_found'), Markup.removeKeyboard())
           .then(() => ctx.scene.leave())
       }
-      bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
-      return ctx.replyWithMarkdown(ctx.i18n.t('finished_procedure'), Markup.removeKeyboard().extra())
+      bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      })
+      return ctx
+        .replyWithHTML(
+          ctx.i18n.t('finished_procedure'),
+          Markup.removeKeyboard()
+        )
         .then(() => ctx.scene.leave())
     }
   )
 }
-module.exports = ExitRaidWizard
+export default ExitRaidWizard

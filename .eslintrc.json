@@ -1,9 +1,0 @@
-{
-  "extends": "standard",
-  "rules": {
-    "no-case-declarations": "off",
-    "semi": "off",
-    "comma-dangle": ["error", "never"],
-    "space-before-function-paren": "off"
-  }
-}

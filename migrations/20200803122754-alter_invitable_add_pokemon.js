@@ -1,14 +1,12 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'invitables', 'pokemon', {
-        type: Sequelize.STRING,
-        allowNull: true,
-        defaultValue: null
-      }
-    )
+    return queryInterface.addColumn('invitables', 'pokemon', {
+      type: Sequelize.STRING,
+      allowNull: true,
+      defaultValue: null
+    })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.removeColumn('invitables', 'pokemon')

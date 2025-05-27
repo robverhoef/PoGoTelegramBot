@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('raidusers', {
       id: {
@@ -11,7 +11,8 @@ module.exports = {
       username: Sequelize.STRING(191),
       uid: Sequelize.STRING(191),
       accounts: {
-        type: Sequelize.INTEGER, defaultValue: 1
+        type: Sequelize.INTEGER,
+        defaultValue: 1
       },
       raidId: {
         type: Sequelize.INTEGER.UNSIGNED,

@@ -1,20 +1,20 @@
 // ===================
 // join raid wizard
 // ===================
-const WizardScene = require('telegraf/scenes/wizard')
-const moment = require('moment-timezone')
-const { Markup } = require('telegraf')
-var models = require('../models')
-const Sequelize = require('sequelize')
+// import WizardScene from 'telegraf/scenes/wizard'
+import { Scenes, Markup } from 'telegraf'
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
 const Op = Sequelize.Op
-const setLocale = require('../util/setLocale')
-const listRaids = require('../util/listRaids')
-const escapeMarkDown = require('../util/escapeMarkDown')
+import setLocale from '../util/setLocale.js'
+import listRaids from '../util/listRaids.js'
 
 moment.tz.setDefault('Europe/Amsterdam')
 
 var RemoteInvitesWizard = function (bot) {
-  return new WizardScene('remote-invites-wizard',
+  return new Scenes.WizardScene(
+    'remote-invites-wizard',
     // step 0
     async (ctx) => {
       await setLocale(ctx)
@@ -27,7 +27,11 @@ var RemoteInvitesWizard = function (bot) {
         }
       })
       if (!dbuser) {
-        return ctx.replyWithMarkdown(`${ctx.i18n.t('noti_something_wrong_finding_user')}`, Markup.removeKeyboard().extra())
+        return ctx
+          .replyWithHTML(
+            `${ctx.i18n.t('noti_something_wrong_finding_user')}`,
+            Markup.removeKeyboard()
+          )
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -58,14 +62,13 @@ var RemoteInvitesWizard = function (bot) {
         }
       })
       if (count > 0) {
-        ctx.session.invitebtns.push(
-          `${ctx.i18n.t('remote_invites_stop')}`
-        )
+        ctx.session.invitebtns.push(`${ctx.i18n.t('remote_invites_stop')}`)
       }
-      return ctx.replyWithMarkdown(`${ctx.i18n.t('remote_invites_until')}`, Markup.keyboard(ctx.session.invitebtns)
-        .oneTime()
-        .resize()
-        .extra())
+      return ctx
+        .replyWithHTML(
+          `${ctx.i18n.t('remote_invites_until')}`,
+          Markup.keyboard(ctx.session.invitebtns).oneTime().resize()
+        )
         .then(() => ctx.wizard.next())
     },
     // step 1
@@ -73,7 +76,7 @@ var RemoteInvitesWizard = function (bot) {
       // simple look up table
       const hours = [0.5, 1, 1.5, 2, -1]
       const term = ctx.update.message.text.trim()
-      const index = ctx.session.invitebtns.findIndex(e => e === term)
+      const index = ctx.session.invitebtns.findIndex((e) => e === term)
       ctx.session.timeval = hours[index]
       if (hours[index] === -1) {
         // no need to ask for a pokemon
@@ -86,9 +89,14 @@ var RemoteInvitesWizard = function (bot) {
     },
     // step 2
     async (ctx) => {
-      return ctx.replyWithMarkdown(ctx.i18n.t('remote_invitables_pokemon'), Markup.removeKeyboard()).then(() => {
-        return ctx.wizard.next()
-      })
+      return ctx
+        .replyWithHTML(
+          ctx.i18n.t('remote_invitables_pokemon'),
+          Markup.removeKeyboard()
+        )
+        .then(() => {
+          return ctx.wizard.next()
+        })
     },
     // store pokemon
     // step 3
@@ -110,12 +118,22 @@ var RemoteInvitesWizard = function (bot) {
             userId: ctx.session.userId
           }
         })
-        ctx.replyWithMarkdown(ctx.i18n.t('remote_invites_finish_stop'), Markup.removeKeyboard().extra())
+        ctx
+          .replyWithHTML(
+            ctx.i18n.t('remote_invites_finish_stop'),
+            Markup.removeKeyboard()
+          )
           .then(async () => {
-            const out = await listRaids(ctx.i18n.t('remote_invite_stop_list', {
-              first_name: escapeMarkDown(user.first_name)
-            }), ctx)
-            bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+            const out = await listRaids(
+              ctx.i18n.t('remote_invite_stop_list', {
+                first_name: user.first_name
+              }),
+              ctx
+            )
+            bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+              parse_mode: 'HTML',
+              disable_web_page_preview: true
+            })
           })
           .then(() => ctx.scene.leave())
       } else {
@@ -144,7 +162,11 @@ var RemoteInvitesWizard = function (bot) {
               }
             )
           } catch (error) {
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard().extra())
+            return ctx
+              .replyWithHTML(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard()
+              )
               .then(() => ctx.scene.leave())
           }
         } else {
@@ -159,16 +181,31 @@ var RemoteInvitesWizard = function (bot) {
             await invitable.save()
           } catch (error) {
             console.log('Woops… registering raiduser failed', error)
-            return ctx.replyWithMarkdown(ctx.i18n.t('problem_while_saving'), Markup.removeKeyboard())
+            return ctx
+              .replyWithHTML(
+                ctx.i18n.t('problem_while_saving'),
+                Markup.removeKeyboard()
+              )
               .then(() => ctx.scene.leave())
           }
         }
-        ctx.replyWithMarkdown(`${ctx.i18n.t('remote_invites_finish_start')}`, Markup.removeKeyboard().extra())
+        ctx
+          .replyWithHTML(
+            `${ctx.i18n.t('remote_invites_finish_start')}`,
+            Markup.removeKeyboard()
+          )
           .then(async () => {
-            const out = await listRaids(ctx.i18n.t('remote_invite_list', {
-              first_name: escapeMarkDown(user.first_name), userid: user.id
-            }), ctx)
-            bot.telegram.sendMessage(process.env.GROUP_ID, out, { parse_mode: 'Markdown', disable_web_page_preview: true })
+            const out = await listRaids(
+              ctx.i18n.t('remote_invite_list', {
+                first_name: user.first_name,
+                userid: user.id
+              }),
+              ctx
+            )
+            bot.telegram.sendMessage(process.env.GROUP_ID, out, {
+              parse_mode: 'HTML',
+              disable_web_page_preview: true
+            })
           })
           .then(() => ctx.scene.leave())
       }
@@ -176,4 +213,4 @@ var RemoteInvitesWizard = function (bot) {
   )
 }
 
-module.exports = RemoteInvitesWizard
+export default RemoteInvitesWizard

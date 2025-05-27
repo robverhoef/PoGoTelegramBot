@@ -1,8 +1,8 @@
-const moment = require('moment-timezone')
-const models = require('../models')
-const Sequelize = require('sequelize')
+import moment from 'moment-timezone'
+import models from '../models/index.js'
+import Sequelize from 'sequelize'
+
 const Op = Sequelize.Op
-const escapeMarkDown = require('../util/escapeMarkDown')
 
 // The timezone
 moment.tz.setDefault('Europe/Amsterdam')
@@ -11,7 +11,7 @@ moment.tz.setDefault('Europe/Amsterdam')
  * Generate a presenatble list of current raids
  * @param reason {string} - The reason why a new list raid was generated
  */
-module.exports = async (reason, ctx) => {
+export default async (reason, ctx) => {
   // save old user language
   ctx.session.oldlang = ctx.i18n.locale()
 
@@ -25,13 +25,9 @@ module.exports = async (reason, ctx) => {
       const usr = encodeURI(
         `https://t.me/${process.env.BOT_USERNAME}?start=udetail_${invitable.User.id}`
       )
-      invstring = `[${escapeMarkDown(
-        invitable.User.tUsername
-      )} ${pokemon}](${usr}) `
+      invstring = `<a href="${usr}">${invitable.User.tUsername} ${pokemon}</a> `
     } else {
-      invstring = `[${escapeMarkDown(
-        invitable.User.tUsername
-      )} ${pokemon}](tg://user?id=${invitable.User.tId}) `
+      invstring = `<a href="tg://user?id=${invitable.User.tId}">${invitable.User.tUsername} ${pokemon}</a> `
     }
     return invstring
   }
@@ -58,14 +54,14 @@ module.exports = async (reason, ctx) => {
   for (let a = 0; a < raids.length; a++) {
     const endtime = moment.unix(raids[a].endtime)
     out += `${ctx.i18n.t('until')}: ${endtime.format('H:mm')} `
-    out += `*${raids[a].target}*\n`
+    out += `<b>${raids[a].target}</b>\n`
     if (raids[a].Raidboss) {
       out += `${ctx.i18n.t('recommended')}: ${
         raids[a].Raidboss.accounts
       } accounts\n`
     }
     if (raids[a].Gym.googleMapsLink) {
-      out += `[${raids[a].Gym.gymname}](${raids[a].Gym.googleMapsLink})\n`
+      out += `<a href="${raids[a].Gym.googleMapsLink}">${raids[a].Gym.gymname}</a>\n`
     } else {
       out += `${raids[a].Gym.gymname}\n`
     }
@@ -85,22 +81,20 @@ module.exports = async (reason, ctx) => {
     for (var b = 0; b < raids[a].Raidusers.length; b++) {
       const raiduser = raids[a].Raidusers[b]
       accounter += raiduser.accounts
-      const tag = startTimeHasPassed ? '' : `(tg://user?id=${raiduser.uid})`
+      const tag = startTimeHasPassed ? '' : `tg://user?id=${raiduser.uid}`
       const accounts = `${
         raiduser.accounts > 1 ? '+' + (raiduser.accounts - 1) : ''
       } `
 
       const getUserString = () => {
         if (raiduser.delayed != null) {
-          return `[<⏰ ${raiduser.delayed} ${escapeMarkDown(
-            raiduser.username
-          )}>]${tag}${accounts}`
+          return `<a href="${tag}">&#171;⏰ ${raiduser.delayed} ${raiduser.username}&#187;</a>${accounts}`
         } else if (raiduser.private && privateuserlist.length === 0) {
-          return `[*${escapeMarkDown(raiduser.username)}*]${tag}${accounts}`
+          return `<a href="${tag}"><b>${raiduser.username}</b></a>${accounts}`
         } else {
-          return `[${escapeMarkDown(
+          return `<a href="${tag}">${
             raiduser.username + (raiduser.invited ? ' 📨' : '')
-          )}]${tag}${accounts}`
+          }${accounts}</a>`
         }
       }
       const userString = getUserString()
@@ -140,7 +134,7 @@ module.exports = async (reason, ctx) => {
   })
   if (invitables.length > 0) {
     out += '------------------------------\n'
-    out += `*${ctx.i18n.t('remote_invitables_list')}*\n`
+    out += `<b>${ctx.i18n.t('remote_invitables_list')}</b>\n`
     for (const invite of invitables) {
       out += getInvitableString(invite)
     }
@@ -170,7 +164,7 @@ module.exports = async (reason, ctx) => {
   })
   if (eliteraids.length > 0) {
     out += '\n------------------------------\n'
-    out += `*${ctx.i18n.t('btn_eliteraids')}*\n`
+    out += `<b>${ctx.i18n.t('btn_eliteraids')}</b>\n`
     out += '------------------------------\n'
     for (const eliteraid of eliteraids) {
       const strtime = moment.unix(eliteraid.start1)
@@ -178,9 +172,9 @@ module.exports = async (reason, ctx) => {
 
       const endtime = moment.unix(eliteraid.endtime)
       out += `${ctx.i18n.t('until')}: ${endtime.format('DD-MM H:mm')} `
-      out += `*${eliteraid.target}*\n`
+      out += `<b>${eliteraid.target}</b>\n`
       if (eliteraid.Gym.googleMapsLink) {
-        out += `[${eliteraid.Gym.gymname}](${eliteraid.Gym.googleMapsLink})\n`
+        out += `<a href="${eliteraid.Gym.googleMapsLink}">${eliteraid.Gym.gymname}</a>\n`
       } else {
         out += `${eliteraid.Gym.gymname}\n`
       }
@@ -190,17 +184,19 @@ module.exports = async (reason, ctx) => {
       for (b = 0; b < eliteraid.Eliteraidusers.length; b++) {
         accounter += eliteraid.Eliteraidusers[b].accounts
         if (eliteraid.Eliteraidusers[b].delayed != null) {
-          userlist += `[<⏰ ${eliteraid.Eliteraidusers[b].delayed} ${
+          userlist += `<a href="tg://user?id=${
+            eliteraid.Eliteraidusers[b].uid
+          }">&#171;⏰ ${eliteraid.Eliteraidusers[b].delayed} ${
             eliteraid.Eliteraidusers[b].username
-          }>](tg://user?id=${eliteraid.Eliteraidusers[b].uid})${
+          }&#187;${
             eliteraid.Eliteraidusers[b].accounts > 1
               ? '+' + (eliteraid.Eliteraidusers[b].accounts - 1)
               : ''
           } `
         } else {
-          userlist += `[${eliteraid.Eliteraidusers[b].username}](tg://user?id=${
+          userlist += `<a href="tg://user?id=${
             eliteraid.Eliteraidusers[b].uid
-          })${
+          }">${eliteraid.Eliteraidusers[b].username}</a>)${
             eliteraid.Eliteraidusers[b].accounts > 1
               ? '+' + (eliteraid.Eliteraidusers[b].accounts - 1)
               : ''
@@ -238,7 +234,7 @@ module.exports = async (reason, ctx) => {
 
   if (exraids.length > 0) {
     out += '------------------------------\n'
-    out += `*${ctx.i18n.t('exraids_today')}*\n`
+    out += `<b>${ctx.i18n.t('exraids_today')}</b>\n`
     out += '------------------------------\n'
     for (const exraid of exraids) {
       const strtime = moment.unix(exraid.start1)
@@ -246,9 +242,9 @@ module.exports = async (reason, ctx) => {
 
       const endtime = moment.unix(exraid.endtime)
       out += `${ctx.i18n.t('until')}: ${endtime.format('H:mm')} `
-      out += `*${exraid.target}*\n`
+      out += `<b>${exraid.target}</b>\n`
       if (exraid.Gym.googleMapsLink) {
-        out += `[${exraid.Gym.gymname}](${exraid.Gym.googleMapsLink})\n`
+        out += `<a href="${exraid.Gym.googleMapsLink}">${exraid.Gym.gymname}</a>\n`
       } else {
         out += `${exraid.Gym.gymname}\n`
       }
@@ -260,24 +256,26 @@ module.exports = async (reason, ctx) => {
         if (exraid.Exraidusers[b].hasinvite) {
           accounter += exraid.Exraidusers[b].accounts
           if (exraid.Exraidusers[b].delayed != null) {
-            userlist += `[<⏰ ${exraid.Exraidusers[b].delayed} ${
+            userlist += `<a href="tg://user?id=${
+              exraid.Exraidusers[b].uid
+            }">&#171;⏰ ${exraid.Exraidusers[b].delayed} ${
               exraid.Exraidusers[b].username
-            }>](tg://user?id=${exraid.Exraidusers[b].uid})${
+            }&#187;</a>${
               exraid.Exraidusers[b].accounts > 1
                 ? '+' + (exraid.Exraidusers[b].accounts - 1)
                 : ''
             } `
           } else {
-            userlist += `[${exraid.Exraidusers[b].username}](tg://user?id=${
-              exraid.Exraidusers[b].uid
-            })${
+            userlist += `<a href="tg://user?id=${exraid.Exraidusers[b].uid}">${
+              exraid.Exraidusers[b].username
+            }</a>${
               exraid.Exraidusers[b].accounts > 1
                 ? '+' + (exraid.Exraidusers[b].accounts - 1)
                 : ''
             } `
           }
         } else {
-          wantedlist += `[${exraid.Exraidusers[b].username}](tg://user?id=${exraid.Exraidusers[b].uid}) `
+          wantedlist += `<a href="tg://user?id=${exraid.Exraidusers[b].uid}">${exraid.Exraidusers[b].username}</a> `
         }
       }
       out += `${ctx.i18n.t('number')}: ${accounter}\n`

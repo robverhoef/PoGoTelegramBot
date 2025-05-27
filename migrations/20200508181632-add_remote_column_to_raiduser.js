@@ -1,19 +1,11 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'raidusers',
-      'remote',
-      Sequelize.BOOLEAN
-    )
+    return queryInterface.addColumn('raidusers', 'remote', Sequelize.BOOLEAN)
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.removeColumn(
-      'raidusers',
-      'remote',
-      Sequelize.BOOLEAN
-    )
+    return queryInterface.removeColumn('raidusers', 'remote', Sequelize.BOOLEAN)
   }
 }

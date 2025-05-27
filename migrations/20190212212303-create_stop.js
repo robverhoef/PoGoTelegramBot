@@ -1,9 +1,13 @@
 'use strict'
 
-module.exports = {
+export default {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('stops', {
-      id: { type: Sequelize.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+      id: {
+        type: Sequelize.INTEGER.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true
+      },
       name: Sequelize.STRING,
       // geo: Sequelize.STRING,
       lon: Sequelize.DECIMAL(11, 8),
