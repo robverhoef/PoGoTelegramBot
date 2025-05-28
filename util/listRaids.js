@@ -305,7 +305,6 @@ export default async (reason, ctx) => {
     researchcount: researchcount,
     exraidcount: exraidcount
   })}`
-  // out += `\r\n[@${process.env.BOT_USERNAME}](https://telegram.me/${process.env.BOT_USERNAME}?start=mainmenu)`
   // restore user locale
   ctx.i18n.locale(ctx.session.oldlang)
   return out

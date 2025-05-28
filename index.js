@@ -41,9 +41,9 @@ import UserSettingsWizard from './wizards/UserSettingsWizard.js'
  * @type {import('telegraf').Context}
  */
 
-if(!process.env.BOT_TOKEN){
+if (!process.env.BOT_TOKEN) {
   console.error('A bot token is required. Check your .env config…')
-  process.exit(1);
+  process.exit(1)
 }
 const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.catch((err) => {
@@ -627,19 +627,8 @@ bot.hears(/\/raids/i, async (ctx) => {
 })
 
 async function startBot() {
-  let botUrl = process.env.BOT_URL
-  // if (process.env.NODE_ENV === 'development') {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'start polling bot')
-    bot.launch()
-  // } else {
-  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'starting bot')
-  //   bot.telegram.setWebhook(botUrl, {certificate: process.env.CERTIFICATE}).then(() => {
-  //     console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook set', botUrl)
-  //   })
-
-  //   bot.startWebhook(process.env.BOT_PATH, null, process.env.PORT)
-  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'webhook started')
-  // }
+  console.log(moment().format('YYYY-MM-DD HH:mm:ss'), 'start polling bot')
+  bot.launch()
 }
 // Let's fire up!
 startBot()
