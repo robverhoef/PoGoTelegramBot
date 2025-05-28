@@ -499,7 +499,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -534,7 +533,6 @@ function EliteraidWizard(bot) {
             Markup.removeKeyboard()
           )
           .then(() => {
-            ctx.session = null
             return ctx.scene.leave()
           })
       }
@@ -553,7 +551,6 @@ function EliteraidWizard(bot) {
             Markup.removeKeyboard()
           )
           .then(() => {
-            ctx.session = null
             return ctx.scene.leave()
           })
       }
@@ -595,7 +592,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -617,7 +613,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -678,7 +673,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -700,7 +694,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -732,7 +725,6 @@ function EliteraidWizard(bot) {
           Markup.removeKeyboard()
         )
         .then(() => {
-          ctx.session = null
           return ctx.scene.leave()
         })
     },
@@ -796,7 +788,6 @@ function EliteraidWizard(bot) {
                 Markup.removeKeyboard()
               )
               .then(() => {
-                ctx.session = null
                 return ctx.scene.leave()
               })
           }
@@ -822,7 +813,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         // change or enlist
@@ -911,7 +901,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -933,7 +922,6 @@ function EliteraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }

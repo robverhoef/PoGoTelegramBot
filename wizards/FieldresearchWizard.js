@@ -96,9 +96,15 @@ function FieldresearchWizard(bot) {
             user: ctx.from,
             first_name: ctx.from.first_name
           }),
-          Markup.keyboard(ctx.session.mainreseachbtns.map((el) => el[0]))
-            .oneTime()
-            .resize()
+          {
+            reply_markup: {
+              keyboard: ctx.session.mainreseachbtns.map((el) => [el[0]]),
+              one_time_keyboard: true,
+              resize_keyboard: true
+            },
+            disable_web_page_preview: true,
+            parse_mode: 'HTML'
+          }
         )
         .then(() => ctx.wizard.next())
     },
@@ -123,9 +129,12 @@ function FieldresearchWizard(bot) {
       if (researches.length === 0) {
         out = ctx.i18n.t('fres_no_fres_yet')
         return ctx
-          .reply(out, Markup.removeKeyboard(), {
+          .reply(out, {
+            disable_web_page_preview: true,
             parse_mode: 'HTML',
-            remove_keyboard: true
+            reply_markup: {
+              remove_keyboard: true
+            }
           })
           .then(() => {
             ctx.session = {}
@@ -137,7 +146,13 @@ function FieldresearchWizard(bot) {
       let c = 0
       for (const res of researches) {
         if (c > 35) {
-          ctx.reply(out, { parse_mode: 'HTML', remove_keyboard: true })
+          ctx.reply(out, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+            reply_markup: {
+              remove_keyboard: true
+            }
+          })
           out = ''
           c = 0
         }
@@ -156,7 +171,9 @@ function FieldresearchWizard(bot) {
       out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
       return ctx
         .reply(out, {
-          remove_keyboard: true,
+          reply_markup: {
+            remove_keyboard: true
+          },
           parse_mode: 'HTML',
           disable_web_page_preview: true
         })
@@ -173,13 +190,16 @@ function FieldresearchWizard(bot) {
         .reply(`${ctx.i18n.t('fres_intro')}\r\n`, {
           reply_markup: {
             keyboard: [
-              {
-                text: ctx.i18n.t('fres_btn_find_location'),
-                request_location: true
-              }
+              [
+                {
+                  text: ctx.i18n.t('fres_btn_find_location'),
+                  request_location: true
+                }
+              ]
             ],
             resize_keyboard: true
           },
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -232,6 +252,8 @@ function FieldresearchWizard(bot) {
             one_time_keyboard: true,
             resize_keyboard: true
           },
+
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -249,7 +271,9 @@ function FieldresearchWizard(bot) {
       if (selectedIndex === -1) {
         return ctx
           .reply(`${ctx.i18n.t('fres_select_something_wrong')}\n`, {
-            remove_keyboard: true,
+            reply_markup: {
+              remove_keyboard: true
+            },
             parse_mode: 'HTML'
           })
           .then(() => {
@@ -260,7 +284,9 @@ function FieldresearchWizard(bot) {
       // User can't find the stop
       if (ctx.session.stopcandidates[selectedIndex][1] === 0) {
         ctx.reply(`${ctx.i18n.t('retry_or_cancel')}`, {
-          remove_keyboard: true,
+          reply_markup: {
+            remove_keyboard: true
+          },
           parse_mode: 'HTML'
         })
         ctx.wizard.selectStep(wizsteps.addresearch)
@@ -304,10 +330,11 @@ function FieldresearchWizard(bot) {
           }\r\n\r\n${ctx.i18n.t('save_question')}`,
           {
             reply_markup: {
-              keyboard: [ctx.i18n.t('yes'), ctx.i18n.t('no')],
+              keyboard: [[ctx.i18n.t('yes')], [ctx.i18n.t('no')]],
               resize: true,
               one_time_keyboard: true
             },
+            disable_web_page_preview: true,
             parse_mode: 'HTML'
           }
         )
@@ -329,7 +356,10 @@ function FieldresearchWizard(bot) {
           return ctx
             .reply(`${ctx.i18n.t('fres_save_failed')}`, {
               parse_mode: 'HTML',
-              remove_keyboard: true
+              disable_web_page_preview: true,
+              reply_markup: {
+                remove_keyboard: true
+              }
             })
             .then(() => {
               ctx.session = {}
@@ -457,6 +487,7 @@ function FieldresearchWizard(bot) {
             one_time_keyboard: true,
             resize_keyboard: true
           },
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -478,6 +509,7 @@ function FieldresearchWizard(bot) {
             one_time_keyboard: true,
             resize_keyboard: true
           },
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -487,10 +519,11 @@ function FieldresearchWizard(bot) {
       ctx
         .reply(`${ctx.i18n.t('fres_save_edit')}`, {
           reply_markup: {
-            keyboard: [ctx.i18n.t('yes'), ctx.i18n.t('no')],
+            keyboard: [[ctx.i18n.t('yes')], [ctx.i18n.t('no')]],
             one_time_keyboard: true,
             resize_keyboard: true
           },
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -517,7 +550,10 @@ function FieldresearchWizard(bot) {
           return ctx
             .reply(out, {
               parse_mode: 'HTML',
-              remove_keyboard: true
+              disable_web_page_preview: true,
+              reply_markup: {
+                remove_keyboard: true
+              }
             })
             .then(async () => {
               // save users langugage
@@ -544,7 +580,10 @@ function FieldresearchWizard(bot) {
           console.log('Whoops… saving new Field Research failed', error)
           return ctx
             .reply(`${ctx.i18n.t('something_wrong')}`, {
-              remove_keyboard: true,
+              reply_markup: {
+                remove_keyboard: true
+              },
+              disable_web_page_preview: true,
               parse_mode: 'HTML'
             })
             .then(() => {
@@ -555,7 +594,10 @@ function FieldresearchWizard(bot) {
       } else {
         ctx
           .reply(`${ctx.i18n.t('finished_procedure_without_saving')}`, {
-            remove_keyboard: true,
+            reply_markup: {
+              remove_keyboard: true
+            },
+            disable_web_page_preview: true,
             parse_mode: 'HTML'
           })
           .then(() => ctx.scene.leave())
@@ -586,7 +628,10 @@ function FieldresearchWizard(bot) {
         return ctx
           .reply(out, {
             parse_mode: 'HTML',
-            remove_keyboard: true
+            disable_web_page_preview: true,
+            reply_markup: {
+              remove_keyboard: true
+            }
           })
           .then(() => {
             ctx.session = {}
@@ -610,6 +655,7 @@ function FieldresearchWizard(bot) {
             one_time_keyboard: true,
             resize_keyboard: true
           },
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -621,7 +667,10 @@ function FieldresearchWizard(bot) {
         return ctx
           .reply(`${ctx.i18n.t('ok')}\r\n\r\n${ctx.i18n.t('fres_done')}`, {
             parse_mode: 'HTML',
-            remove_keyboard: true
+            disable_web_page_preview: true,
+            reply_markup: {
+              remove_keyboard: true
+            }
           })
           .then(() => {
             ctx.session = {}
@@ -638,7 +687,10 @@ function FieldresearchWizard(bot) {
         return ctx
           .reply(`${ctx.i18n.t('fres_done')}`, {
             parse_mode: 'HTML',
-            remove_keyboard: true
+            disable_web_page_preview: true,
+            reply_markup: {
+              remove_keyboard: true
+            }
           })
           .then(() => {
             ctx.session = {}
@@ -649,9 +701,10 @@ function FieldresearchWizard(bot) {
         .reply(`${ctx.i18n.t('fres_delete_confirm')}`, {
           reply_markup: {
             keyboard: [[ctx.i18n.t('yes')], [ctx.i18n.t('no')]],
-            one_time_keyboard: true,
+            one_time_replykeyboard: true,
             resize_keyboard: true
           },
+          disable_web_page_preview: true,
           parse_mode: 'HTML'
         })
         .then(() => ctx.wizard.next())
@@ -693,6 +746,7 @@ function FieldresearchWizard(bot) {
             )
             return ctx
               .reply(`${ctx.i18n.t('fres_delete_failed')}`, {
+                disable_web_page_preview: true,
                 parse_mode: 'HTML'
               })
               .then(() => {
@@ -710,7 +764,13 @@ function FieldresearchWizard(bot) {
       if (researches.length === 0) {
         out = `${ctx.i18n.t('fres_no_fres_now')}`
         return ctx
-          .reply(out, { parse_mode: 'HTML', remove_keyboard: true })
+          .reply(out, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+            reply_markup: {
+              remove_keyboard: true
+            }
+          })
           .then(() => {
             ctx.session = {}
             return ctx.scene.leave()
@@ -729,7 +789,13 @@ function FieldresearchWizard(bot) {
       out += `\r\n\r\n${ctx.i18n.t('fres_done')}`
 
       return ctx
-        .reply(out, { parse_mode: 'HTML', remove_keyboard: true })
+        .reply(out, {
+          parse_mode: 'HTML',
+          disable_web_page_preview: true,
+          reply_markup: {
+            remove_keyboard: true
+          }
+        })
         .then(() => {
           ctx.session = {}
           return ctx.scene.leave()
@@ -742,7 +808,10 @@ function FieldresearchWizard(bot) {
       return ctx
         .reply(`${ctx.i18n.t('ok')}… \r\n\r\n${ctx.i18n.t('fres_done')}`, {
           parse_mode: 'HTML',
-          remove_keyboard: true
+          disable_web_page_preview: true,
+          reply_markup: {
+            remove_keyboard: true
+          }
         })
         .then(() => {
           ctx.session = {}

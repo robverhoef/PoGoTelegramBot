@@ -447,7 +447,6 @@ function AddRaidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }

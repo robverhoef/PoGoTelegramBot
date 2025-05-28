@@ -501,7 +501,6 @@ function ExraidWizard(bot) {
               Markup.removeKeyboard()
             )
             .then(() => {
-              ctx.session = null
               return ctx.scene.leave()
             })
         }
@@ -536,7 +535,6 @@ function ExraidWizard(bot) {
             Markup.removeKeyboard()
           )
           .then(() => {
-            ctx.session = null
             return ctx.scene.leave()
           })
       }
@@ -629,7 +627,6 @@ function ExraidWizard(bot) {
                 Markup.removeKeyboard()
               )
               .then(() => {
-                ctx.session = null
                 return ctx.scene.leave()
               })
           }

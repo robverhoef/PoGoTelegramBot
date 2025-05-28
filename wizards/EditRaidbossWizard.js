@@ -205,7 +205,6 @@ function EditRaidbossWizard(bot) {
                 }
               }
             )
-            ctx.session = null
             return ctx.replyWithHTML(
               ctx.i18n.t('finished_procedure'),
               Markup.removeKeyboard()
@@ -218,7 +217,7 @@ function EditRaidbossWizard(bot) {
                 Markup.removeKeyboard()
               )
               .then(() => {
-                ctx.session = null
+                ctx.scene.session = null
                 return ctx.scene.leave()
               })
           }
