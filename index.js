@@ -260,6 +260,7 @@ async function showMainMenu(ctx, user) {
 // This runs after the user has started from an inline query in the group or /start in private mode
 bot.command('start', async (ctx) => {
   // check if start is not directly coming from the group
+  console.debug('Start command')
   if (ctx.update.message.chat.id === parseInt(process.env.GROUP_ID)) {
     return
   }
