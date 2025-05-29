@@ -513,13 +513,9 @@ var StatsWizard = function (bot) {
           statMessage = await determineGlobalStats(time, ctx)
         }
         statMessage =
-          `<b>${
-            (ctx,
-            'stats_since',
-            {
-              timestr: moment.unix(time).format('DD-MM-YYYY')
-            })
-          }</b>\n\n` + statMessage
+          `<b>${ctx.i18n.t('stats_since', {
+            timestr: moment.unix(time).format('DD-MM-YYYY')
+          })}</b>\n\n` + statMessage
       } else {
         // ex raid stats
         let start

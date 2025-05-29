@@ -5,6 +5,7 @@
 ### [0.97] 2025-05-27
 
 - code cleanup
+- minor fix in stats
 
 ### [0.96] 2025-05-27
 
