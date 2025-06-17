@@ -16,7 +16,7 @@ export default (sequelize, DataTypes) => {
       start2: DataTypes.DATE,
       start3: DataTypes.DATE,
       reporterName: DataTypes.STRING,
-      reporterId: DataTypes.INTEGER,
+      reporterId: DataTypes.BIGINT,
       raidbossId: DataTypes.INTEGER,
       shiny: {
         type: DataTypes.INTEGER,

@@ -1,6 +1,15 @@
 # Changelog
 
-### [0.96] 2025-05-27
+## unreleased
+
+### [0.9.7] 2025-05-27
+
+- code cleanup
+- minor fix in stats
+- fix integer size for Telegram ID's
+- fixed changelog numbering typo
+
+### [0.9.6] 2025-05-27
 
 #### Updates
 

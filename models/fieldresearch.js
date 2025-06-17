@@ -12,7 +12,7 @@ export default (sequelize, DataTypes) => {
       reward: DataTypes.STRING,
       stopId: DataTypes.INTEGER,
       reporterName: DataTypes.STRING,
-      reporterId: DataTypes.INTEGER
+      reporterId: DataTypes.BIGINT
     },
     {
       tableName: 'fieldresearches'

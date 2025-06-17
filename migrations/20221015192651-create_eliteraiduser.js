@@ -28,7 +28,8 @@ export default {
         updatedAt: Sequelize.DATE
       })
       .then(() => {
-        queryInterface.addConstraint('eliteraidusers', ['eliteraidId'], {
+        queryInterface.addConstraint('eliteraidusers', {
+          fields: ['eliteraidId'],
           type: 'foreign key',
           name: 'FBK_eliteraidId',
           references: {

@@ -13,7 +13,7 @@ export default (sequelize, DataTypes) => {
       gymId: DataTypes.INTEGER.UNSIGNED,
       start1: DataTypes.INTEGER,
       reporterName: DataTypes.STRING,
-      reporterId: DataTypes.INTEGER,
+      reporterId: DataTypes.BIGINT,
       raidbossId: DataTypes.INTEGER
     },
     { tableName: 'eliteraids' }
