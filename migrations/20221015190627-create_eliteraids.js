@@ -26,7 +26,8 @@ export default {
         reporterId: Sequelize.INTEGER
       })
       .then(() => {
-        queryInterface.addConstraint('eliteraids', ['gymId'], {
+        queryInterface.addConstraint('eliteraids', {
+          fields: ['gymId'],
           type: 'foreign key',
           name: 'FBK_elite_gymId',
           references: {
@@ -37,7 +38,8 @@ export default {
           onDelete: 'cascade',
           onUpdate: 'cascade'
         })
-        queryInterface.addConstraint('eliteraids', ['raidbossId'], {
+        queryInterface.addConstraint('eliteraids', {
+          fields: ['raidbossId'],
           type: 'foreign key',
           name: 'FBK_elite_raidbossId',
           references: {

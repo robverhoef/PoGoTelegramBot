@@ -17,7 +17,7 @@ export default (sequelize, DataTypes) => {
       qualifier: DataTypes.STRING,
       region: DataTypes.STRING,
       reporterName: DataTypes.STRING,
-      reporterId: DataTypes.INTEGER,
+      reporterId: DataTypes.BIGINT,
       lat: {
         type: DataTypes.DECIMAL,
         defaultValue: null
