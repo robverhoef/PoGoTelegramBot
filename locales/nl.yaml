@@ -8,71 +8,71 @@
 # hyperlinks look like this <a href=\"url\">clickable text</a>
 
 # general
-btn_gym_not_found: "Mijn gym staat er niet bij…"
-cancel: "Annuleren"
-coordinates: "Cooördinaten"
-done: "Klaar!"
-edit_more: "OK, meer wijzigingen…"
-edit_what: "Wat wil je wijzigen?"
+btn_gym_not_found: 'Mijn gym staat er niet bij…'
+cancel: 'Annuleren'
+coordinates: 'Cooördinaten'
+done: 'Klaar!'
+edit_more: 'OK, meer wijzigingen…'
+edit_what: 'Wat wil je wijzigen?'
 find_gym_failed_retry: "Ik kon geen gym vinden met '${term === '/start help_fromgroup' ? '' : term}' in de naam…\nGebruik /cancel om te stoppen.\n<b>Of probeer het nog eens</b>"
 find_gym_two_chars_minimum: "Geef minimaal 2 tekens van de gymnaam…\n<b>Probeer het nog eens.</b> 🤨"
 finished_procedure: "Dankjewel!\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 finished_procedure_without_saving: "OK.\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-map: "Kaart"
-no: "Nee"
-no_dont_know: "Nee / Weet ik niet"
-no_input: "Niets opgegeven"
-number: "Aantal"
-ok: "OK"
-participants: "Lokaal ⬇"
-participants_remotely: "Remote 🚀"
-select_a_gym: "Kies een gym."
-send_my_gps_location: "Stuur mijn GPS locatie"
+map: 'Kaart'
+no: 'Nee'
+no_dont_know: 'Nee / Weet ik niet'
+no_input: 'Niets opgegeven'
+number: 'Aantal'
+ok: 'OK'
+participants: 'Lokaal ⬇'
+participants_remotely: 'Remote 🚀'
+select_a_gym: 'Kies een gym.'
+send_my_gps_location: 'Stuur mijn GPS locatie'
 problem_while_saving: "Sorry, hier ging iets <b>niet</b> goed tijdens het bewaren… Wil je het nog eens proberen met /start?\n<b>Of je kan ook weer terug naar de groep gaan…</b>"
 retry_or_cancel: "<b>Probeer het nog eens…</b>\nJe kan ook altijd stoppen door /cancel te typen."
-save_question: "Bewaren?"
+save_question: 'Bewaren?'
 something_wrong: "Hier ging iets niet goed…\n\n<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 something_wrong_press_button: "Hier ging iets niet goed…\n<b>Je moet op een knop klikken 👆. Of </b>/cancel<b> gebruiken om mij te resetten.</b>"
-start: "Start"
-until: "Tot"
-yes: "Ja"
+start: 'Start'
+until: 'Tot'
+yes: 'Ja'
 covid19_disclaimer: "<b>Let op:</b> Als je lokaal meedoet, zorg ervoor dat je de coronamaatregelen volgt zoals die door de overheid zijn gesteld!\n\n<b>-Houd te allen tijde 1.5m afstand van elkaar</b>"
 
 # index.js
 
-address: "Adres"
+address: 'Adres'
 already_know_user: "Dag ${first_name}!\n Wij kennen elkaar al 👍\nJe kunt mij aanspreken vanuit <b>${chattitle}</b> met \n<b>@${me.username} actie</b>"
-btn_join_raid: "Meedoen met een raid"
-btn_exit_raid: "Afmelden bij een raid"
-btn_add_raid: "Een nieuwe raid melden"
-btn_edit_raid: "Een raid wijzigen"
-btn_find_gym: "Vind een gymlocatie"
-btn_manage_fieldresearches: "Admin: Field Researches beheren"
-btn_add_gym: "Admin: een gym toevoegen"
-btn_edit_gym: "Admin: een gym wijzigen"
-btn_add_boss: "Admin: een raidboss toevoegen"
-btn_edit_boss: "Admin: een raidboss wijzigen"
-btn_field_researches: "Field researches"
-btn_stats: "Statistieken"
-btn_eliteraids: "Elite Raids"
-btn_exraids: "Ex Raids"
-btn_notifications: "Notificaties van gyms of raidbosses"
+btn_join_raid: 'Meedoen met een raid'
+btn_exit_raid: 'Afmelden bij een raid'
+btn_add_raid: 'Een nieuwe raid melden'
+btn_edit_raid: 'Een raid wijzigen'
+btn_find_gym: 'Vind een gymlocatie'
+btn_manage_fieldresearches: 'Admin: Field Researches beheren'
+btn_add_gym: 'Admin: een gym toevoegen'
+btn_edit_gym: 'Admin: een gym wijzigen'
+btn_add_boss: 'Admin: een raidboss toevoegen'
+btn_edit_boss: 'Admin: een raidboss wijzigen'
+btn_field_researches: 'Field researches'
+btn_stats: 'Statistieken'
+btn_eliteraids: 'Elite Raids'
+btn_exraids: 'Ex Raids'
+btn_notifications: 'Notificaties van gyms of raidbosses'
 cancelmessage: "Ok.\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-exraid_candidate: "EX Raid kanshebber"
-help_from_group: "Ik help je graag verder als je via de Raid groep komt… 🤔"
+exraid_candidate: 'EX Raid kanshebber'
+help_from_group: 'Ik help je graag verder als je via de Raid groep komt… 🤔'
 helpmessage: 'Doet de bot vaag? Heb je een foutje gemaakt?\nJe kunt een chat met de bot altijd afbreken met het "/cancel" commando.'
-hi_from_group_warning: "Nee joh… doe dit vanuit de groep!"
+hi_from_group_warning: 'Nee joh… doe dit vanuit de groep!'
 invalid_time_retry: "Dit is geen geldige tijd. \n<b>Probeer het nog eens.</b>\nAls je er niet uitkomt, kan je altijd stoppen met /cancel"
 invalid_time_minutes_retry: "Opgegeven minuten moeten tussen de 0 en ${hatchtime} liggen. \n<b>Probeer het nog eens.</b>"
 invalid_time_range: "Dit is geen geldige tijd. Geef de tijd tussen <b>${range_start}</b> en 5 minuten voor <b>${range_end}</b>  of vul een <b>x</b> in om deze leeg te laten. \n<b>Probeer het nog eens.</b>"
-invalid_time_range_too_early: "De starttijd is te kort op de eindtijd om de raid te kunnen spelen. "
+invalid_time_range_too_early: 'De starttijd is te kort op de eindtijd om de raid te kunnen spelen. '
 just_met_message: "Dag ${first_name}!\n Je kunt mij vanaf nu aanspreken vanuit <b>${chattitle}</b> met <b>@${me.username} actie</b>"
 main_menu_greeting: "Hallo ${first_name}.\nWat wil je doen?"
 
 user_unknown_warning: "Uhm… ik ken je niet, sorry. Meldt je bij mij aan in je groep met \n\n<b>/hi@${me.username}</b>\n\nDan stuur ik je instructies."
-no_raids_found: "Geen raids gevonden…"
+no_raids_found: 'Geen raids gevonden…'
 raidboss_question: "<b>Wat is de raid boss?</b>\nBijvoorbeeld <b>Kyogre</b> of <b>Level 5 ei</b>"
-recommended: "Aanbevolen"
+recommended: 'Aanbevolen'
 starttime_proposal: "<b>Welke starttijd stel je voor?</b>\nGeef de tijd tussen <b>${starttm}</b> en <b>${endtm}</b> of vul een <b>x</b> in om deze leeg te laten"
 time_to_tight: "<b>Dat wordt een beetje krap om nog te melden, volgende keer beter.\nWil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 
@@ -89,13 +89,13 @@ new_gym_almost_done_confirm: "Bijna klaar!\nJe hebt deze gegevens ingevuld:\nNie
 
 #  AddRaidWizard.js
 add_raid_welcome: "Je wilt een nieuwe raid toevoegen. We gaan eerst de gym zoeken.\n\n<b>Gebruik de knop 'Zoek gyms in mijn omgeving…'</b>\nOf voer een deel van de naam in, minimaal 2 tekens…"
-btn_start_mode_time: "Uitkomen van het ei: start tijd"
-btn_start_mode_min: "Uitkomen van het ei: in minuten"
-btn_end_mode_time: "Einde van de raid: eind tijd"
-btn_end_mode_min: "Einde van de raid: in minuten"
+btn_start_mode_time: 'Uitkomen van het ei: start tijd'
+btn_start_mode_min: 'Uitkomen van het ei: in minuten'
+btn_end_mode_time: 'Einde van de raid: eind tijd'
+btn_end_mode_min: 'Einde van de raid: in minuten'
 do_you_participate: "Dankjewel!\n<b>Doe je zelf mee met deze raid?</b>"
 enter_end_time_mode_question: "<b>Hoe wil je de eindtijd van de raid opgeven?</b>\nKlik op een knop…"
-enter_endtime_minutes: "<b>Hoeveel minuten staat er nog op de raid?</b>"
+enter_endtime_minutes: '<b>Hoeveel minuten staat er nog op de raid?</b>'
 enter_endtime_time: "<b>Hoe laat eindigt de raid?</b>\nGeef de tijd zo op: <b>09:30</b> of <b>13:45</b>…\n(Noot: eindtijd is uitkomen van het ei + ${bosstime} minuten)"
 enter_starttime_minutes: "<b>Hoeveel minuten staat er nog op het ei?</b>\n(Noot: eindtijd is uitkomen van het ei + ${bosstime} minuten)"
 enter_starttime_time: "<b>Hoe laat komt het ei uit?</b>\nGeef de tijd zo op: <b>09:30</b> of <b>13:45</b>…"
@@ -106,13 +106,13 @@ raid_user_added_list: '<a href="tg://user?id=${user.id}">${user_first_name}</a> 
 unexpected_raid_not_found: "Mmmm, vreemd. Sorry, geen raid te vinden.\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 add_raid_wrong_while_selecting: "Er ging iets fout bij het kiezen van de gym.\n<b>Gebruik </b>/start<b> om het nog eens te proberen…</b>"
 add_raid_0_45_min_error: "Opgegeven minuten moeten tussen de 0 en ${bosstime} liggen. \n<b>Probeer het nog eens.</b>"
-btn_gym_find_location: "Zoek gyms in mijn omgeving…"
-remote_raid_question: "Hoe doe jij mee?"
-remote_raid_confirm: "Op afstand! 🚀"
-remote_invite_raid_confirm: "Op afstand, ik heb een invite 📨"
-local_raid_confirm: "Lokaal, bij de gym ⬇"
-private_raid_confirm: "Private raid; remote of lokaal 🤫"
-participants_private: "Private raid 🤫"
+btn_gym_find_location: 'Zoek gyms in mijn omgeving…'
+remote_raid_question: 'Hoe doe jij mee?'
+remote_raid_confirm: 'Op afstand! 🚀'
+remote_invite_raid_confirm: 'Op afstand, ik heb een invite 📨'
+local_raid_confirm: 'Lokaal, bij de gym ⬇'
+private_raid_confirm: 'Private raid; remote of lokaal 🤫'
+participants_private: 'Private raid 🤫'
 maximum_remote_raid_reached: "Helaas, het maximaal aantal remote raid users is bereikt. \n\n Het maximale aantal is: "
 try_again_remote_limit: "\nProbeer het met een lager aantal wellicht, klik hier op /start…"
 
@@ -120,102 +120,102 @@ try_again_remote_limit: "\nProbeer het met een lager aantal wellicht, klik hier 
 add_raidboss_finished: "Dankjewel!\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 add_raidboss_intro: "Je wilt een nieuwe raidboss toevoegen.\n<b>Voer de naam in…</b>"
 raidboss_exists: "Deze raidboss bestaat al!\n\n<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-raidboss_level_question: "Welk level heeft ${bossname}?"
-raidboss_recommended_accounts: "Wat is het aanbevolen aantal accounts voor ${bossname}?"
+raidboss_level_question: 'Welk level heeft ${bossname}?'
+raidboss_recommended_accounts: 'Wat is het aanbevolen aantal accounts voor ${bossname}?'
 raidboss_save_canceled: "OK, de nieuwe raidboss wordt niet bewaard.\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 raidboss_save_question: "Raidboss: ${bossname}\nLevel: ${bosslevel}\nAanbevolen aantal accounts: ${numaccounts}\n\n<b>Opslaan?</b>"
 
 #  EditGymWizard.js
-btn_edit_gym_name: "Naam"
-btn_edit_gym_gmlink: "Google Maps link"
-btn_edit_gym_address: "Adres"
-btn_edit_gym_exraid: "Ex-Raid kans"
-btn_edit_gym_cancel: "Ik wil toch niets wijzigen en niets bewaren…"
+btn_edit_gym_name: 'Naam'
+btn_edit_gym_gmlink: 'Google Maps link'
+btn_edit_gym_address: 'Adres'
+btn_edit_gym_exraid: 'Ex-Raid kans'
+btn_edit_gym_cancel: 'Ik wil toch niets wijzigen en niets bewaren…'
 edit_gym_intro: "We gaan de gym zoeken die je wilt wijzigen.\n<b>Voer een deel van de naam in, minimaal 2 tekens…</b>"
 edit_gym_question_address: "<b>Geef een nieuw adres:</b>\nType 'x' om het adres te wissen"
 edit_gym_question_gmlink: '<b>Geef een nieuwe googleMapsLink</b>\nType ''x'' de link te wissen\n<a href="https://dev.romeen.nl/pogo_googlemaps/">Hulp bij het maken van een Google Maps link</a>'
 edit_gym_question_coords: "<b>Geef de nieuwe GPS cooördinaat (lengtegraad, breedtegraad) op</b>\nBijvoorbeeld 52.098115,5.015154"
-edit_gym_question_name: "<b>Geef een nieuwe naam:</b>"
+edit_gym_question_name: '<b>Geef een nieuwe naam:</b>'
 edit_gym_question_exraid: "<b>Kan hier een ExRaid op vallen?</b>\nType <b>Ja</b> of <b>Nee</b>"
 edit_gym_question_not_found: "Sorry. Ik heb geen idee wat je wilt wijzigen\n<b>Klik op </b>/start<b> om het nog eens te proberen. Of ga terug naar de groep.</b>"
 edit_gym_overview: "Dit zijn nu de gym gegevens:\n\n${out}<b>Wat wil je nu doen?</b>"
-edit_gym_btn_save_close: "Opslaan en afsluiten"
-edit_gym_btn_edit_more: "Nog iets wijzigen aan deze gym"
-edit_gym_btn_cancel: "Annuleren"
+edit_gym_btn_save_close: 'Opslaan en afsluiten'
+edit_gym_btn_edit_more: 'Nog iets wijzigen aan deze gym'
+edit_gym_btn_cancel: 'Annuleren'
 edit_gym_delete: "Weet je zeker dat je '${label}' wilt verwijderen? Type 'Ja' of 'Nee'"
 edit_gym_delete_success: "OK, verwijderd…\n\n<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 edit_gym_delete_canceled: "OK, <b>niet</b> verwijderd.\n\n<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 
 #  EditRaidWizard.js
 edit_raid_no_raids_found: "Sorry, ik kan nu geen raid vinden 🤨\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-edit_raid_until: "tot"
-edit_raid_start: "start"
-edit_raid_not_found: "…de raid staat er niet bij"
-edit_raid_which_raid: "Welke raid wil je wijzigen?"
-edit_raid_gym: "Gym"
-edit_raid_endtime: "Eindtijd"
-edit_raid_starttime: "Starttijd"
-edit_raid_pokemon: "Pokemon"
+edit_raid_until: 'tot'
+edit_raid_start: 'start'
+edit_raid_not_found: '…de raid staat er niet bij'
+edit_raid_which_raid: 'Welke raid wil je wijzigen?'
+edit_raid_gym: 'Gym'
+edit_raid_endtime: 'Eindtijd'
+edit_raid_starttime: 'Starttijd'
+edit_raid_pokemon: 'Pokemon'
 edit_raid_question_endtime: "<b>Geef een nieuwe eindtijd</b>\nBijvoorbeeld <b>9:45</b> of <b>14:30</b>"
 edit_raid_question_starttime_range: "<b>Geef een nieuwe starttijd</b>\nDeze tijd moet tussen ${start1str} en ${endtimestr} liggen"
 edit_raid_question_pokemon: "<b>Hoe heet de nieuwe raidboss of ei?</b>\nBijvoorbeeld 'Kyogre' of 'Lvl 5 ei'"
 edit_raid_question_gym: "Je wilt de gym wijzigen\nWelke gym wordt het nu?\n<b>Voer een deel van de naam in, minimaal 2 tekens…</b>"
 edit_raid_overview_data: "Dit zijn nu de raid gegevens:\n\n${out}<b>Wat wil je nu doen?</b>"
-edit_raid_edit_more: "Nog iets wijzigen aan deze raid"
+edit_raid_edit_more: 'Nog iets wijzigen aan deze raid'
 edit_raid_list_message: '<b>Raid bij ${gymname} gewijzigd</b> door: <a href="tg://user?id=${user.id}">${user_first_name}</a>\n\n'
 edit_raid_search_gym_again: "We gaan opnieuw zoeken. \nGebruik /cancel als je wilt stoppen\n<b>Voer een deel van de naam in, minimaal 2 tekens…</b>"
 
 #  EditRaidbossWizard.js
-edit_raidboss_cancel: "Ik wil niets wijzigen en niets bewaren…"
+edit_raidboss_cancel: 'Ik wil niets wijzigen en niets bewaren…'
 edit_raiddboss_intro: "Je wilt een raidboss wijzigen.\n<b>Voer een deel van de naam in…</b>"
 edit_raidboss_not_found: "Ik kon geen boss vinden met '${term}' in de naam…\n\n<b>Gebruik </b>/start<b> als je nog een actie wilt uitvoeren. Of ga terug naar de groep.</b>"
-edit_raidboss_not_listed: "Mijn raidboss staat er niet bij…"
-edit_raidboss_select: "Kies een raidboss."
+edit_raidboss_not_listed: 'Mijn raidboss staat er niet bij…'
+edit_raidboss_select: 'Kies een raidboss.'
 edit_raidboss_not_listed_close: "OK\n\n<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start'"
-edit_raidboss_btn_name: "Naam"
-edit_raidboss_btn_level: "Level"
-edit_raidboss_btn_number_of_accounts: "Aantal accounts"
-edit_raidboss_btn_do_nothing: "Ik wil toch niets wijzigen en niets bewaren…"
-edit_raidboss_name_question: "<b>Wat wordt de nieuwe naam?</b>"
-edit_raidboss_level_question: "<b>Wat wordt het nieuwe level?</b>"
-edit_raidboss_accounts_question: "<b>Hoeveel accounts beveel je aan?</b>"
+edit_raidboss_btn_name: 'Naam'
+edit_raidboss_btn_level: 'Level'
+edit_raidboss_btn_number_of_accounts: 'Aantal accounts'
+edit_raidboss_btn_do_nothing: 'Ik wil toch niets wijzigen en niets bewaren…'
+edit_raidboss_name_question: '<b>Wat wordt de nieuwe naam?</b>'
+edit_raidboss_level_question: '<b>Wat wordt het nieuwe level?</b>'
+edit_raidboss_accounts_question: '<b>Hoeveel accounts beveel je aan?</b>'
 edit_raidboss_cancel_edit: "OK\n\n<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 edit_raidboss_no_clue: "Ik heb geen idee wat je wilt doen…\n\n<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-edit_raidboss_overview_name: "Naam"
-edit_raidboss_overview_accounts: "Aanbevolen aantal"
-edit_raidboss_overview_level: "Level"
+edit_raidboss_overview_name: 'Naam'
+edit_raidboss_overview_accounts: 'Aanbevolen aantal'
+edit_raidboss_overview_level: 'Level'
 edit_raidboss_overview: "Dit zijn nu de raidboss gegevens:\n\n${out}\n\n<b>Wat wil je nu doen?</b>"
-edit_raidboss_btn_edit_more: "Nog iets wijzigen aan deze raidboss"
-edit_raidboss_btn_save_close: "Opslaan en afsluiten"
-edit_raidboss_btn_cancel: "Annuleren"
+edit_raidboss_btn_edit_more: 'Nog iets wijzigen aan deze raidboss'
+edit_raidboss_btn_save_close: 'Opslaan en afsluiten'
+edit_raidboss_btn_cancel: 'Annuleren'
 
 #  ExitRaidWizard.js
 exit_raid_not_participating: "Je doet nog niet mee met raids…\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-exit_raid_not_listed: "Mijn raid staat er niet bij…"
-exit_raid_select_raid: "Kies een raid…"
+exit_raid_not_listed: 'Mijn raid staat er niet bij…'
+exit_raid_select_raid: 'Kies een raid…'
 exit_raid_list_message: '<a href="tg://user?id=${user.id}">${user_first_name}</a> meldde zich af voor raid bij ${gymname}\n\n'
 
 #  FindGymWizard.js
-find_gym_location_intro: "Geef minstens 2 tekens van de gymnaam…"
+find_gym_location_intro: 'Geef minstens 2 tekens van de gymnaam…'
 find_gym_location_overview: "Ik heb ${l} gym${l === 1 ? '' : 's'} gevonden voor '${term}' 🤓\n\n${out}<b>Gebruik </b>/start<b> als je nog een actie wilt uitvoeren. Of ga terug naar de groep.</b>"
 
 #  JoinRaidWizard.js
 join_raid_no_raids_found: "Sorry, er is nu geen raid te doen… 😉\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-join_raid_dont_participate: "…toch niet meedoen"
-join_raid_select_raid: "Kies een raid…"
+join_raid_dont_participate: '…toch niet meedoen'
+join_raid_select_raid: 'Kies een raid…'
 join_raid_cancel: "Jammer! \n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-join_raid_accounts_question: "Met hoeveel accounts/mensen kom je naar <b>${gymname}</b>?"
+join_raid_accounts_question: 'Met hoeveel accounts/mensen kom je naar <b>${gymname}</b>?'
 join_raid_list_reason: '<a href="tg://user?id=${user.id}">${user_first_name}</a> toegevoegd aan raid bij ${gymname}'
 join_raid_finished: "Je bent aangemeld voor ${joinedraid.gymname} om ${joinedraid.startsat} 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 join_raid_not_found: "Raid niet gevonden!\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
-current_number_remote_users: "Op dit moment is het aantal remote deelnemers:"
+current_number_remote_users: 'Op dit moment is het aantal remote deelnemers:'
 
 #  UserDelayedWizard
-btn_user_delayed: "Ik kom te laat voor een raid…"
-user_delayed_dont_change_status: "…ik wil mijn status toch niet veranderen"
+btn_user_delayed: 'Ik kom te laat voor een raid…'
+user_delayed_dont_change_status: '…ik wil mijn status toch niet veranderen'
 user_delayed_select_raid: "Je gaat je status voor een raid veranderen.\n<b>Kies een raid…</b>"
-user_delayed_is_on_time: "…ik kom toch op tijd!"
-user_delayed_how_much_later: "Hoeveel minuten ga je te laat komen voor <b>${gymname}</b>?"
+user_delayed_is_on_time: '…ik kom toch op tijd!'
+user_delayed_how_much_later: 'Hoeveel minuten ga je te laat komen voor <b>${gymname}</b>?'
 user_delayed_by_2min: '<a href="tg://user?id=${uid}">${first_name}</a> komt 2 minuten later bij ${gymname}'
 user_delayed_by_5min: '<a href="tg://user?id=${uid}">${first_name}</a> komt 5 minuten later bij ${gymname}'
 user_delayed_on_time: '<a href="tg://user?id=${uid}">${first_name}</a> komt toch op tijd bij ${gymname}'
@@ -223,87 +223,87 @@ user_delayed_selection_wrong: "Hier ging iets niet goed tijdens het updaten… \
 user_delayed_status_changed: "Je status voor ${gymname} is gewijzigd 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 
 #  StatsWizard
-stats_your_total_raids_reported: "Totaal aantal raids door jou gemeld: <b>${ownraids.length}</b>"
-stats_your_most_reported_gyms: "Jouw meest gemelde gyms"
-stats_times_reported: "x gemeld"
-stats_total_times_joined: "Totaal keer aangemeld voor raids"
-stats_your_most_visited_gyms: "Jouw meest bezochte gyms"
-stats_times_visited: "x bezocht"
-stats_total_reported_raids_everybody: "Totaal aantal raids gemeld door iedereen"
-stats_most_reported_gyms: "De meest gemelde gyms waren"
-stats_total_joins_for_these_raids: "Totaal aantal aanmeldigen voor al deze raids"
-stats_total_accounts_for_these_raids: "Totaal aantal accounts voor al deze raids"
-stats_in: "in"
-stats_joins: "aanmeldingen"
-stats_accounts: "accounts"
-stats_busiest_gyms_in_period: "De drukst bezochte gyms van deze periode waren"
-stats_top_raiders_period: "De top raiders van deze periode waren"
-stats_times_raided: "x geraid"
-stats_heroes_most_reported: "De volgende helden hebben de meeste raids gemeld"
-stats_my_statistics: "Mijn raid statistieken"
-stats_total_statistics: "Totale raid statistieken"
-stats_see_which_stats_question: "Welke statistieken wil je inzien?"
-stats_today: "Vandaag"
-stats_this_week: "Deze week tot nu toe"
-stats_this_month: "Deze maand tot nu toe"
-stats_this_year: "Dit jaar tot nu toe"
+stats_your_total_raids_reported: 'Totaal aantal raids door jou gemeld: <b>${ownraids.length}</b>'
+stats_your_most_reported_gyms: 'Jouw meest gemelde gyms'
+stats_times_reported: 'x gemeld'
+stats_total_times_joined: 'Totaal keer aangemeld voor raids'
+stats_your_most_visited_gyms: 'Jouw meest bezochte gyms'
+stats_times_visited: 'x bezocht'
+stats_total_reported_raids_everybody: 'Totaal aantal raids gemeld door iedereen'
+stats_most_reported_gyms: 'De meest gemelde gyms waren'
+stats_total_joins_for_these_raids: 'Totaal aantal aanmeldigen voor al deze raids'
+stats_total_accounts_for_these_raids: 'Totaal aantal accounts voor al deze raids'
+stats_in: 'in'
+stats_joins: 'aanmeldingen'
+stats_accounts: 'accounts'
+stats_busiest_gyms_in_period: 'De drukst bezochte gyms van deze periode waren'
+stats_top_raiders_period: 'De top raiders van deze periode waren'
+stats_times_raided: 'x geraid'
+stats_heroes_most_reported: 'De volgende helden hebben de meeste raids gemeld'
+stats_my_statistics: 'Mijn raid statistieken'
+stats_total_statistics: 'Totale raid statistieken'
+stats_see_which_stats_question: 'Welke statistieken wil je inzien?'
+stats_today: 'Vandaag'
+stats_this_week: 'Deze week tot nu toe'
+stats_this_month: 'Deze maand tot nu toe'
+stats_this_year: 'Dit jaar tot nu toe'
 stats_expass_today: "EX pas datum: ${dates.lastExwaveDate.format('DD-MM-YYYY HH:mm')} tot vandaag"
 stats_expass_prev_period: "EX pas datum: ${dates.secondToLastExwaveDate.format('DD-MM-YYYY HH:mm')} tot ${dates.lastExwaveDate.format('DD-MM-YYYY HH:mm')}"
-stats_see_which_period_question: "Welke periode wil je inzien?"
-stats_no_stat_identified: "Er konden geen statistieken worden bepaald!"
-stats_since: "Statistieken vanaf ${timestr}"
-stats_exraid_since: "EX Raid statistieken van ${timestr} tot ${endtimestr}"
-stats_finished: "<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
+stats_see_which_period_question: 'Welke periode wil je inzien?'
+stats_no_stat_identified: 'Er konden geen statistieken worden bepaald!'
+stats_since: 'Statistieken vanaf ${timestr}'
+stats_exraid_since: 'EX Raid statistieken van ${timestr} tot ${endtimestr}'
+stats_finished: '<b>Wil je nog een actie uitvoeren? Klik dan hier op </b>/start'
 
 # Shiny stats
-sh_stats_btn_report: "Admin: Shiny rapporteren"
-sh_stats_btn_show: "Admin: Shiny stats tonen"
+sh_stats_btn_report: 'Admin: Shiny rapporteren'
+sh_stats_btn_show: 'Admin: Shiny stats tonen'
 sh_stats_no_raids: "Er was geen raid in het afgelopen uur. \n<b>Klik </b>/start <b>om een nog een actie uit te voeren</b>"
 sh_stats_report_intro: "Je wilt shiny raid Pokémons rapporteren. \n\n<b>Belangrijk:</b> Voor goede stats is het belangrijk dat je váák raids invoert; niet alleen als er een shiny is gevangen…\n\n<b>Kies de raid of klik </b>/cancel<b> om te stoppen:</b>"
 sh_stats_input_question: "Geef het aantal accounts dat de raid heeft gespeeld, het aantal shinies en (optioneel) het aantal nieuwe spelers ofwel dex entries met shiny (standaard 0), gescheiden door een spatie… Dus zo: \n11 2 ofwel 11 2 1"
 sh_stats_input: "Accounts: ${accounts} Shinies: ${shinies} Nieuwe accounts: ${newAccounts}\n\n"
-sh_stats_input_wrong: "Snap ik niet! <b>Vul nog eens in… of gebruik </b>/cancel<b> om af te breken.</b>"
+sh_stats_input_wrong: 'Snap ik niet! <b>Vul nog eens in… of gebruik </b>/cancel<b> om af te breken.</b>'
 sh_stats_save_failed: "Oops… bewaren faalde\nKlik /start om nog een actie uit te voeren"
 sh_stats_save_success: "OK, bewaard…\n<b>Klik </b>/start<b> om nog een actie uit te voeren</b>"
 sh_stats_save_canceled: "OK, NIET bewaard…\nKlik /start om nog een actie uit te voeren"
-sh_stats_head: "<b>Shiny Stats</b>"
+sh_stats_head: '<b>Shiny Stats</b>'
 sh_stats_done: "\nKlik /start om nog een actie uit te voeren"
 
 # Notifications
 noti_something_wrong_finding_user: "Hier ging iets <b>niet</b> met het ophalen van jouw gebruiker…\nMisschien kun je het nog eens proberen met /start. Of ga terug naar de groep."
-noti_gyms: "Gym notificaties"
-noti_raidbosses: "Raisboss notificaties"
-noti_which_notification: "<b>Welke type notificaties gaan we mee aan de slag?</b>"
-noti_nothing_set: "- Je hebt geen notificaties ingesteld"
+noti_gyms: 'Gym notificaties'
+noti_raidbosses: 'Raisboss notificaties'
+noti_which_notification: '<b>Welke type notificaties gaan we mee aan de slag?</b>'
+noti_nothing_set: '- Je hebt geen notificaties ingesteld'
 noti_current_notifications: "<b>Je hebt momenteel op de volgende ${noti_string} notificaties ingesteld als er raids gemeld worden:</b>\n${message}\nWil je notificaties toevoegen op een ${noti_single_string} of juist afmelden?\nDan gaan we deze eerst zoeken.\n\n<b>Voer een deel van de naam in, minimaal 2 tekens in…</b>"
 noti_min_2_chars: "Geef minimaal 2 tekens van de naam…\n<b>Probeer het nog eens of gebruik /cancel om te annuleren</b> 🤨"
 noti_subject_not_found: "Ik kon geen ${noti_string} vinden met '${term}' in de naam… \nWellicht staat deze nog niet geregistreerd… Een van de admins kan deze wellicht toevoegen…\nGebruik /cancel om te stoppen.\n<b>Of probeer het nog eens</b>"
-noti_subject_not_listed: "Mijn ${noti_single_string} staat er niet bij…"
-noti_select_subject: "Kies een ${noti_single_string}"
+noti_subject_not_listed: 'Mijn ${noti_single_string} staat er niet bij…'
+noti_select_subject: 'Kies een ${noti_single_string}'
 noti_select_something_wrong: "Er ging iets fout bij het kiezen van de ${noti_single_string}.\n<b>Gebruik </b>/start<b> om het nog eens te proberen…</b>\n"
-noti_want_notification: "Wil je een notificatie van ${selected_candidate} als er wat te raiden valt?"
-noti_turn_off: "<b>Wil je je notificaties uitzetten van ${selected_candidate}?</b>"
+noti_want_notification: 'Wil je een notificatie van ${selected_candidate} als er wat te raiden valt?'
+noti_turn_off: '<b>Wil je je notificaties uitzetten van ${selected_candidate}?</b>'
 noti_no_save: "Prima.\n<b>Gebruik </b>/start<b> om nog een opdracht uit te voeren…</b>\n"
 noti_gym_finished: "Je bent aangemeld voor notificaties op de volgende gym: ${selected}.\nZodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 noti_raidboss_finished: "Je bent aangemeld voor notifiaties op de volgende raidboss: ${selected}.\nZodra er een raid gemeld wordt, ben jij de eerste die het hoort. 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 noti_finished_gym_removal: "Je bent afgemeld voor notificaties op de volgende gym: ${selected}. 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 noti_finished_raidboss_removal: "Je bent afgemeld voor notificaties op de volgende raidboss: ${selected}. 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-noti_gym_notification: "Psst… Er is zojuist een <b>${target}</b> raid toegevoegd bij <b>${gymname}</b> om <b>${starttime}</b>."
-noti_raidboss_notification: "Hey… Jij was toch geïnteresseerd in <b>${target}</b> raids? Er is er zojuist een toegevoegd bij <b>${gymname}</b> om <b>${starttime}</b>."
+noti_gym_notification: 'Psst… Er is zojuist een <b>${target}</b> raid toegevoegd bij <b>${gymname}</b> om <b>${starttime}</b>.'
+noti_raidboss_notification: 'Hey… Jij was toch geïnteresseerd in <b>${target}</b> raids? Er is er zojuist een toegevoegd bij <b>${gymname}</b> om <b>${starttime}</b>.'
 # Field researches
-fres_btn_mainmenu_showlist: "Lijst tonen"
-fres_btn_mainmenu_add_research: "Research toevoegen"
-fres_btn_mainmenu_edit_research: "Research aanpassen"
-fres_btn_mainmenu_remove_research: "Research verwijderen"
+fres_btn_mainmenu_showlist: 'Lijst tonen'
+fres_btn_mainmenu_add_research: 'Research toevoegen'
+fres_btn_mainmenu_edit_research: 'Research aanpassen'
+fres_btn_mainmenu_remove_research: 'Research verwijderen'
 fres_no_fres_yet: "Er zijn voor vandaag nog geen Field Researches gemeld…\n\n<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-fres_fres_today: "<b>Field Researches voor vandaag:</b>"
+fres_fres_today: '<b>Field Researches voor vandaag:</b>'
 fres_reportedstop: '<a href="${stoplink}">${stopname}</a> melder: <a href="tg://user?id=${reporterid}">${reportername}</a>'
-fres_done: "<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
+fres_done: '<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start'
 fres_intro: "Je wilt een nieuwe Field Research toevoegen.\n\nWe gaan eerst de stop zoeken.\n\n<b>Gebruik de knop 'Zoek stops in mijn omgeving…'</b>\nOf voer een deel van de naam in, minimaal 2 tekens…"
 fres_minimum_2_chars: "Geef minimaal 2 tekens van de stopnaam…\n<b>Probeer het nog eens.</b> 🧐"
 fres_stop_not_found: "Ik kon geen stop vinden…\nGebruik /cancel om te stoppen.\n<b>Of probeer het nog eens door de naam in te vullen</b>"
-fres_stop_not_listed: "Mijn stop staat er niet bij…"
-fres_select_stop: "Kies een stop."
+fres_stop_not_listed: 'Mijn stop staat er niet bij…'
+fres_select_stop: 'Kies een stop.'
 fres_select_something_wrong: "Er ging iets fout bij het kiezen van de stop.\n<b>Gebruik </b>/start<b> om het nog eens te proberen…</b>"
 fres_exists: "Er is al een Field Research op deze stop gemeld!\n\n<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 fres_what_to_do: "<b>Wat moet je doen voor deze research?</b>\nKlik op een knop of typ de research als het niet in de lijst staat."
@@ -312,61 +312,61 @@ fres_save_success: "<b>Top!</b>\nDe nieuwe Field Research voor ${stopname} is op
 fres_added_fres: '<a href="${stoplink}">${stopname}</a> toegevoegd door: <a href="tg://user?id=${reporterid}">${reportername}</a>'
 fres_list_reason: '<a href="tg://user?id=${uid}">${firstname}</a> heeft een Field Research toegevoegd\n\n'
 frest_list_reason_modified: '<a href="tg://user?id=${uid}">${firstname}</a> heeft een Field Research gewijzigd'
-fres_delete_confirm: "Weet je zeker dat je deze wilt verwijderen?"
+fres_delete_confirm: 'Weet je zeker dat je deze wilt verwijderen?'
 fres_list_reason_delete: '<a href="tg://user?id=${uid}">${firstname}</a> heeft een Field Research verwijderd'
 fres_delete_failed: "Mmmm, vreemd. Verwijderen is niet gelukt.\n\n<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 fres_what_to_do_location: "<b>Wat moet je doen voor deze research?</b>\nKlik op een knop of typ de research als het niet in de lijst staat."
 fres_delete_which: "Je wilt een Field Research verwijderen…\n\n<b>Welke Field Research wil je verwijderen?</b>"
 fres_no_fres_now: "Er zijn nu geen Field Researches.\n\n<b>Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-fres_save_edit: "Wijziging opslaan?"
+fres_save_edit: 'Wijziging opslaan?'
 fres_saved_edit: "OK, je wijziging is opgeslagen.\n\n<b>Field Researches voor vandaag:</b>"
-fres_edit_which: "<b>Welke Field Research wil je wijzigen?</b>"
-fres_btn_find_location: "Zoek stops in mijn omgeving…"
+fres_edit_which: '<b>Welke Field Research wil je wijzigen?</b>'
+fres_btn_find_location: 'Zoek stops in mijn omgeving…'
 
 # Admin Field Researches
-admin_fres_btn_add_fres: "Field Research toevoegen…"
-admin_fres_modify: "<b>Field Researches aanpassen</b></a>"
-admin_fres_edit: "Wijzigen"
-admin_fres_delete: "Verwijderen"
-admin_fres_do_what: "Wat wil je doen met “${label}”"
-admin_fres_new_label: "Geef de nieuwe tekst voor “${label}”"
-admin_fres_save_edit: "“${newtext}” opslaan?"
-admin_fres_save_failed: "Mmm… opslaan is mislukt!, ${message}"
-admin_fres_save_success: "Opgeslagen!"
-admin_fres_save_canceled: "OK, niet opgeslagen."
-admin_fres_add_new_label: "<b>Geef de tekst van de nieuwe knop</b>"
+admin_fres_btn_add_fres: 'Field Research toevoegen…'
+admin_fres_modify: '<b>Field Researches aanpassen</b>'
+admin_fres_edit: 'Wijzigen'
+admin_fres_delete: 'Verwijderen'
+admin_fres_do_what: 'Wat wil je doen met “${label}”'
+admin_fres_new_label: 'Geef de nieuwe tekst voor “${label}”'
+admin_fres_save_edit: '“${newtext}” opslaan?'
+admin_fres_save_failed: 'Mmm… opslaan is mislukt!, ${message}'
+admin_fres_save_success: 'Opgeslagen!'
+admin_fres_save_canceled: 'OK, niet opgeslagen.'
+admin_fres_add_new_label: '<b>Geef de tekst van de nieuwe knop</b>'
 admin_fres_save_new: "${newbtn}'\nOpslaan?"
-admin_fres_not_saved: "Niet opgeslagen"
-admin_fres_saved_new: "Nieuwe Field Research optie opgeslagen!"
+admin_fres_not_saved: 'Niet opgeslagen'
+admin_fres_saved_new: 'Nieuwe Field Research optie opgeslagen!'
 admin_fres_confirm_delete: "Weet je zeker dat je '${label}' wilt verwijderen?"
 admin_fres_delete_failed: "Verwijderen is mislukt…\n${message}"
-admin_fres_delete_success: "OK, verwijderd…"
-admin_fres_delete_canceled: "OK, <b>niet</b> verwijderd."
-admin_fres_finished: "OK, gebruik /start als je nog iets wilt doen."
+admin_fres_delete_success: 'OK, verwijderd…'
+admin_fres_delete_canceled: 'OK, <b>niet</b> verwijderd.'
+admin_fres_finished: 'OK, gebruik /start als je nog iets wilt doen.'
 
 # Admin stops
-btn_admin_stops: "Admin: PokéStops beheren"
-admin_stops_btn_add: "PokéStop toevoegen"
-admin_stops_btn_edit: "PokéStop wijzigen"
-admin_stops_btn_delete: "PokéStop verwijderen"
-admin_stops_intro: "<b>Wat wil je doen met PokéStops?</b>"
-admin_stops_add: "<b>Hoe heet de nieuwe PokéStop?</b>"
+btn_admin_stops: 'Admin: PokéStops beheren'
+admin_stops_btn_add: 'PokéStop toevoegen'
+admin_stops_btn_edit: 'PokéStop wijzigen'
+admin_stops_btn_delete: 'PokéStop verwijderen'
+admin_stops_intro: '<b>Wat wil je doen met PokéStops?</b>'
+admin_stops_add: '<b>Hoe heet de nieuwe PokéStop?</b>'
 admin_stops_location_question: "<b>Wat is de GPS locatie?</b>\nGeef de cooördinaat zo op: Breedtegraad,Lengtegraad. Bijvoorbeeld: 52.098115,5.015154"
-admin_stops_name: "Naam"
+admin_stops_name: 'Naam'
 admin_stops_invalid_location: "Geen geldige cooördinaat voor deze PokéStop!\n\n<b>Probeer het nog eens…</b>\nOf gebruik /cancel om te stoppen."
 admin_stops_save_canceled: "OK, niets opgeslagen.\n\n<b>Klik op </b>/start<b> om nog een actie uit te voeren</b>"
 admin_stops_save_success: "OK! De PokéStop is opgeslagen.\n\n<b>Klik op </b>/start<b> om nog een actie uit te voeren</b>"
 admin_stops_edit: "Je wilt een PokéStop aanpassen.\n\n<b>Klik op 'Toon PokéStops in de omgeving'</b>\nOf geef een deel van de naam, minimaal 2 tekens."
-admin_stops_list_nearby: "Toon PokéStops in de omgeving"
+admin_stops_list_nearby: 'Toon PokéStops in de omgeving'
 admin_stops_two_chars_minimum: "<b>Geef minimaal 2 tekens uit de naam</b>.\nProbeer het nog eens.\nOf gebruik /cancel om te stoppen."
-admin_stops_select: "<b>Kies de PokéStop</b>"
+admin_stops_select: '<b>Kies de PokéStop</b>'
 admin_stops_delete: "Je wilt een PokéStop verwijderen.\n\n<b>Klik op 'Toon PokéStops in de omgeving'</b>\nOf geef een deel van de naam, minimaal 2 tekens."
-admin_stops_edit_name: "<b>Geef de nieuwe naam voor ${stopname}</b>"
-admin_stops_edit_location: "<b>Geef de nieuwe GPS locatie voor ${stopname}</b>"
+admin_stops_edit_name: '<b>Geef de nieuwe naam voor ${stopname}</b>'
+admin_stops_edit_location: '<b>Geef de nieuwe GPS locatie voor ${stopname}</b>'
 admin_stops_confirm_delete: "Weet je zeker dat je '${label}' wilt verwijderen?"
 admin_stops_not_found: "Ik kon geen stops vinden.\nProbeer het nog eens.\nOf gebruik /cancel om te stoppen."
 admin_stops_not_listed: "OK\n<b>Probeer het nog eens.</b>\nOf gebruik /cancel om te stoppen."
-admin_stops_my_stop_not_listed: "Mijn stop staat er niet bij"
+admin_stops_my_stop_not_listed: 'Mijn stop staat er niet bij'
 
 # Language wizard
 lang_set: "Je taal is nu ingesteld op Nederlands.\n\n<b>Klik op </b>/start<b> om nog een actie uit te voeren</b>"
@@ -377,124 +377,124 @@ list_raids_fres_count: "De bot kent nu ${researchcount} Field Researches\n\n"
 # Eliteraids
 
 edit_eliteraid_no_raids_found: "Sorry, ik kan nu geen Elite Raid vinden 🤨\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-edit_eliteraid_not_found: "…de Elite Raid staat er niet bij"
-edit_eliteraid_which_raid: "Welke Elite Raid wil je wijzigen?"
-edit_eliteraid_starttime: "Starttijd"
+edit_eliteraid_not_found: '…de Elite Raid staat er niet bij'
+edit_eliteraid_which_raid: 'Welke Elite Raid wil je wijzigen?'
+edit_eliteraid_starttime: 'Starttijd'
 edit_eliteraid_question_pokemon: "<b>Hoe heet de nieuwe raidboss?</b>\nType bijvoorbeeld 'Hoopa Unbound' of gebruik de knoppen"
 edit_eliteraid_question_gym: "Je wilt de gym wijzigen\nWelke gym wordt het nu?\n<b>Voer een deel van de naam in, minimaal 2 tekens…</b>"
 edit_eliteraid_overview_data: "Dit zijn nu de Elite Raid gegevens:\n\n${out}<b>Wat wil je nu doen?</b>"
-edit_eliteraid_edit_more: "Nog iets wijzigen aan deze Elite Raid"
+edit_eliteraid_edit_more: 'Nog iets wijzigen aan deze Elite Raid'
 edit_eliteraid_list_message: '<b>Elite Raid bij ${gymname} gewijzigd</b> door: <a href="tg://user?id=${user.id}">${user_first_name}</a>\n\n'
 eliteraid_added_list: 'Elite Raid bij ${gymname} toegevoegd door: <a href="tg://user?id=${user.id}">${user_first_name}</a>\n\n'
 eliteraid_add_finish: "Je bent aangemeld voor ${gymname} op ${starttm} 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 eliteraid_add_welcome: "Je wilt een nieuwe Elite Raid toevoegen. We gaan eerst de gym zoeken.\n\n<b>Gebruik de knop 'Zoek gyms in mijn omgeving…'</b>\nOf voer een deel van de naam in, minimaal 2 tekens…"
-eliteraid_btn_add: "Elite Raid toevoegen"
-eliteraid_btn_done: "Klaar"
-eliteraid_btn_edit: "Elite Raid wijzigen"
-eliteraid_btn_leave: "Deelname verwijderen"
-eliteraid_btn_join: "Meedoen of deelname wijzigen"
-eliteraid_date: "Op welke dag is de Elite Raid?"
-eliteraid_date_changed: "OK, datum gewijzigd."
+eliteraid_btn_add: 'Elite Raid toevoegen'
+eliteraid_btn_done: 'Klaar'
+eliteraid_btn_edit: 'Elite Raid wijzigen'
+eliteraid_btn_leave: 'Deelname verwijderen'
+eliteraid_btn_join: 'Meedoen of deelname wijzigen'
+eliteraid_date: 'Op welke dag is de Elite Raid?'
+eliteraid_date_changed: 'OK, datum gewijzigd.'
 eliteraid_days: "OK, over ${eliteraiddays} dagen\n<b>Hoe laat begint de Elite Raid zelf?</b> \nGeef de tijd zo op: bijvoorbeeld 9:45 of 17:30"
 eliteraid_do_what: "${start1} ${gymname}\n<b>What do you want to do with this Elite Raid?</b>"
 eliteraid_do_you_participate: "Dankjewel!\n<b>Doe je zelf mee met deze Elite Raid?</b>"
-eliteraid_edit: "OK, je wilt deze Elite Raid wijzigen…"
-eliteraid_edit_what: "<b>Wat wil je wijzigen aan deze Elite Raid?</b>"
+eliteraid_edit: 'OK, je wilt deze Elite Raid wijzigen…'
+eliteraid_edit_what: '<b>Wat wil je wijzigen aan deze Elite Raid?</b>'
 eliteraid_enter_starttime: "<b>Wat wordt de starttijd?</b>\nVul een <b>x</b> in voor ${start1}.\nOf vul een starttijd in tussen ${start1} en ${endtime}"
 eliteraid_exists_warning: "Deze Elite Raid bestaat al.\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 eliteraid_exit_list_message: '<a href="tg://user?id=${user.id}">${user_first_name}</a> meldde zich af voor Elite Raid bij ${gymname}'
 eliteraid_greeting: "Hallo ${user_first_name}.\n\nJe kunt je hier inschrijven op een Elite Raid, je inschrijving aanpassen door opnieuw aan te melden of een Elite Raid toevoegen/wijzigen.\n\nKies 'Klaar' als je niets wilt wijzigen.\n\n<b>Wat wil je doen?</b>"
-eliteraid_intro: "<b>Wat wil je doen met deze Elite Raid?</b>"
+eliteraid_intro: '<b>Wat wil je doen met deze Elite Raid?</b>'
 eliteraid_invalid_starttime: "Dat is geen goede starttijd. \nVul een tijd in tussen ${start1} en ${endtime}"
 eliteraid_join: "OK, meedoen met ${gymname} ${start1} \n"
 eliteraid_joined_message: '<a href="tg://user?id=${user.id}">${user_first_name}</a> doet mee met Elite Raid bij ${gymname}.'
 eliteraid_raidboss: "Wat is de raidboss? \nBijvoorbeeld 'Deoxys'"
-eliteraid_selected_raid: "Selecteer een elite raid om verder te gaan. Of kies voor Toevoegen of Afsluiten"
+eliteraid_selected_raid: 'Selecteer een elite raid om verder te gaan. Of kies voor Toevoegen of Afsluiten'
 eliteraid_user_added_list: '<a href="tg://user?id=${user.id}">${user_first_name}</a> toegevoegd aan Elite Raid bij ${gymname}'
 eliteraid_user_left: "OK, je doet niet meer mee met deze Elite Raid.\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 
 # Exraids
 
 edit_exraid_no_raids_found: "Sorry, ik kan nu geen EX Raid vinden 🤨\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-edit_exraid_not_found: "…de Ex Raid staat er niet bij"
-edit_exraid_which_raid: "Welke Ex Raid wil je wijzigen?"
-edit_exraid_starttime: "Starttijd"
+edit_exraid_not_found: '…de Ex Raid staat er niet bij'
+edit_exraid_which_raid: 'Welke Ex Raid wil je wijzigen?'
+edit_exraid_starttime: 'Starttijd'
 edit_exraid_question_pokemon: "<b>Hoe heet de nieuwe raidboss?</b>\nType bijvoorbeeld 'Kyogre' of 'Groudon' of gebruik de knoppen"
 edit_exraid_question_gym: "Je wilt de gym wijzigen\nWelke gym wordt het nu?\n<b>Voer een deel van de naam in, minimaal 2 tekens…</b>"
 edit_exraid_overview_data: "Dit zijn nu de EX Raid gegevens:\n\n${out}<b>Wat wil je nu doen?</b>"
-edit_exraid_edit_more: "Nog iets wijzigen aan deze EX Raid"
+edit_exraid_edit_more: 'Nog iets wijzigen aan deze EX Raid'
 edit_exraid_list_message: '<b>EX Raid bij ${gymname} gewijzigd</b> door: <a href="tg://user?id=${user.id}">${user_first_name}</a>\n\n'
 exraid_added_list: 'EX Raid bij ${gymname} toegevoegd door: <a href="tg://user?id=${user.id}">${user_first_name}</a>\n\n'
 exraid_add_finish: "Je bent aangemeld voor ${gymname} op ${starttm} 👍\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 exraid_add_welcome: "Je wilt een nieuwe EX Raid toevoegen. We gaan eerst de gym zoeken.\n\n<b>Gebruik de knop 'Zoek gyms in mijn omgeving…'</b>\nOf voer een deel van de naam in, minimaal 2 tekens…"
-exraid_btn_add: "EX Raid toevoegen"
-exraid_btn_done: "Klaar"
-exraid_btn_edit: "EX Raid wijzigen"
-exraid_btn_leave: "Deelname verwijderen"
-exraid_btn_join: "Meedoen of deelname wijzigen"
-exraid_date: "Op welke dag is de Ex Raid?"
-exraid_date_changed: "OK, datum gewijzigd."
+exraid_btn_add: 'EX Raid toevoegen'
+exraid_btn_done: 'Klaar'
+exraid_btn_edit: 'EX Raid wijzigen'
+exraid_btn_leave: 'Deelname verwijderen'
+exraid_btn_join: 'Meedoen of deelname wijzigen'
+exraid_date: 'Op welke dag is de Ex Raid?'
+exraid_date_changed: 'OK, datum gewijzigd.'
 exraid_days: "OK, over ${exraiddays} dagen\n<b>Hoe laat begint de Ex Raid zelf?</b> \nGeef de tijd zo op: bijvoorbeeld 9:45 of 17:30"
 exraid_do_what: "${start1} ${gymname}\n<b>What do you want to do with this Ex Raid?</b>"
 exraid_do_you_participate: "Dankjewel!\n<b>Doe je zelf mee met deze Ex Raid?</b>"
-exraid_edit: "OK, je wilt deze Ex Raid wijzigen…"
-exraid_edit_what: "<b>Wat wil je wijzigen aan deze Ex Raid?</b>"
+exraid_edit: 'OK, je wilt deze Ex Raid wijzigen…'
+exraid_edit_what: '<b>Wat wil je wijzigen aan deze Ex Raid?</b>'
 exraid_enter_starttime: "<b>Wat wordt de starttijd?</b>\nVul een <b>x</b> in voor ${start1}.\nOf vul een starttijd in tussen ${start1} en ${endtime}"
 exraid_exists_warning: "Deze EX Raid bestaat al.\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan hier op </b>/start"
 exraid_exit_list_message: '<a href="tg://user?id=${user.id}">${user_first_name}</a> meldde zich af voor Ex Raid bij ${gymname}'
 exraid_greeting: "Hallo ${user_first_name}.\n\nJe kunt je hier inschrijven -ook zonder invite- op een Ex Raid, je inschrijving aanpassen door opnieuw aan te melden of een Ex Raid toevoegen/wijzigen.\n\nKies 'Klaar' als je niets wilt wijzigen.\n\n<b>Wat wil je doen?</b>"
-exraid_has_pass: "<b>Heb je een Ex Raid-pas?</b>"
-exraid_intro: "<b>Wat wil je doen met deze EX Raid?</b>"
+exraid_has_pass: '<b>Heb je een Ex Raid-pas?</b>'
+exraid_intro: '<b>Wat wil je doen met deze EX Raid?</b>'
 exraid_invalid_starttime: "Dat is geen goede starttijd. \nVul een tijd in tussen ${start1} en ${endtime}"
 exraid_join: "OK, inschrijven op ${gymname} ${start1} \n<b>Heb je een Ex Raid-pas?</b>"
 exraid_joined_message: '<a href="tg://user?id=${user.id}">${user_first_name}</a> doet mee met Ex Raid bij ${gymname}.'
 exraid_joined_noinvite_message: '<a href="tg://user?id=${user.id}">${user_first_name}</a> wil meedoen met de Ex Raid bij ${gymname}. Heeft iemand een invite over?'
 exraid_raidboss: "Wat is de raidboss? \nBijvoorbeeld 'Deoxys'"
 exraid_registered_without_pass: "OK, je staat <b>voorlopig</b> geregistreerd. \nAndere spelers kunnen in deze lijst zien dat je nog een pas nodig hebt.\n<b> Wijzig direct deze inschrijving als je een pas krijgt.</b> \nDit kun je doen door je opnieuw aan te melden, maar dan met pas. Zo weten anderen dat je meedoet en geen pas meer nodig hebt.\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-exraid_selected_raid: "Selecteer een ex raid om verder te gaan. Of kies voor Toevoegen of Afsluiten"
+exraid_selected_raid: 'Selecteer een ex raid om verder te gaan. Of kies voor Toevoegen of Afsluiten'
 exraid_user_added_list: '<a href="tg://user?id=${user.id}">${user_first_name}</a> toegevoegd aan EX Raid bij ${gymname}'
 exraid_user_left: "OK, je doet niet meer mee met deze Ex Raid.\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
-exraids_today: "EX RAIDS vandaag"
+exraids_today: 'EX RAIDS vandaag'
 
 # remote invites
-btn_remote_invites: "Remote invites"
-btn_remote_invites_want: "Ik wil invites ontvangen"
-btn_remote_invites_stop: "Ik wil nu geen invites meer ontvangen"
-remote_invites_until: "Hoe lang wil je - vanaf nu - invites ontvangen?"
-remote_invites_stop: "Ik wil geen invites meer ontvangen"
+btn_remote_invites: 'Remote invites'
+btn_remote_invites_want: 'Ik wil invites ontvangen'
+btn_remote_invites_stop: 'Ik wil nu geen invites meer ontvangen'
+remote_invites_until: 'Hoe lang wil je - vanaf nu - invites ontvangen?'
+remote_invites_stop: 'Ik wil geen invites meer ontvangen'
 remote_invites_finish_start: "Vanaf nu wordt vermeld dat je invites wilt ontvangen. Je kunt dit altijd stoppen door hier terug te komen.\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 remote_invites_finish_stop: "Vanaf nu wordt je naam niet meer genoemd in de lijst met  beschikbare spelers\n\n<b>Je kunt nu weer terug naar de groep gaan. Wil je nog een actie uitvoeren? Klik dan op </b>/start"
 hour: "${pluralize(hour, 'uur', 'uur')}"
 remote_invite_list: '<a href="tg://user?id=${userid}">${first_name}</a> wil invites ontvangen\n\n'
 remote_invite_stop_list: "${first_name} wil geen invites meer ontvangen\n\n"
-remote_invitables_list: "Deze gebruikers willen een invite: "
+remote_invitables_list: 'Deze gebruikers willen een invite: '
 remote_invitables_pokemon: "<b>Voor welke Pokemon wil je een invite?</b>\nTyp x voor alle Pokemons."
 # user settings
-btn_usersettings: "Jouw gegevens"
-btn_usersettings_language: "Taal"
-btn_usersettings_friend_code: "Pokemon friend code"
-btn_usersettings_pokemon_naam: "Jouw Pokemon trainer naam"
-btn_edit_more_or_finish: "Wil je nog iets wijzigen of opslaan en aflsuiten?"
-btn_usersettings_edit_more: "Nog iets wijzigen…"
-usersettings_welcome: "Hoi ${first_name}, wat wil je wijzigen?"
-usersettings_language_question: "Welke taal wil je nu als standaard?"
+btn_usersettings: 'Jouw gegevens'
+btn_usersettings_language: 'Taal'
+btn_usersettings_friend_code: 'Pokemon friend code'
+btn_usersettings_pokemon_naam: 'Jouw Pokemon trainer naam'
+btn_edit_more_or_finish: 'Wil je nog iets wijzigen of opslaan en aflsuiten?'
+btn_usersettings_edit_more: 'Nog iets wijzigen…'
+usersettings_welcome: 'Hoi ${first_name}, wat wil je wijzigen?'
+usersettings_language_question: 'Welke taal wil je nu als standaard?'
 usersettings_friendcode_question: "Wat is jouw friend code? \nGebruik een x om je code te wissen."
 usersettings_wrong_friendcode: "Een friend code bestaat uit 12 tekens\nProbeer het nog eens of breek af met /cancel…"
 usersetings_pokemon_name_question: "Wat is jou naam in Pokemon?\n Gebruik een x om je naam te wissen"
-telegram_name: "Telegram naam"
-friend_code: "Friend code"
-trainer_name: "Trainer naam"
+telegram_name: 'Telegram naam'
+friend_code: 'Friend code'
+trainer_name: 'Trainer naam'
 
 # Months:
-jan: "Januari"
-feb: "Februari"
-mar: "Maart"
-apr: "April"
-may: "May"
-jun: "Juni"
-jul: "Juli"
-aug: "Augsutus"
-sep: "September"
-oct: "Oktober"
-nov: "November"
-dec: "December"
+jan: 'Januari'
+feb: 'Februari'
+mar: 'Maart'
+apr: 'April'
+may: 'May'
+jun: 'Juni'
+jul: 'Juli'
+aug: 'Augsutus'
+sep: 'September'
+oct: 'Oktober'
+nov: 'November'
+dec: 'December'
