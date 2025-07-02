@@ -147,7 +147,7 @@ function AdminFieldResearchWizard(bot) {
               })
           }
           return ctx
-            .replyWithHTML(`${ctx.i18n.t('admin_fres_saved_success')}`)
+            .replyWithHTML(`${ctx.i18n.t('admin_fres_save_success')}`)
             .then(() => {
               ctx.wizard.selectStep(wizsteps.mainmenu)
               return ctx.wizard.steps[wizsteps.mainmenu](ctx)
