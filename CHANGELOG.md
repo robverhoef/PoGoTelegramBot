@@ -2,6 +2,12 @@
 
 ## unreleased
 
+### [0.9.8] 2025-12-03
+
+#### Updates
+
+- dependencies update
+
 ### [0.9.7] 2025-05-27
 
 - code cleanup
